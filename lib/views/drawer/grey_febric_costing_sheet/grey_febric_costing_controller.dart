@@ -1,5 +1,6 @@
 
 import 'package:costex_app/utils/colour.dart';
+import 'package:costex_app/utils/pdf_printer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -186,7 +187,7 @@ class GreyFabricCostingController extends GetxController {
     );
   }
 
-  void generatePDF() {
+  Future<void> generatePDF() async {
     if (customerName.value.isEmpty) {
       Get.snackbar(
         'Error',
@@ -198,15 +199,53 @@ class GreyFabricCostingController extends GetxController {
       return;
     }
 
-    // Implement your PDF generation logic here
-    
-    Get.snackbar(
-      'Success',
-      'PDF generated successfully',
-      backgroundColor: AppColors.success,
-      colorText: AppColors.textLight,
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    // Build rows for PDF including inputs and computed values
+    final rows = <List<String>>[];
+    rows.addAll([
+      ['Customer', customerNameController.text],
+      ['Quality', qualityController.text],
+      ['Warp Count', warpCountController.text],
+      ['Weft Count', weftCountController.text],
+      ['Reeds', reedsController.text],
+      ['Picks', picksController.text],
+      ['Grey Width', greyWidthController.text],
+      ['P/C Ratio', pcRatioController.text],
+      ['Loom', loomController.text],
+      ['Weave', weaveController.text],
+      ['Warp Rate', warpRateController.text],
+      ['Weft Rate', weftRateController.text],
+      ['Conversion/Picks', coversionPicksController.text],
+      ['Profit %', profitPercentController.text],
+      ['Warp Weight', warpWeight.toStringAsFixed(4)],
+      ['Weft Weight', weftWeight.toStringAsFixed(4)],
+      ['Total Weight', totalWeight.toStringAsFixed(4)],
+      ['Warp Price', warpPrice.toStringAsFixed(4)],
+      ['Weft Price', weftPrice.toStringAsFixed(4)],
+      ['Conversion Charges', coversionCharges.toStringAsFixed(4)],
+      ['Grey Fabric Price', greyFabricPrice.toStringAsFixed(4)],
+      ['Final Fabric Price', fabricPriceFinal.toStringAsFixed(4)],
+    ]);
+
+    // Use the printing utility to print directly and await completion
+    final pages = [ {'title': 'Grey Fabric Costing', 'rows': rows} ];
+    try {
+      await printPagesDirect(pages, header: 'Grey Fabric Costing');
+      Get.snackbar(
+        'Success',
+        'PDF generated successfully',
+        backgroundColor: AppColors.success,
+        colorText: AppColors.textLight,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to generate PDF: $e',
+        backgroundColor: AppColors.error,
+        colorText: AppColors.textLight,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:costex_app/utils/pdf_printer.dart';
 
 class ExportGreyController extends GetxController {
   // Text Controllers
@@ -359,18 +360,75 @@ class ExportGreyController extends GetxController {
       try {
         isLoading.value = true;
 
-        // TODO: Implement PDF generation
-        await Future.delayed(const Duration(seconds: 2));
+        final rows = <List<String>>[];
+        rows.addAll([
+          ['Customer', customerNameController.text],
+          ['Quality', qualityController.text],
+          ['Warp Count', warpCountController.text],
+          ['Weft Count', weftCountController.text],
+          ['Reeds', reedsController.text],
+          ['Picks', picksController.text],
+          ['Grey Width', greyWidthController.text],
+          ['P/C Ratio', pcRatioController.text],
+          ['Loom', loomController.text],
+          ['Weave', weaveController.text],
+          ['Warp Rate', warpRateController.text],
+          ['Weft Rate', weftRateController.text],
+          ['Conversion/Pick', coversionPickController.text],
 
-        Get.snackbar(
-          'Success',
-          'PDF generated successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF4CAF50),
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
-        );
+          ['Warp Weight', warpWeightController.text],
+          ['Weft Weight', weftWeightController.text],
+          ['Total Weight', totalWeightController.text],
+          ['Warp Price', warpPriceController.text],
+          ['Weft Price', weftPriceController.text],
+          ['Conversion Charges', coversionChargesController.text],
+
+          ['Grey Fabric Price', greyFabricPriceController.text],
+          ['Mending/MT', mendingMTController.text],
+          ['Packing Type', packingTypeController.text],
+          ['Packing Charges', packingChargesController.text],
+          ['Wastage %', wastageController.text],
+          ['Container Size', containerSizeController.text],
+
+          ['Container Capacity', containerCapacityController.text],
+          ['FOB Price PKR', fobPricePKRController.text],
+          ['Rate of Exchange', rateOfExchangeController.text],
+          ['FOB Price \$', fobPriceDollarController.text],
+          ['Freight in \$', freightInDollarController.text],
+          ['Freight Calculation', freightCalculationController.text],
+
+          ['C&F Price', cfPriceController.text],
+          ['Commission', commissionController.text],
+          ['Port', portController.text],
+          ['Profit %', profitPercentController.text],
+          ['Overhead %', overheadPercentController.text],
+          ['FOB Final', fobPriceFinalController.text],
+          ['C&F Final', cfPriceFinalController.text],
+        ]);
+
+        final pages = [ {'title': 'Export Grey Fabric', 'rows': rows} ];
+        try {
+          await printPagesDirect(pages, header: 'Export Grey Fabric');
+          Get.snackbar(
+            'Success',
+            'PDF generated successfully',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFF4CAF50),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+            margin: const EdgeInsets.all(16),
+          );
+        } catch (e) {
+          Get.snackbar(
+            'Error',
+            'Failed to generate PDF: $e',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFFF44336),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+            margin: const EdgeInsets.all(16),
+          );
+        }
       } catch (e) {
         Get.snackbar(
           'Error',

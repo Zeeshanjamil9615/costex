@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:costex_app/utils/pdf_printer.dart';
 
 class ExportMadeupsController extends GetxController {
   // Text Controllers
@@ -342,18 +343,105 @@ class ExportMadeupsController extends GetxController {
     try {
       isLoading.value = true;
 
-      // TODO: Implement PDF generation
-      await Future.delayed(const Duration(seconds: 2));
+      // Build full page data from all form fields (structured as rows)
+      final pages = [
+        {
+          'title': 'Export Madeups Fabric',
+          'rows': [
+            ['Company', customerNameController.text],
+            ['Product Name', productNameController.text],
+            ['Product Size', productSizeController.text],
 
-      Get.snackbar(
-        'Success',
-        'PDF generated successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF4CAF50),
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
-      );
+            // Basic Information - Row 1
+            ['Quality', qualityController.text],
+            ['Warp Count', warpCountController.text],
+            ['Weft Count', weftCountController.text],
+            ['Reeds', reedsController.text],
+            ['Picks', picksController.text],
+            ['Grey Width', greyWidthController.text],
+
+            // Basic Information - Row 2
+            ['Finish Width', finishWidthController.text],
+            ['P/C Ratio', pcRatioController.text],
+            ['Loom', loomController.text],
+            ['Weave', weaveController.text],
+            ['Warp Rate/Lbs', warpRateLbsController.text],
+            ['Weft Rate/Lbs', weftRateLbsController.text],
+
+            // Basic Information - Row 3
+            ['Conversion/Pick', conversionPickController.text],
+            ['Warp Weight', warpWeightController.text],
+            ['Weft Weight', weftWeightController.text],
+            ['Total Weight', totalWeightController.text],
+            ['Warp Price', warpPriceController.text],
+            ['Weft Price', weftPriceController.text],
+
+            // Basic Information - Row 4
+            ['Conversion Charges', conversionChargesController.text],
+            ['Grey Fabric Price', fabricPriceMeterController.text],
+            ['Mending/MT', mendingMTController.text],
+            ['Process Type', processTypeController.text],
+            ['Process Rate (/Inch)', processRateController.text],
+            ['Process Charges', processChargesController.text],
+
+            // Pricing Details - Row 5
+            ['Packing Type', packingTypeController.text],
+            ['Packing Charges/MT', packingChargesMTController.text],
+            ['Wastage %', wastagePercentController.text],
+            ['Finish Fabric Cost', finishFabricCostController.text],
+            ['Consumption', consumptionController.text],
+            ['Consumption Price', consumptionPriceController.text],
+
+            // Pricing Details - Row 6
+            ['Stitching', stitchingController.text],
+            ['Accessories', accessoriesController.text],
+            ['Poly Bags', polyBagController.text],
+            ['Miscellaneous', miscellaneousController.text],
+            ['Container Size', containerSizeController.text],
+            ['Container Capacity', containerCapacityController.text],
+
+            // Export Pricing - Row 7
+            ['Rate of Exchange', rateOfExchangeController.text],
+            ['FOB Price PKR', fobPricePKRController.text],
+            ['FOB Price \$', fobPriceDollarController.text],
+            ['Freight in \$', freightInDollarController.text],
+            ['Freight Calculation', freightCalculationController.text],
+            ['Rate', rateController.text],
+
+            // Final Calculation - Row 8
+            ['C&F Price \$', cfPriceInDollarController.text],
+            ['Commission %', commissionController.text],
+            ['Overhead %', overheadController.text],
+            ['Profit %', profitController.text],
+            ['C&F Final Price', cfPriceFinalController.text],
+            ['FOB Final Price', fobPriceFinalController.text],
+          ]
+        }
+      ];
+
+      // Use printing utility to directly open print dialog (no preview) and await result
+      try {
+        await printPagesDirect(pages, header: 'Export Madeups Fabric');
+        Get.snackbar(
+          'Success',
+          'PDF generated successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF4CAF50),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(16),
+        );
+      } catch (e) {
+        Get.snackbar(
+          'Error',
+          'Failed to generate PDF: $e',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFF44336),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(16),
+        );
+      }
     } catch (e) {
       Get.snackbar(
         'Error',

@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:costex_app/utils/pdf_printer.dart';
 
 class TowelCostingController extends GetxController with GetSingleTickerProviderStateMixin {
   late TabController tabController;
@@ -766,15 +767,60 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
   Future<void> generatePDF() async {
     try {
       isLoading.value = true;
-      await Future.delayed(const Duration(seconds: 2));
-      Get.snackbar(
-        'Success',
-        'PDF generated successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF4CAF50),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
-      );
+      // Build rows with main sections and fields
+      final rows = <List<String>>[];
+      rows.addAll([
+        ['Date', dateController.text],
+        ['Client', clientNameController.text],
+        ['', ''],
+        ['Pile Count', pileCountController.text],
+        ['Pile Rate', pileRateController.text],
+        ['Pile Age', pileAgeController.text],
+        ['Pile Amount', pileAmountController.text],
+        ['', ''],
+        ['Weft Count', weftCountController.text],
+        ['Weft Rate', weftRateController.text],
+        ['Weft Age', weftAgeController.text],
+        ['Weft Amount', weftAmountController.text],
+        ['', ''],
+        ['Ground Count', groundCountController.text],
+        ['Ground Rate', groundRateController.text],
+        ['Ground Age', groundAgeController.text],
+        ['Ground Amount', groundAmountController.text],
+        ['', ''],
+        ['Fancy Count', fancyCountController.text],
+        ['Fancy Rate', fancyRateController.text],
+        ['Fancy Age', fancyAgeController.text],
+        ['Fancy Amount', fancyAmountController.text],
+        ['', ''],
+        ['Yarn Total', yarnTotalController.text],
+        ['Grey Fabric (Pound)', greyFabricInPoundController.text],
+        ['Grey Fabric (Kg)', greyFabricInKgController.text],
+        ['Viscous Sizing', viscousSizingController.text],
+        ['Yarn Freight', yarnFreightController.text],
+        ['Grey Total', greyTotalController.text],
+        ['', ''],
+        ['Towel Rate', towelRateController.text],
+        ['Ex Factory Towel', exFactoryTowelController.text],
+        ['', ''],
+        ['Freight KG - SubTotal', subTotalKgController.text],
+        ['Total KG', totalKgController.text],
+        ['USD Rate KG', usdRateKgController.text],
+        ['Dollar KG', dollarKgController.text],
+        ['', ''],
+        ['Freight PC - SubTotal', subTotalPcController.text],
+        ['Total PC', totalPcController.text],
+        ['USD Rate PC', usdRatePcController.text],
+        ['Dollar PC', dollarPcController.text],
+      ]);
+
+      final pages = [ {'title': 'Towel Costing Sheet', 'rows': rows} ];
+      try {
+        await printPagesDirect(pages, header: 'Towel Costing Sheet');
+        Get.snackbar('Success', 'PDF generated successfully', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: const EdgeInsets.all(16));
+      } catch (e) {
+        Get.snackbar('Error', 'Failed to generate PDF: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: const EdgeInsets.all(16));
+      }
     } finally {
       isLoading.value = false;
     }

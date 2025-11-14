@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:costex_app/utils/pdf_printer.dart';
 
 class MultiMadeupsController extends GetxController with GetSingleTickerProviderStateMixin {
   late TabController tabController;
@@ -1153,8 +1154,106 @@ class MultiMadeupsController extends GetxController with GetSingleTickerProvider
   Future<void> generatePDF() async {
     try {
       isLoading.value = true;
-      await Future.delayed(const Duration(seconds: 2));
-      Get.snackbar('Success', 'PDF generated successfully', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: const EdgeInsets.all(16));
+      // Build comprehensive page containing all form fields
+      final rows = <List<String>>[];
+
+      rows.addAll([
+        ['Customer', customerNameController.text],
+        // Basic details per width
+        ['Warp 1', warp1Controller.text],
+        ['Weft 1', weft1Controller.text],
+        ['Reed 1', reed1Controller.text],
+        ['Pick 1', pick1Controller.text],
+        ['Grey Width 1', greyWidth1Controller.text],
+        ['Finish Width 1', finishWidth1Controller.text],
+
+        ['Warp 2', warp2Controller.text],
+        ['Weft 2', weft2Controller.text],
+        ['Reed 2', reed2Controller.text],
+        ['Pick 2', pick2Controller.text],
+        ['Grey Width 2', greyWidth2Controller.text],
+        ['Finish Width 2', finishWidth2Controller.text],
+
+        ['Warp 3', warp3Controller.text],
+        ['Weft 3', weft3Controller.text],
+        ['Reed 3', reed3Controller.text],
+        ['Pick 3', pick3Controller.text],
+        ['Grey Width 3', greyWidth3Controller.text],
+        ['Finish Width 3', finishWidth3Controller.text],
+
+        ['Warp 4', warp4Controller.text],
+        ['Weft 4', weft4Controller.text],
+        ['Reed 4', reed4Controller.text],
+        ['Pick 4', pick4Controller.text],
+        ['Grey Width 4', greyWidth4Controller.text],
+        ['Finish Width 4', finishWidth4Controller.text],
+      ]);
+
+      // Consumption & products (flattened for PDF)
+      for (int p = 1; p <= 4; p++) {
+        rows.add(['', '']);
+        rows.add(['Product Group', 'Product $p']);
+        for (int r = 1; r <= 4; r++) {
+          final ctrls = _getConsumptionRowControllers(p, r);
+          rows.add(['Product Name', ctrls[0].text]);
+          rows.add(['Size', ctrls[1].text]);
+          rows.add(['Cut Size', ctrls[3].text]);
+          rows.add(['Grey Width', ctrls[4].text]);
+          rows.add(['Finish Width', ctrls[5].text]);
+          rows.add(['PCS', ctrls[6].text]);
+          rows.add(['Consumption', ctrls[7].text]);
+          rows.add(['Consumption Price', ctrls[8].text]);
+        }
+        rows.add(['Total', _getTotalController(p).text]);
+      }
+
+      // Fabric details per product
+      for (int i = 1; i <= 4; i++) {
+        final fabric = _getFabricCalculatedControllers(i);
+        rows.add(['', '']);
+        rows.add(['Fabric Details', 'Product $i']);
+        rows.add(['Warp Weight', fabric[0].text]);
+        rows.add(['Weft Weight', fabric[1].text]);
+        rows.add(['Total Weight', fabric[2].text]);
+        rows.add(['Warp Price', fabric[3].text]);
+        rows.add(['Weft Price', fabric[4].text]);
+        rows.add(['Conversion', fabric[5].text]);
+        rows.add(['Grey Fabric Price', fabric[6].text]);
+        rows.add(['Processing Charges', fabric[7].text]);
+        rows.add(['Finish Fabric Cost', fabric[8].text]);
+      }
+
+      // Freight / export details per product
+      for (int i = 1; i <= 4; i++) {
+        final freight = _getFreightCalculatedControllers(i);
+        rows.add(['', '']);
+        rows.add(['Freight Details', 'Product $i']);
+        rows.add(['Consumption Price', _getConsumptionPriceController(i).text]);
+        rows.add(['Stitching', _getFreightControllers(i)[0].text]);
+        rows.add(['Accessories', _getFreightControllers(i)[1].text]);
+        rows.add(['Poly Bag', _getFreightControllers(i)[2].text]);
+        rows.add(['Miscellaneous', _getFreightControllers(i)[3].text]);
+        rows.add(['Packing Charges', _getFreightControllers(i)[4].text]);
+        rows.add(['Container Capacity', _getFreightControllers(i)[5].text]);
+        rows.add(['Rate of Exchange', _getFreightControllers(i)[6].text]);
+        rows.add(['FOB Price PKR', freight[0].text]);
+  rows.add(['FOB Price \$', freight[1].text]);
+        rows.add(['Freight Calculation', freight[2].text]);
+  rows.add(['C&F Price \$', freight[3].text]);
+        rows.add(['FOB Final', freight[4].text]);
+        rows.add(['C&F Final', freight[5].text]);
+      }
+
+      final pages = [
+        {'title': 'Export Multi-Width Fabric', 'rows': rows}
+      ];
+
+      try {
+        await printPagesDirect(pages, header: 'Export Multi-Width Fabric');
+        Get.snackbar('Success', 'PDF generated successfully', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: const EdgeInsets.all(16));
+      } catch (e) {
+        Get.snackbar('Error', 'Failed to generate PDF: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: const EdgeInsets.all(16));
+      }
     } finally {
       isLoading.value = false;
     }
