@@ -32,7 +32,7 @@ class GreyFabricCostingController extends GetxController {
   var loom = ''.obs;
   var weave = ''.obs;
   var warpRate = 0.0.obs;
-  var weftRate = 0.0.obs;
+  var weftRate = 0.0.obs;                      
   var coversionPicks = 0.0.obs;
   var profitPercent = 0.0.obs;
 
@@ -44,6 +44,19 @@ class GreyFabricCostingController extends GetxController {
     // Web parity: ((((reeds*width)/800)/warp_count)*1.0936)
     return (((reeds.value * greyWidth.value) / 800.0) / warpCount.value) * 1.0936;
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   double get weftWeight {
     if (weftCount.value == 0 || picks.value == 0 || greyWidth.value == 0) {

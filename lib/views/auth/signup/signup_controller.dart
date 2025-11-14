@@ -1,4 +1,5 @@
 import 'package:costex_app/views/auth/login/login.dart';
+import 'package:costex_app/views/auth/otp/otp_verification.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -57,10 +58,10 @@ class SignupController extends GetxController {
         // Simulate API call
         await Future.delayed(const Duration(seconds: 2));
 
-        // Show success and navigate to login
+        // Show success and navigate to OTP verification
         Get.snackbar(
           'Success',
-          'Company registered successfully! Please login.',
+          'Company registered. A verification code has been sent to your email.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4CAF50),
           colorText: Colors.white,
@@ -68,9 +69,10 @@ class SignupController extends GetxController {
           margin: const EdgeInsets.all(16),
         );
 
-        // Navigate to login after 1 second
+        // Navigate to OTP verification page after a short delay
         await Future.delayed(const Duration(seconds: 1));
-        Get.offAllNamed('/login'); // or Get.offAll(() => LoginPage());
+        // Pass email to OTP page
+        Get.to(() => OtpVerificationPage(email: emailController.text));
       } catch (e) {
         Get.snackbar(
           'Error',
