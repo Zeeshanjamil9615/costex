@@ -221,29 +221,94 @@ class GreyFabricCostingScreen extends StatelessWidget {
   Widget _buildRow(List<Widget> children) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // On mobile, stack fields vertically
-        if (constraints.maxWidth < 1000) {
-          return Column(
-            children: children
-                .where((child) => child is! SizedBox || child.key != null)
-                .expand((child) => [child, const SizedBox(height: 16)])
-                .toList()
-              ..removeLast(),
-          );
+        // On mobile/tablet narrow width, arrange according to widget type:
+        // - Read-only/result widgets (highlighted) should take full width (one per row)
+        // - Input widgets should be two-per-row
+        final isNarrow = constraints.maxWidth < 1000;
+
+        List<Widget> buildStacked() {
+          final rows = <Widget>[];
+          final inputsBuffer = <Widget>[];
+
+          void flushInputsBuffer() {
+            if (inputsBuffer.isEmpty) return;
+            // Pair inputs two-per-row
+            for (var i = 0; i < inputsBuffer.length; i += 2) {
+              final first = inputsBuffer[i];
+              final second = (i + 1) < inputsBuffer.length ? inputsBuffer[i + 1] : null;
+              if (second != null) {
+                rows.add(Row(
+                  children: [
+                    Expanded(child: first),
+                    const SizedBox(width: 16),
+                    Expanded(child: second),
+                  ],
+                ));
+              } else {
+                rows.add(Row(children: [Expanded(child: first)]));
+              }
+              rows.add(const SizedBox(height: 16));
+            }
+            inputsBuffer.clear();
+          }
+
+          for (final child in children) {
+            // Treat our highlighted/read-only widgets as full-row items
+            final isReadOnly = child is _ReadOnlyHighlightedField || child is HighlightedNumericTextField || child is SizedBox && child.key != null;
+            if (isReadOnly) {
+              // flush any buffered inputs first
+              flushInputsBuffer();
+              rows.add(child);
+              rows.add(const SizedBox(height: 16));
+            } else {
+              inputsBuffer.add(child);
+            }
+          }
+          // flush remaining inputs
+          flushInputsBuffer();
+          if (rows.isNotEmpty) rows.removeLast();
+          return rows;
         }
-        // On desktop/tablet, show in grid
-        return Row(
-          children: children
-              .map((child) => Expanded(
-                    child: child is SizedBox && child.key == null
-                        ? const SizedBox.shrink()
-                        : Padding(
-                            padding: const EdgeInsets.only(right: 16),
-                            child: child,
-                          ),
-                  ))
-              .toList(),
-        );
+
+        if (isNarrow) {
+          return Column(children: buildStacked());
+        }
+
+        // On wide screens: show inputs side-by-side, but ensure read-only fields span full width
+        final widgets = <Widget>[];
+        final inputs = <Widget>[];
+
+        void flushWideInputs() {
+          if (inputs.isEmpty) return;
+          if (inputs.length == 1) {
+            widgets.add(Row(children: [Expanded(child: Padding(padding: const EdgeInsets.only(right: 0), child: inputs[0]))]));
+          } else {
+            widgets.add(Row(
+              children: inputs
+                  .map((w) => Expanded(child: Padding(padding: const EdgeInsets.only(right: 16), child: w)))
+                  .toList(),
+            ));
+          }
+          widgets.add(const SizedBox(height: 16));
+          inputs.clear();
+        }
+
+        for (final child in children) {
+          final isReadOnly = child is _ReadOnlyHighlightedField || child is HighlightedNumericTextField || child is SizedBox && child.key != null;
+          if (isReadOnly) {
+            flushWideInputs();
+            widgets.add(child);
+            widgets.add(const SizedBox(height: 16));
+          } else {
+            inputs.add(child);
+            if (inputs.length == 2) {
+              flushWideInputs();
+            }
+          }
+        }
+        flushWideInputs();
+        if (widgets.isNotEmpty) widgets.removeLast();
+        return Column(children: widgets);
       },
     );
   }

@@ -1,7 +1,8 @@
+import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/utils/colour.dart';
+import 'package:costex_app/views/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:costex_app/utils/colour.dart';
-import 'package:costex_app/views/auth/login/login.dart';
 
 class OtpVerificationPage extends StatefulWidget {
   final String email;
@@ -14,6 +15,7 @@ class OtpVerificationPage extends StatefulWidget {
 
 class _OtpVerificationPageState extends State<OtpVerificationPage> {
   final _codeController = TextEditingController();
+  final ApiService _apiService = ApiService();
   bool _isLoading = false;
 
   @override
@@ -23,20 +25,53 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   }
 
   Future<void> _verifyCode() async {
-    if (_codeController.text.trim().length != 6) {
+    final code = _codeController.text.trim();
+
+    if (code.length != 6) {
       Get.snackbar('Invalid code', 'Please enter the 6-digit code sent to your email.',
           snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
     setState(() => _isLoading = true);
-    // TODO: replace with real verification API call
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final response = await _apiService.verifyOtp(
+        email: widget.email,
+        otp: code,
+      );
 
-    setState(() => _isLoading = false);
+      if (!mounted) return;
 
-    // On success navigate to login
-    Get.offAll(() => const LoginPage());
+      setState(() => _isLoading = false);
+
+      Get.snackbar(
+        'Success',
+        response['message']?.toString() ?? 'OTP verified successfully.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF4CAF50),
+        colorText: Colors.white,
+      );
+
+      Get.offAll(() => const HomePage());
+    } on ApiException catch (error) {
+      setState(() => _isLoading = false);
+      Get.snackbar(
+        'Error',
+        error.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFF44336),
+        colorText: Colors.white,
+      );
+    } catch (error) {
+      setState(() => _isLoading = false);
+      Get.snackbar(
+        'Error',
+        'OTP verification failed: $error',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFF44336),
+        colorText: Colors.white,
+      );
+    }
   }
 
   Future<void> _resendCode() async {

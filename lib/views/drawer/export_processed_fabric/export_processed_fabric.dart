@@ -333,29 +333,84 @@ Widget _sectionCard(String header, List<Widget> children) {
 Widget _inputWrap(List<Widget> children) {
   return LayoutBuilder(
     builder: (context, constraints) {
-      // Stack vertically on narrow screens, horizontally on wider
+      // Arrange read-only/highlighted widgets full-width, inputs two-per-row
       final isNarrow = constraints.maxWidth < 700;
-      if (isNarrow) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var i = 0; i < children.length; i++) ...[
-              children[i],
-              if (i < children.length - 1) const SizedBox(height: 10),
-            ],
-          ],
-        );
-      } else {
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var i = 0; i < children.length; i++) ...[
-              Expanded(child: children[i]),
-              if (i < children.length - 1) const SizedBox(width: 16),
-            ],
-          ],
-        );
+
+      List<Widget> buildStacked() {
+        final rows = <Widget>[];
+        final inputsBuffer = <Widget>[];
+
+        void flushInputs() {
+          if (inputsBuffer.isEmpty) return;
+          for (var i = 0; i < inputsBuffer.length; i += 2) {
+            final first = inputsBuffer[i];
+            final second = (i + 1) < inputsBuffer.length ? inputsBuffer[i + 1] : null;
+            if (second != null) {
+              rows.add(Row(
+                children: [
+                  Expanded(child: first),
+                  const SizedBox(width: 16),
+                  Expanded(child: second),
+                ],
+              ));
+            } else {
+              rows.add(Row(children: [Expanded(child: first)]));
+            }
+            rows.add(const SizedBox(height: 10));
+          }
+          inputsBuffer.clear();
+        }
+
+        for (final child in children) {
+          final isReadOnly = child is HighlightedNumericTextField || child is SizedBox && child.key != null;
+          if (isReadOnly) {
+            flushInputs();
+            rows.add(child);
+            rows.add(const SizedBox(height: 10));
+          } else {
+            inputsBuffer.add(child);
+          }
+        }
+        flushInputs();
+        if (rows.isNotEmpty) rows.removeLast();
+        return rows;
       }
+
+      if (isNarrow) {
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: buildStacked());
+      }
+
+      // Wide layout: pair inputs two-per-row; read-only spans full width
+      final widgets = <Widget>[];
+      final inputs = <Widget>[];
+
+      void flushWide() {
+        if (inputs.isEmpty) return;
+        if (inputs.length == 1) {
+          widgets.add(Row(children: [Expanded(child: Padding(padding: const EdgeInsets.only(right: 0), child: inputs[0]))]));
+        } else {
+          widgets.add(Row(
+            children: inputs.map((w) => Expanded(child: Padding(padding: const EdgeInsets.only(right: 16), child: w))).toList(),
+          ));
+        }
+        widgets.add(const SizedBox(height: 10));
+        inputs.clear();
+      }
+
+      for (final child in children) {
+        final isReadOnly = child is HighlightedNumericTextField || child is SizedBox && child.key != null;
+        if (isReadOnly) {
+          flushWide();
+          widgets.add(child);
+          widgets.add(const SizedBox(height: 10));
+        } else {
+          inputs.add(child);
+          if (inputs.length == 2) flushWide();
+        }
+      }
+      flushWide();
+      if (widgets.isNotEmpty) widgets.removeLast();
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: widgets);
     },
   );
 }

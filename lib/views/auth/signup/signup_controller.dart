@@ -1,9 +1,12 @@
+import 'package:costex_app/api_service/api_service.dart';
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/auth/otp/otp_verification.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SignupController extends GetxController {
+  final ApiService _apiService = ApiService();
+
   // Text Controllers
   final companyNameController = TextEditingController();
   final companyAddressController = TextEditingController();
@@ -46,22 +49,21 @@ class SignupController extends GetxController {
       try {
         isLoading.value = true;
 
-        // TODO: Implement API call
-        final signupData = {
-          'companyName': companyNameController.text,
-          'companyAddress': companyAddressController.text,
-          'companyPhone': companyPhoneController.text,
-          'email': emailController.text,
-          'password': passwordController.text,
-        };
+        final response = await _apiService.registerCompany(
+          companyName: companyNameController.text.trim(),
+          address: companyAddressController.text.trim(),
+          phoneNumber: companyPhoneController.text.trim(),
+          email: emailController.text.trim(),
+          password: passwordController.text,
+          confirmPassword: confirmPasswordController.text,
+        );
 
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
+        final email = response['email']?.toString() ?? emailController.text.trim();
 
-        // Show success and navigate to OTP verification
         Get.snackbar(
           'Success',
-          'Company registered. A verification code has been sent to your email.',
+          response['message']?.toString() ??
+              'Company registered. A verification code has been sent to your email.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4CAF50),
           colorText: Colors.white,
@@ -69,10 +71,17 @@ class SignupController extends GetxController {
           margin: const EdgeInsets.all(16),
         );
 
-        // Navigate to OTP verification page after a short delay
-        await Future.delayed(const Duration(seconds: 1));
-        // Pass email to OTP page
-        Get.to(() => OtpVerificationPage(email: emailController.text));
+        Get.to(() => OtpVerificationPage(email: email));
+      } on ApiException catch (error) {
+        Get.snackbar(
+          'Error',
+          error.message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFF44336),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(16),
+        );
       } catch (e) {
         Get.snackbar(
           'Error',

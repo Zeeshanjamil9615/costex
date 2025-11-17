@@ -407,7 +407,7 @@ class ExportProcessedFabricController extends GetxController {
 
   // Save quotation
   Future<void> saveQuotation() async {
-    if (formKey.currentState!.validate()) {
+  if (formKey.currentState?.validate() ?? true) {
       try {
         isLoading.value = true;
 

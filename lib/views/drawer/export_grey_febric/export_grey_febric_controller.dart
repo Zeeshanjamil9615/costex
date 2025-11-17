@@ -310,7 +310,7 @@ class ExportGreyController extends GetxController {
 
   // Save quotation
   Future<void> saveQuotation() async {
-    if (formKey.currentState!.validate()) {
+  if (formKey.currentState?.validate() ?? true) {
       try {
         isLoading.value = true;
 
@@ -356,7 +356,7 @@ class ExportGreyController extends GetxController {
 
   // Generate PDF
   Future<void> generatePDF() async {
-    if (formKey.currentState!.validate()) {
+  if (formKey.currentState?.validate() ?? true) {
       try {
         isLoading.value = true;
 

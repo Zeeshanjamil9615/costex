@@ -245,27 +245,79 @@ class ExportGreyPage extends StatelessWidget {
   Widget _buildRow(List<Widget> children) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // On mobile, stack fields vertically
-        if (constraints.maxWidth < 1000) {
-          return Column(
-            children: children
-                .expand((child) => [child, const SizedBox(height: 16)])
-                .toList()
-              ..removeLast(),
-          );
+        final isNarrow = constraints.maxWidth < 1000;
+
+        List<Widget> buildStacked() {
+          final rows = <Widget>[];
+          final inputsBuffer = <Widget>[];
+
+          void flushInputs() {
+            if (inputsBuffer.isEmpty) return;
+          for (var i = 0; i < inputsBuffer.length; i += 2) {
+            final first = inputsBuffer[i];
+            final second = (i + 1) < inputsBuffer.length ? inputsBuffer[i + 1] : null;
+            if (second != null) {
+              rows.add(Row(children: [
+                Expanded(child: first),
+                const SizedBox(width: 16),
+                Expanded(child: second),
+              ]));
+            } else {
+              rows.add(Row(children: [Expanded(child: first)]));
+            }
+            rows.add(const SizedBox(height: 16));
+          }
+            inputsBuffer.clear();
+          }
+
+          for (final child in children) {
+            final isReadOnly = child is HighlightedNumericTextField || child is SizedBox && child.key != null;
+            if (isReadOnly) {
+              flushInputs();
+              rows.add(child);
+              rows.add(const SizedBox(height: 16));
+            } else {
+              inputsBuffer.add(child);
+            }
+          }
+          flushInputs();
+          if (rows.isNotEmpty) rows.removeLast();
+          return rows;
         }
-        // On desktop/tablet, show in grid
-        return Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: children
-              .map((child) => SizedBox(
-                    width: (constraints.maxWidth - (16 * (children.length - 1))) /
-                        children.length.clamp(1, 6),
-                    child: child,
-                  ))
-              .toList(),
-        );
+
+        if (isNarrow) {
+          return Column(children: buildStacked());
+        }
+
+        // Wide: use pairing for inputs, read-only spans full width
+        final widgets = <Widget>[];
+        final inputs = <Widget>[];
+
+        void flushWide() {
+          if (inputs.isEmpty) return;
+          if (inputs.length == 1) {
+            widgets.add(Row(children: [Expanded(child: Padding(padding: const EdgeInsets.only(right: 0), child: inputs[0]))]));
+          } else {
+            widgets.add(Row(children: inputs.map((w) => Expanded(child: Padding(padding: const EdgeInsets.only(right: 16), child: w))).toList()));
+          }
+          widgets.add(const SizedBox(height: 16));
+          inputs.clear();
+        }
+
+        for (final child in children) {
+          final isReadOnly = child is HighlightedNumericTextField || child is SizedBox && child.key != null;
+          if (isReadOnly) {
+            flushWide();
+            widgets.add(child);
+            widgets.add(const SizedBox(height: 16));
+          } else {
+            inputs.add(child);
+            if (inputs.length == 2) flushWide();
+          }
+        }
+        flushWide();
+        if (widgets.isNotEmpty) widgets.removeLast();
+        return Column(children: widgets);
       },
     );
   }

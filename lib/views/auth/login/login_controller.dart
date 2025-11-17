@@ -1,9 +1,11 @@
+import 'package:costex_app/api_service/api_service.dart';
 import 'package:costex_app/views/auth/signup/signup.dart';
 import 'package:costex_app/views/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginController extends GetxController {
+  final ApiService _apiService = ApiService();
   // Text Controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -29,35 +31,33 @@ class LoginController extends GetxController {
 
   // Login function
   Future<void> login() async {
-         Get.offAll(() => HomePage());
-
-
-
-
     if (formKey.currentState!.validate()) {
       try {
         isLoading.value = true;
-
-        // TODO: Implement API call
-        final loginData = {
-          'email': emailController.text,
-          'password': passwordController.text,
-        };
-
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
-
-        // Navigate to home on success
-        // Get.offAllNamed('/home'); 
-         Get.offAll(() => HomePage());
+        final response = await _apiService.login(
+          username: emailController.text.trim(),
+          password: passwordController.text,
+        );
 
         Get.snackbar(
           'Success',
-          'Login successful',
+          response['message']?.toString() ?? 'Login successful',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4CAF50),
           colorText: Colors.white,
           duration: const Duration(seconds: 2),
+          margin: const EdgeInsets.all(16),
+        );
+
+        Get.offAll(() => HomePage());
+      } on ApiException catch (error) {
+        Get.snackbar(
+          'Error',
+          error.message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFF44336),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
           margin: const EdgeInsets.all(16),
         );
       } catch (e) {
