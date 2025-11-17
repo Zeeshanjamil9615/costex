@@ -91,7 +91,10 @@ class HomePage extends StatelessWidget {
         ),
         actions: [
           TextButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              Get.offAll(() => LoginPage());
+
+            },
             icon: const Icon(Icons.logout, color: Colors.white, size: 18),
             label: const Text(
               'Logout',

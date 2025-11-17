@@ -1,5 +1,6 @@
 import 'package:costex_app/api_service/api_service.dart';
 import 'package:costex_app/utils/colour.dart';
+import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -52,7 +53,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         colorText: Colors.white,
       );
 
-      Get.offAll(() => const HomePage());
+      Get.offAll(() => const LoginPage());
     } on ApiException catch (error) {
       setState(() => _isLoading = false);
       Get.snackbar(

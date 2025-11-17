@@ -2,6 +2,7 @@
 
 
 // all_users_page.dart
+import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/adduser/alluser/all_user_controller.dart';
 import 'package:costex_app/views/drawer/adduser/alluser/update_user.dart';
 import 'package:costex_app/views/home/home.dart';
@@ -40,6 +41,8 @@ class AllUsersPage extends StatelessWidget {
           TextButton.icon(
             onPressed: () {
               // Handle logout
+              Get.offAll(() => LoginPage());
+
             },
             icon: const Icon(Icons.logout, color: Colors.white, size: 18),
             label: const Text(

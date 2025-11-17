@@ -1,4 +1,5 @@
 // my_quotations_page.dart
+import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/user_quotation/user_quotation_controller.dart';
 import 'package:costex_app/views/home/home.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,8 @@ class UserQuotation extends StatelessWidget {
           TextButton.icon(
             onPressed: () {
               // Handle logout
+              Get.offAll(() => LoginPage());
+
             },
             icon: const Icon(Icons.logout, color: Colors.white, size: 18),
             label: const Text(

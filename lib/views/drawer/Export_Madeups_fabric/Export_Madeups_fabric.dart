@@ -1,3 +1,4 @@
+import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/Export_Madeups_fabric/Export_Madeups_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,7 +35,10 @@ class ExportMadeupsPage extends StatelessWidget {
         ),
         actions: [
           TextButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              Get.offAll(() => LoginPage());
+
+            },
             icon: const Icon(Icons.logout, color: Colors.white, size: 18),
             label: const Text(
               'Logout',

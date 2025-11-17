@@ -1,3 +1,4 @@
+import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/grey_febric_costing_sheet/grey_febric_costing_controller.dart';
 import 'package:costex_app/widget/custom_textfield.dart';
 import 'package:costex_app/views/home/home.dart';
@@ -34,7 +35,10 @@ class GreyFabricCostingScreen extends StatelessWidget {
         ),
         actions: [
           TextButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              Get.offAll(() => LoginPage());
+
+            },
             icon: const Icon(Icons.logout, color: Colors.white, size: 18),
             label: const Text(
               'Logout',

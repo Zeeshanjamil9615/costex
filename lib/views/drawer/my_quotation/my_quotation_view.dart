@@ -1,4 +1,5 @@
 // view_quotation_page.dart
+import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,6 +34,8 @@ class ViewQuotationPage extends StatelessWidget {
           TextButton.icon(
             onPressed: () {
               // Handle logout
+              Get.offAll(() => LoginPage());
+
             },
             icon: const Icon(Icons.logout, color: Colors.white, size: 18),
             label: const Text(

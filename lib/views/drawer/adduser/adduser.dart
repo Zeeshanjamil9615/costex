@@ -1,3 +1,4 @@
+import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/adduser/adduser_controller.dart';
 import 'package:costex_app/views/home/home.dart';
 import 'package:costex_app/widget/custom_textfield.dart';
@@ -34,7 +35,10 @@ class AddUserPage extends StatelessWidget {
         ),
         actions: [
           TextButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              Get.offAll(() => LoginPage());
+
+            },
             icon: const Icon(Icons.logout, color: Colors.white, size: 18),
             label: const Text(
               'Logout',
