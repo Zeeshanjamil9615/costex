@@ -1,4 +1,5 @@
 import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/auth/otp/otp_verification.dart';
 import 'package:flutter/material.dart';
@@ -159,8 +160,8 @@ class SignupController extends GetxController {
   }
 
   // Navigate to login
-  void goToLogin() {
-    // Get.offAllNamed('/login');
-     Get.offAll(() => LoginPage());
+  Future<void> goToLogin() async {
+    await SessionService.instance.clearSession();
+    Get.offAll(() => const LoginPage());
   }
 }

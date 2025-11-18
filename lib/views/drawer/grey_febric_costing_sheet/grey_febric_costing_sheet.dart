@@ -1,3 +1,4 @@
+import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/grey_febric_costing_sheet/grey_febric_costing_controller.dart';
 import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
@@ -46,9 +47,9 @@ class GreyFabricCostingScreen extends StatelessWidget {
         ),
         actions: [
           TextButton.icon(
-            onPressed: () {
-              Get.offAll(() => LoginPage());
-
+            onPressed: () async {
+              await SessionService.instance.clearSession();
+              Get.offAll(() => const LoginPage());
             },
             icon: const Icon(Icons.logout, color: Colors.white, size: 18),
             label: const Text(
@@ -176,55 +177,73 @@ class GreyFabricCostingScreen extends StatelessWidget {
                     const SizedBox(height: 32),
 
                     // Action Buttons
-                    Row(
-                      children: [
-                        if (!viewMode) ...[
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: controller.saveQuotation,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFDC143C),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
+                    Obx(() => Row(
+                          children: [
+                            if (!viewMode) ...[
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: controller.isSaving.value
+                                      ? null
+                                      : controller.saveQuotation,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFDC143C),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: controller.isSaving.value
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                          ),
+                                        )
+                                      : const Text(
+                                          'SAVE QUOTATION',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
                                 ),
-                                elevation: 0,
                               ),
-                              child: const Text(
-                                'SAVE QUOTATION',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                              const SizedBox(width: 16),
+                            ],
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: controller.isSaving.value
+                                    ? null
+                                    : controller.generatePDF,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFDC143C),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: const Text(
+                                  'GENERATE PDF',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                        ],
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: controller.generatePDF,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFDC143C),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: const Text(
-                              'GENERATE PDF',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                          ],
+                        )),
                   ],
                 ),
               ),

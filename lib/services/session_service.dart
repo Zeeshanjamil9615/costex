@@ -7,6 +7,7 @@ class SessionService {
 
   final GetStorage _box = GetStorage();
   static const String _companyDataKey = 'company_data';
+  static const String _userEmailKey = 'user_email';
 
   Future<void> saveCompanyData(Map<String, dynamic>? data) async {
     if (data == null) return;
@@ -37,8 +38,26 @@ class SessionService {
         'COMPANY';
   }
 
-  Future<void> clear() async {
-    await _box.remove(_companyDataKey);
+  Future<void> saveUserEmail(String email) async {
+    await _box.write(_userEmailKey, email);
   }
+
+  String? get userEmail {
+    final value = _box.read(_userEmailKey);
+    if (value is String && value.isNotEmpty) {
+      return value;
+    }
+    return null;
+  }
+
+  bool get hasActiveSession => userEmail != null && companyId != null;
+
+  Future<void> clearSession() async {
+    await _box.remove(_companyDataKey);
+    await _box.remove(_userEmailKey);
+  }
+
+  @Deprecated('Use clearSession instead')
+  Future<void> clear() async => clearSession();
 }
 

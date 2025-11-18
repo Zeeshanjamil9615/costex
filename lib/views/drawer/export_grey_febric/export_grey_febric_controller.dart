@@ -1,8 +1,13 @@
+import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
+import 'package:costex_app/utils/pdf_printer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:costex_app/utils/pdf_printer.dart';
 
 class ExportGreyController extends GetxController {
+  final ApiService _apiService = ApiService();
+  final SessionService _session = SessionService.instance;
+
   // Text Controllers
   final customerNameController = TextEditingController();
   
@@ -314,16 +319,83 @@ class ExportGreyController extends GetxController {
       try {
         isLoading.value = true;
 
-        // TODO: Implement API call (collect all fields here when wiring backend)
+        final companyId = _session.companyId;
+        if (companyId == null) {
+          Get.snackbar(
+            'Error',
+            'Company information missing. Please login again.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFFF44336),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+            margin: const EdgeInsets.all(16),
+          );
+          return;
+        }
 
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
+        final payload = {
+          'company_id': companyId,
+          'company_name': _session.companyName,
+          'customer_name': _text(customerNameController),
+          'quality': _text(qualityController),
+          'warp_count': _number(warpCountController),
+          'weft_count': _number(weftCountController),
+          'reeds': _number(reedsController),
+          'picks': _number(picksController),
+          'grey_width': _number(greyWidthController),
+          'pc_ratio': _text(pcRatioController),
+          'loom': _text(loomController),
+          'weave': _text(weaveController),
+          'warp_rate_lbs': _number(warpRateController),
+          'weft_rate_lbs': _number(weftRateController),
+          'conversion_pick': _number(coversionPickController),
+          'warp_weight': _number(warpWeightController),
+          'weft_weight': _number(weftWeightController),
+          'total_weight': _number(totalWeightController),
+          'warp_price': _number(warpPriceController),
+          'weft_price': _number(weftPriceController),
+          'conversion_charges': _number(coversionChargesController),
+          'grey_fabric_price': _number(greyFabricPriceController),
+          'mending_mt': _number(mendingMTController),
+          'packing_type': _text(packingTypeController),
+          'packing charges': _number(packingChargesController),
+          'wastage': _number(wastageController),
+          'container_size': _text(containerSizeController),
+          'container_capacity': _number(containerCapacityController),
+          'fob_price_pkr': _number(fobPricePKRController),
+          'exchange_rate': _number(rateOfExchangeController),
+          'fob_price_dollar': _number(fobPriceDollarController),
+          'freight in \$': _number(freightInDollarController),
+          'freight_calculation_dollar': _number(freightCalculationController),
+          'c & f price in \$': _number(cfPriceController),
+          'commission': _number(commissionController),
+          'port': _text(portController),
+          'profit': _number(profitPercentController),
+          'overhead': _number(overheadPercentController),
+          'fob price final': _number(fobPriceFinalController),
+          'c & f price final': _number(cfPriceFinalController),
+        };
+
+        final response = await _apiService.saveExportGreyFabricQuote(
+          payload: payload,
+        );
 
         Get.snackbar(
           'Success',
-          'Quotation saved successfully',
+          response['message']?.toString() ??
+              'Export grey fabric quotation saved successfully',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4CAF50),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(16),
+        );
+      } on ApiException catch (error) {
+        Get.snackbar(
+          'Error',
+          error.message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
           margin: const EdgeInsets.all(16),
@@ -514,5 +586,13 @@ class ExportGreyController extends GetxController {
       return 'Please enter a valid number';
     }
     return null;
+  }
+
+  String _text(TextEditingController controller) => controller.text.trim();
+
+  String _number(TextEditingController controller) {
+    final value = controller.text.trim();
+    if (value.isEmpty) return '0';
+    return value;
   }
 }

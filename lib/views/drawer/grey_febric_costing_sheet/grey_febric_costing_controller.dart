@@ -1,10 +1,15 @@
 
+import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/utils/colour.dart';
 import 'package:costex_app/utils/pdf_printer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class GreyFabricCostingController extends GetxController {
+  final ApiService _apiService = ApiService();
+  final SessionService _session = SessionService.instance;
+
   // Text Controllers
   final customerNameController = TextEditingController();
   final qualityController = TextEditingController();
@@ -36,6 +41,8 @@ class GreyFabricCostingController extends GetxController {
   var weftRate = 0.0.obs;                      
   var coversionPicks = 0.0.obs;
   var profitPercent = 0.0.obs;
+
+  final isSaving = false.obs;
 
   // Computed values (these will auto-update)
   double get warpWeight {
@@ -163,8 +170,9 @@ class GreyFabricCostingController extends GetxController {
     });
   }
 
-  void saveQuotation() {
-    if (customerName.value.isEmpty) {
+  Future<void> saveQuotation() async {
+    if (isSaving.value) return;
+    if (customerNameController.text.trim().isEmpty) {
       Get.snackbar(
         'Error',
         'Please enter customer name',
@@ -175,16 +183,76 @@ class GreyFabricCostingController extends GetxController {
       return;
     }
 
-    // Implement your save logic here
-    // Example: API call to save quotation data
-    
-    Get.snackbar(
-      'Success',
-      'Quotation saved successfully',
-      backgroundColor: AppColors.success,
-      colorText: AppColors.textLight,
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    final companyId = _session.companyId;
+    if (companyId == null) {
+      Get.snackbar(
+        'Error',
+        'Company information missing. Please login again.',
+        backgroundColor: AppColors.error,
+        colorText: AppColors.textLight,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final payload = {
+      'company_name': _session.companyName,
+      'customer_name': _text(customerNameController),
+      'quality': _text(qualityController),
+      'warp_count': _number(warpCountController),
+      'weft_count': _number(weftCountController),
+      'reeds': _number(reedsController),
+      'picks': _number(picksController),
+      'grey_width': _number(greyWidthController),
+      'pc_ratio': _text(pcRatioController),
+      'loom': _text(loomController),
+      'wave': _text(weaveController),
+      'warp_rate_lbs': _number(warpRateController),
+      'weft_rate_lbs': _number(weftRateController),
+      'conversion_pick': _number(coversionPicksController),
+      'warp_weight': _formatDouble(warpWeight),
+      'weft_weight': _formatDouble(weftWeight),
+      'total_weight': _formatDouble(totalWeight),
+      'warp_price': _formatDouble(warpPrice),
+      'weft_price': _formatDouble(weftPrice),
+      'conversion_charges': _formatDouble(coversionCharges),
+      'grey_fabric_price': _formatDouble(greyFabricPrice),
+      'profit': _number(profitPercentController),
+      'final_fabric_price': _formatDouble(fabricPriceFinal),
+      'company_id': companyId,
+    };
+
+    try {
+      isSaving.value = true;
+      final response =
+          await _apiService.saveGreyFabricQuote(payload: payload);
+      Get.snackbar(
+        'Success',
+        response['message']?.toString() ??
+            'Grey Fabric Quotation Saved Successfully',
+        backgroundColor: AppColors.success,
+        colorText: AppColors.textLight,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } on ApiException catch (error) {
+      Get.snackbar(
+        'Error',
+        error.message,
+        backgroundColor: AppColors.error,
+        colorText: AppColors.textLight,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to save quotation: $e',
+        backgroundColor: AppColors.error,
+        colorText: AppColors.textLight,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isSaving.value = false;
+    }
   }
 
   Future<void> generatePDF() async {
@@ -266,4 +334,13 @@ class GreyFabricCostingController extends GetxController {
     profitPercentController.dispose();
     super.onClose();
   }
+
+  String _text(TextEditingController controller) => controller.text.trim();
+
+  String _number(TextEditingController controller) {
+    final value = controller.text.trim();
+    return value.isEmpty ? '0' : value;
+  }
+
+  String _formatDouble(double value) => value.toStringAsFixed(4);
 }

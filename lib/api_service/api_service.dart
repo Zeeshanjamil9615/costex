@@ -234,6 +234,46 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> saveGreyFabricQuote({
+    required Map<String, dynamic> payload,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'saveGreyFabricQuote',
+        data: FormData.fromMap(payload),
+      );
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to save grey fabric quotation')
+            : error.message ?? 'Unable to save grey fabric quotation',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> saveExportGreyFabricQuote({
+    required Map<String, dynamic> payload,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'saveExportGreyFabricQuote',
+        data: FormData.fromMap(payload),
+      );
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to save export grey fabric quotation')
+            : error.message ?? 'Unable to save export grey fabric quotation',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
   Map<String, dynamic> _parseResponse(Response<dynamic> response) {
     if (response.statusCode != 200) {
       throw ApiException(

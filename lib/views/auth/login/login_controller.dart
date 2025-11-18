@@ -20,6 +20,13 @@ class LoginController extends GetxController {
   final isPasswordVisible = false.obs;
 
   @override
+  void onInit() {
+    super.onInit();
+    _prefillEmail();
+    _redirectIfLoggedIn();
+  }
+
+  @override
   void onClose() {
     emailController.dispose();
     passwordController.dispose();
@@ -47,6 +54,7 @@ class LoginController extends GetxController {
               ) ??
               {},
         );
+        await _session.saveUserEmail(emailController.text.trim());
 
         Get.snackbar(
           'Success',
@@ -109,13 +117,19 @@ class LoginController extends GetxController {
 
   // Navigate to signup
   void goToSignup() {
-    // Get.toNamed('/signup'); 
-     Get.to(() => SignupPage());
+    Get.to(() => SignupPage());
   }
 
-  // Navigate back to home
-  void backToHome() {
-    // Get.offAllNamed('/home');
-      Get.offAll(() => HomePage());
+  void _prefillEmail() {
+    final savedEmail = _session.userEmail;
+    if (savedEmail != null && savedEmail.isNotEmpty) {
+      emailController.text = savedEmail;
+    }
+  }
+
+  void _redirectIfLoggedIn() {
+    if (_session.hasActiveSession) {
+      Future.microtask(() => Get.offAll(() => const HomePage()));
+    }
   }
 }

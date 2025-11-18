@@ -1,3 +1,4 @@
+import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/Export_Madeups_fabric/Export_Madeups_controller.dart';
 import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
@@ -46,9 +47,9 @@ class ExportMadeupsPage extends StatelessWidget {
         ),
         actions: [
           TextButton.icon(
-            onPressed: () {
-              Get.offAll(() => LoginPage());
-
+            onPressed: () async {
+              await SessionService.instance.clearSession();
+              Get.offAll(() => const LoginPage());
             },
             icon: const Icon(Icons.logout, color: Colors.white, size: 18),
             label: const Text(
