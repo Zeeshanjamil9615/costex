@@ -16,6 +16,7 @@ class CustomTextField extends StatelessWidget {
   final bool enabled;
   final int? maxLines;
   final bool required;
+  final bool readOnly;
 
   const CustomTextField({
     Key? key,
@@ -31,6 +32,7 @@ class CustomTextField extends StatelessWidget {
     this.enabled = true,
     this.maxLines = 1,
     this.required = false,
+    this.readOnly = false,
   }) : super(key: key);
 
   @override
@@ -75,6 +77,7 @@ class CustomTextField extends StatelessWidget {
           validator: validator,
           onChanged: onChanged,
           enabled: enabled,
+          readOnly: readOnly,
           maxLines: maxLines,
           style: const TextStyle(
             color: AppColors.textPrimary,
@@ -299,6 +302,7 @@ class NumericTextField extends StatelessWidget {
   final bool enabled;
   final bool required;
   final bool allowDecimal;
+  final bool readOnly;
 
   const NumericTextField({
     Key? key,
@@ -309,6 +313,7 @@ class NumericTextField extends StatelessWidget {
     this.enabled = true,
     this.required = false,
     this.allowDecimal = true,
+    this.readOnly = false,
   }) : super(key: key);
 
   @override
@@ -321,6 +326,7 @@ class NumericTextField extends StatelessWidget {
       onChanged: onChanged,
       enabled: enabled,
       required: required,
+      readOnly: readOnly,
       validator: (value) {
         if (required && (value == null || value.isEmpty)) {
           return 'This field is required';

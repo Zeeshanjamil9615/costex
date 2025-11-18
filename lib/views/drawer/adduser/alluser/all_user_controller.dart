@@ -1,144 +1,127 @@
 // all_users_controller.dart
-import 'package:costex_app/views/drawer/adduser/alluser/update_user.dart';
+import 'dart:developer';
+
+import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
 import 'package:get/get.dart';
 
 class User {
   final int id;
+  final String companyId;
+  final String addedBy;
   final String userName;
   final String email;
   final String cellNo;
   final String department;
   final String designation;
   final String address;
-  final String password;
+  final String status;
+  final String timestamp;
 
-  User({
+  const User({
     required this.id,
+    required this.companyId,
+    required this.addedBy,
     required this.userName,
     required this.email,
     required this.cellNo,
     required this.department,
     required this.designation,
     required this.address,
-    required this.password,
+    required this.status,
+    required this.timestamp,
   });
+
+  factory User.fromMap(Map<String, dynamic> map) {
+    String readValue(String primary, [String? fallback]) {
+      if (map[primary] != null && map[primary].toString().isNotEmpty) {
+        return map[primary].toString();
+      }
+      if (fallback != null && map[fallback] != null) {
+        return map[fallback].toString();
+      }
+      return '';
+    }
+
+    return User(
+      id: int.tryParse(readValue('id', '0')) ?? 0,
+      companyId: readValue('company_id', '1'),
+      addedBy: readValue('added_by', '2'),
+      userName: readValue('full_name', '3'),
+      email: readValue('email_address', '4'),
+      address: readValue('address', '5'),
+      cellNo: readValue('cell_number', '6'),
+      department: readValue('department_name', '7'),
+      designation: readValue('designation_no', '8'),
+      status: readValue('status', '10'),
+      timestamp: readValue('timestamp', '11'),
+    );
+  }
 }
 
 class AllUsersController extends GetxController {
-  // Observable list of all users
+  final ApiService _apiService = ApiService();
+  final SessionService _session = SessionService.instance;
+
   final RxList<User> allUsers = <User>[].obs;
-  
-  // Observable list of filtered users
   final RxList<User> filteredUsers = <User>[].obs;
-  
-  // Search query
   final RxString searchQuery = ''.obs;
-  
-  // Loading state
   final RxBool isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadDummyUsers();
-    
-    // Listen to search query changes
+    fetchUsers();
     ever(searchQuery, (_) => filterUsers());
   }
 
-  void loadDummyUsers() {
-    isLoading.value = true;
-    
-    // Simulate API call delay
-    Future.delayed(const Duration(milliseconds: 500), () {
-      allUsers.value = [
-        User(
-          id: 1,
-          userName: 'HANAN waqar',
-          email: 'hananwaqar7@gmail.com',
-          cellNo: '03036646640',
-          department: 'NO',
-          designation: 'NO',
-          address: 'Faisalabad',
-          password: 'password123',
-        ),
-        User(
-          id: 2,
-          userName: 'Alison Parker',
-          email: 'arslan12@gmail.com',
-          cellNo: '571',
-          department: 'Peter Nieves',
-          designation: 'Senior Developer',
-          address: 'New York',
-          password: 'password123',
-        ),
-        User(
-          id: 3,
-          userName: 'ARFAT MAJEED',
-          email: 'arafat.m@traveLocity.com.pk',
-          cellNo: '03218667901',
-          department: 'ADMIN',
-          designation: 'CEO',
-          address: 'Lahore',
-          password: 'password123',
-        ),
-        User(
-          id: 4,
-          userName: 'M. Arslan Aslam',
-          email: 'arslan@gmail.com',
-          cellNo: '0321-3123124',
-          department: 'Finance',
-          designation: 'Developer',
-          address: 'Islamabad',
-          password: 'password123',
-        ),
-        User(
-          id: 5,
-          userName: 'Sarah Johnson',
-          email: 'sarah.j@example.com',
-          cellNo: '03001234567',
-          department: 'Marketing',
-          designation: 'Marketing Manager',
-          address: 'Karachi',
-          password: 'password123',
-        ),
-        User(
-          id: 6,
-          userName: 'Ahmed Khan',
-          email: 'ahmed.khan@example.com',
-          cellNo: '03119876543',
-          department: 'Sales',
-          designation: 'Sales Executive',
-          address: 'Rawalpindi',
-          password: 'password123',
-        ),
-      ];
-      
-      filteredUsers.value = allUsers;
+  Future<void> fetchUsers() async {
+    final companyId = _session.companyId;
+    if (companyId == null) {
+      log('No company id found for fetching users');
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final response = await _apiService.getCompanyUsers(companyId: companyId);
+      final users = response.map(User.fromMap).toList();
+      allUsers.assignAll(users);
+      filterUsers();
+    } catch (error, stack) {
+      log('Failed to fetch users', error: error, stackTrace: stack);
+      Get.snackbar(
+        'Error',
+        'Unable to fetch users. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
       isLoading.value = false;
-    });
+    }
   }
 
   void filterUsers() {
-    if (searchQuery.value.isEmpty) {
-      filteredUsers.value = allUsers;
-    } else {
-      filteredUsers.value = allUsers.where((user) {
-        final query = searchQuery.value.toLowerCase();
-        return user.userName.toLowerCase().contains(query) ||
-               user.email.toLowerCase().contains(query) ||
-               user.cellNo.contains(query) ||
-               user.department.toLowerCase().contains(query) ||
-               user.designation.toLowerCase().contains(query);
-      }).toList();
+    final query = searchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) {
+      filteredUsers.assignAll(allUsers);
+      return;
     }
+
+    filteredUsers.assignAll(allUsers.where((user) {
+      return user.userName.toLowerCase().contains(query) ||
+          user.email.toLowerCase().contains(query) ||
+          user.cellNo.toLowerCase().contains(query) ||
+          user.department.toLowerCase().contains(query) ||
+          user.designation.toLowerCase().contains(query) ||
+          user.address.toLowerCase().contains(query);
+    }).toList());
   }
 
   void updateSearchQuery(String query) {
     searchQuery.value = query;
   }
 
-  void refreshUsers() {
-    loadDummyUsers();
+  Future<void> refreshUsers() async {
+    await fetchUsers();
   }
 }

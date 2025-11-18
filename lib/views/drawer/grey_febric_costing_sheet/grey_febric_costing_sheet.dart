@@ -1,5 +1,6 @@
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/grey_febric_costing_sheet/grey_febric_costing_controller.dart';
+import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
 import 'package:costex_app/widget/custom_textfield.dart';
 import 'package:costex_app/views/home/home.dart';
 import 'package:flutter/material.dart';
@@ -7,11 +8,21 @@ import 'package:get/get.dart';
 import 'package:costex_app/utils/colour.dart';
 
 class GreyFabricCostingScreen extends StatelessWidget {
-  const GreyFabricCostingScreen({Key? key}) : super(key: key);
+  final Quotation? quotation;
+  final bool viewMode;
+  
+  const GreyFabricCostingScreen({Key? key, this.quotation, this.viewMode = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(GreyFabricCostingController());
+    
+    // Load quotation data if in view mode
+    if (viewMode && quotation != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadQuotationData(controller, quotation!);
+      });
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -167,28 +178,30 @@ class GreyFabricCostingScreen extends StatelessWidget {
                     // Action Buttons
                     Row(
                       children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: controller.saveQuotation,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFDC143C),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
+                        if (!viewMode) ...[
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: controller.saveQuotation,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFDC143C),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                elevation: 0,
                               ),
-                              elevation: 0,
-                            ),
-                            child: const Text(
-                              'SAVE QUOTATION',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                              child: const Text(
+                                'SAVE QUOTATION',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
+                          const SizedBox(width: 16),
+                        ],
                         Expanded(
                           child: ElevatedButton(
                             onPressed: controller.generatePDF,
@@ -324,13 +337,38 @@ class GreyFabricCostingScreen extends StatelessWidget {
         label: label,
         hintText: '0',
         controller: controller,
+        readOnly: viewMode,
       );
     }
     return CustomTextField(
       label: label,
       hintText: label,
       controller: controller,
+      readOnly: viewMode,
     );
+  }
+  
+  void _loadQuotationData(GreyFabricCostingController controller, Quotation quotation) {
+    final details = quotation.details;
+    controller.customerNameController.text = quotation.customerName;
+    controller.qualityController.text = quotation.quality;
+    
+    if (details.containsKey('warpCount')) controller.warpCountController.text = details['warpCount'].toString();
+    if (details.containsKey('weftCount')) controller.weftCountController.text = details['weftCount'].toString();
+    if (details.containsKey('reeds')) controller.reedsController.text = details['reeds'].toString();
+    if (details.containsKey('picks')) controller.picksController.text = details['picks'].toString();
+    if (details.containsKey('greyWidth')) controller.greyWidthController.text = details['greyWidth'].toString();
+    if (details.containsKey('pcRatio')) controller.pcRatioController.text = details['pcRatio'].toString();
+    if (details.containsKey('loom')) controller.loomController.text = details['loom'].toString();
+    if (details.containsKey('weave')) controller.weaveController.text = details['weave'].toString();
+    if (details.containsKey('warpRate')) controller.warpRateController.text = details['warpRate'].toString();
+    if (details.containsKey('weftRate')) controller.weftRateController.text = details['weftRate'].toString();
+    if (details.containsKey('coverationPick') || details.containsKey('coversionPicks')) {
+      controller.coversionPicksController.text = (details['coverationPick'] ?? details['coversionPicks']).toString();
+    }
+    if (details.containsKey('profit') || details.containsKey('profitPercent')) {
+      controller.profitPercentController.text = (details['profit'] ?? details['profitPercent']).toString();
+    }
   }
 
   Widget _buildCalculatedFieldWithGetter(String label, double Function() getValue) {

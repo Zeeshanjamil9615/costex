@@ -1,4 +1,5 @@
 import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/views/auth/signup/signup.dart';
 import 'package:costex_app/views/home/home.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:get/get.dart';
 
 class LoginController extends GetxController {
   final ApiService _apiService = ApiService();
+  final SessionService _session = SessionService.instance;
   // Text Controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -39,6 +41,13 @@ class LoginController extends GetxController {
           password: passwordController.text,
         );
 
+        await _session.saveCompanyData(
+          (response['data'] as Map<String, dynamic>?)?.map(
+                (key, value) => MapEntry(key.toString(), value),
+              ) ??
+              {},
+        );
+
         Get.snackbar(
           'Success',
           response['message']?.toString() ?? 'Login successful',
@@ -49,7 +58,7 @@ class LoginController extends GetxController {
           margin: const EdgeInsets.all(16),
         );
 
-        Get.offAll(() => HomePage());
+        Get.offAll(() => const HomePage());
       } on ApiException catch (error) {
         Get.snackbar(
           'Error',

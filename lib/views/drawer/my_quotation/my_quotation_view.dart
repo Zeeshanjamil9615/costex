@@ -57,7 +57,7 @@ class ViewQuotationPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  Text( 
                     'View ${quotation.fabricType} Costing Sheet',
                     style: const TextStyle(
                       fontSize: 18,

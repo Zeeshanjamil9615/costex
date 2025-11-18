@@ -40,7 +40,6 @@ class AllUsersPage extends StatelessWidget {
         actions: [
           TextButton.icon(
             onPressed: () {
-              // Handle logout
               Get.offAll(() => LoginPage());
 
             },

@@ -1,5 +1,6 @@
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/export_multi_width_fabric/export_multi_width_controller.dart';
+import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:costex_app/utils/colour.dart';
@@ -7,11 +8,21 @@ import 'package:costex_app/widget/custom_textfield.dart';
 import 'package:costex_app/views/home/home.dart';
 
 class MultiMadeupsPage extends StatelessWidget {
-  const MultiMadeupsPage({Key? key}) : super(key: key);
+  final Quotation? quotation;
+  final bool viewMode;
+  
+  const MultiMadeupsPage({Key? key, this.quotation, this.viewMode = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final MultiMadeupsController controller = Get.put(MultiMadeupsController());
+    
+    // Load quotation data if in view mode
+    if (viewMode && quotation != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadQuotationData(controller, quotation!);
+      });
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -88,11 +99,12 @@ class MultiMadeupsPage extends StatelessWidget {
         ),
         child: Obx(() => Row(
               children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: controller.isLoading.value
-                        ? null
-                        : controller.saveQuotation,
+                if (!viewMode) ...[
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : controller.saveQuotation,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFDC143C),
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -120,6 +132,7 @@ class MultiMadeupsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
+                ],
                 Expanded(
                   child: ElevatedButton(
                     onPressed: controller.isLoading.value
@@ -176,6 +189,7 @@ class MultiMadeupsPage extends StatelessWidget {
                   label: 'Customer Name',
                   hintText: 'Customer Name',
                   controller: controller.customerNameController,
+                  readOnly: viewMode,
                 ),
                 const SizedBox(height: 24),
                 Column(
@@ -232,6 +246,7 @@ class MultiMadeupsPage extends StatelessWidget {
                 label: labelList[i],
                 hintText: labelList[i],
                 controller: ctrls[i],
+                readOnly: viewMode,
               ),
               if (i < ctrls.length - 1) const SizedBox(height: 10),
             ],
@@ -341,6 +356,7 @@ class MultiMadeupsPage extends StatelessWidget {
                 label: 'Product Name',
                 hintText: 'Product Name',
                 controller: generalProductNameController,
+                readOnly: viewMode,
               ),
             ),
             // Vertical layout – no header, each line stacked for readability
@@ -397,7 +413,7 @@ class MultiMadeupsPage extends StatelessWidget {
           Widget widthWithDropdown(TextEditingController c, RxString obs, String hint) {
             return Row(
               children: [
-                Expanded(child: NumericTextField(hintText: hint, controller: c)),
+                Expanded(child: NumericTextField(hintText: hint, controller: c, readOnly: viewMode)),
                 const SizedBox(width: 6),
                 Obx(() {
                   // Get grey widths from Basic Details
@@ -431,7 +447,7 @@ class MultiMadeupsPage extends StatelessWidget {
                         items: items
                             .map((u) => DropdownMenuItem(value: u, child: Text(u, style: const TextStyle(fontSize: 12))))
                             .toList(),
-                        onChanged: (v) { if (v != null) obs.value = v; },
+                        onChanged: viewMode ? null : (v) { if (v != null) obs.value = v; },
                       ),
                     ),
                   );
@@ -444,19 +460,19 @@ class MultiMadeupsPage extends StatelessWidget {
             Text('#$rowNum', style: const TextStyle(fontSize: 12, color: Colors.black54)),
             const SizedBox(height: 6),
             Row(children: [
-              Expanded(flex: 2, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: CustomTextField(hintText: 'Product Name', controller: controllers[0]))),
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[1]))),
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[2]))),
+              Expanded(flex: 2, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: CustomTextField(hintText: 'Product Name', controller: controllers[0], readOnly: viewMode))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[1], readOnly: viewMode))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[2], readOnly: viewMode))),
             ]),
             const SizedBox(height: 8),
             Row(children: [
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'CutSize', controller: controllers[3]))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'CutSize', controller: controllers[3], readOnly: viewMode))),
               Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: widthWithDropdown(controllers[4], gvObs, 'Grey Width'))),
               Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: widthWithDropdown(controllers[5], fwObs, 'Finish Width'))),
             ]),
             const SizedBox(height: 8),
             Row(children: [
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Pcs', controller: controllers[6]))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Pcs', controller: controllers[6], readOnly: viewMode))),
               Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: HighlightedNumericTextField(hintText: 'Consumption', controller: controllers[7], readOnly: true))),
               Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: HighlightedNumericTextField(hintText: 'Consumption Price', controller: controllers[8], readOnly: true))),
             ]),
@@ -466,13 +482,13 @@ class MultiMadeupsPage extends StatelessWidget {
             Text('#$rowNum', style: const TextStyle(fontSize: 12, color: Colors.black54)),
             const SizedBox(height: 6),
             Row(children: [
-              Expanded(flex: 2, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: CustomTextField(hintText: 'Product Name', controller: controllers[0]))),
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[1]))),
+              Expanded(flex: 2, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: CustomTextField(hintText: 'Product Name', controller: controllers[0], readOnly: viewMode))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[1], readOnly: viewMode))),
             ]),
             const SizedBox(height: 8),
             Row(children: [
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[2]))),
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'CutSize', controller: controllers[3]))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[2], readOnly: viewMode))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'CutSize', controller: controllers[3], readOnly: viewMode))),
             ]),
             const SizedBox(height: 8),
             Row(children: [
@@ -481,7 +497,7 @@ class MultiMadeupsPage extends StatelessWidget {
             ]),
             const SizedBox(height: 8),
             Row(children: [
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Pcs', controller: controllers[6]))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Pcs', controller: controllers[6], readOnly: viewMode))),
               Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: HighlightedNumericTextField(hintText: 'Consumption', controller: controllers[7], readOnly: true))),
             ]),
             const SizedBox(height: 8),
@@ -491,21 +507,21 @@ class MultiMadeupsPage extends StatelessWidget {
           List<Widget> buildCompact() => [
             Text('#$rowNum', style: const TextStyle(fontSize: 12, color: Colors.black54)),
             const SizedBox(height: 6),
-            Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: CustomTextField(hintText: 'Product Name', controller: controllers[0])),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: CustomTextField(hintText: 'Product Name', controller: controllers[0], readOnly: viewMode)),
             const SizedBox(height: 8),
             Row(children: [
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[1]))),
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[2]))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[1], readOnly: viewMode))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Size', controller: controllers[2], readOnly: viewMode))),
             ]),
             const SizedBox(height: 8),
-            Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'CutSize', controller: controllers[3])),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'CutSize', controller: controllers[3], readOnly: viewMode)),
             const SizedBox(height: 8),
             Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: widthWithDropdown(controllers[4], gvObs, 'Grey Width')),
             const SizedBox(height: 8),
             Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: widthWithDropdown(controllers[5], fwObs, 'Finish Width')),
             const SizedBox(height: 8),
             Row(children: [
-              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Pcs', controller: controllers[6]))),
+              Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: NumericTextField(hintText: 'Pcs', controller: controllers[6], readOnly: viewMode))),
               Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: HighlightedNumericTextField(hintText: 'Consumption', controller: controllers[7], readOnly: true))),
             ]),
             const SizedBox(height: 8),
@@ -663,7 +679,7 @@ class MultiMadeupsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildFabricVertical(controller),
+                _buildFabricVertical(controller, viewMode),
               ],
             ),
           ),
@@ -673,7 +689,13 @@ class MultiMadeupsPage extends StatelessWidget {
   }
 // FABRIC TAB - FIXED: All calculated fields now use HighlightedNumericTextField with readOnly: true
 
-Widget _buildFabricVertical(MultiMadeupsController c) {
+  void _loadQuotationData(MultiMadeupsController controller, Quotation quotation) {
+    controller.customerNameController.text = quotation.customerName;
+    // Add more field mappings as needed based on MultiMadeupsController fields
+    // final details = quotation.details; // Use this to map additional fields when needed
+  }
+
+  Widget _buildFabricVertical(MultiMadeupsController c, bool viewMode) {
   final fields = [
     ['Quality', c.quality1Controller, c.quality2Controller, c.quality3Controller, c.quality4Controller, false],
     ['Loom', c.loom1Controller, c.loom2Controller, c.loom3Controller, c.loom4Controller, false],
@@ -743,10 +765,10 @@ Widget _buildFabricVertical(MultiMadeupsController c) {
                       spacing: 12,
                       runSpacing: 12,
                       children: [
-                        _fabricInput(field[1] as TextEditingController, isCalculated),
-                        _fabricInput(field[2] as TextEditingController, isCalculated),
-                        _fabricInput(field[3] as TextEditingController, isCalculated),
-                        _fabricInput(field[4] as TextEditingController, isCalculated),
+                        _fabricInput(field[1] as TextEditingController, isCalculated, viewMode),
+                        _fabricInput(field[2] as TextEditingController, isCalculated, viewMode),
+                        _fabricInput(field[3] as TextEditingController, isCalculated, viewMode),
+                        _fabricInput(field[4] as TextEditingController, isCalculated, viewMode),
                       ],
                     ),
                   ),
@@ -760,12 +782,12 @@ Widget _buildFabricVertical(MultiMadeupsController c) {
   );
 }
 
-Widget _fabricInput(TextEditingController controller, bool isCalculated) {
+Widget _fabricInput(TextEditingController controller, bool isCalculated, bool viewMode) {
   return SizedBox(
     width: 141,
     child: isCalculated
         ? HighlightedNumericTextField(hintText: '0', controller: controller, readOnly: true)
-        : NumericTextField(hintText: '0', controller: controller),
+        : NumericTextField(hintText: '0', controller: controller, readOnly: viewMode),
   );
 }
 
@@ -801,7 +823,7 @@ Widget _fabricInput(TextEditingController controller, bool isCalculated) {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildFreightTable(controller),
+                _buildFreightTable(controller, viewMode),
               ],
             ),
           ),
@@ -811,7 +833,7 @@ Widget _fabricInput(TextEditingController controller, bool isCalculated) {
   }
 // FIXED FREIGHT TAB - Replace _buildFreightTable method in your view file
 
-Widget _buildFreightTable(MultiMadeupsController c) {
+Widget _buildFreightTable(MultiMadeupsController c, bool viewMode) {
   final regularFields = [
     // FIXED: Use generalProductName controllers instead of separate freight controllers
     ['Product Name', c.generalProductName1Controller, c.generalProductName2Controller, c.generalProductName3Controller, c.generalProductName4Controller, false, true],
@@ -880,17 +902,17 @@ Widget _buildFreightTable(MultiMadeupsController c) {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _freightLabeledInput(field[1] as TextEditingController, isCalculated, isText, '1'),
+                    _freightLabeledInput(field[1] as TextEditingController, isCalculated, isText, '1', viewMode),
                     const SizedBox(width: 8),
-                    _freightLabeledInput(field[2] as TextEditingController, isCalculated, isText, '2'),
+                    _freightLabeledInput(field[2] as TextEditingController, isCalculated, isText, '2', viewMode),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _freightLabeledInput(field[3] as TextEditingController, isCalculated, isText, '3'),
+                    _freightLabeledInput(field[3] as TextEditingController, isCalculated, isText, '3', viewMode),
                     const SizedBox(width: 8),
-                    _freightLabeledInput(field[4] as TextEditingController, isCalculated, isText, '4'),
+                    _freightLabeledInput(field[4] as TextEditingController, isCalculated, isText, '4', viewMode),
                   ],
                 ),
               ],
@@ -992,7 +1014,7 @@ Widget _buildFreightTable(MultiMadeupsController c) {
   );
 }
 
-Widget _freightLabeledInput(TextEditingController controller, bool isCalculated, bool isText, String productLabel) {
+Widget _freightLabeledInput(TextEditingController controller, bool isCalculated, bool isText, String productLabel, bool viewMode) {
   return Expanded(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1002,8 +1024,8 @@ Widget _freightLabeledInput(TextEditingController controller, bool isCalculated,
         isCalculated
             ? HighlightedNumericTextField(hintText: '0', controller: controller, readOnly: true)
             : isText
-                ? CustomTextField(hintText: 'Enter text', controller: controller)
-                : NumericTextField(hintText: '0', controller: controller),
+                ? CustomTextField(hintText: 'Enter text', controller: controller, readOnly: viewMode)
+                : NumericTextField(hintText: '0', controller: controller, readOnly: viewMode),
       ],
     ),
   );

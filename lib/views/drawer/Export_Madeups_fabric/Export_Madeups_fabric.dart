@@ -1,5 +1,6 @@
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/Export_Madeups_fabric/Export_Madeups_controller.dart';
+import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:costex_app/utils/colour.dart';
@@ -7,11 +8,21 @@ import 'package:costex_app/widget/custom_textfield.dart';
 import 'package:costex_app/views/home/home.dart';
 
 class ExportMadeupsPage extends StatelessWidget {
-  const ExportMadeupsPage({Key? key}) : super(key: key);
+  final Quotation? quotation;
+  final bool viewMode;
+  
+  const ExportMadeupsPage({Key? key, this.quotation, this.viewMode = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final ExportMadeupsController controller = Get.put(ExportMadeupsController());
+    
+    // Load quotation data if in view mode
+    if (viewMode && quotation != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadQuotationData(controller, quotation!);
+      });
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -77,6 +88,7 @@ class ExportMadeupsPage extends StatelessWidget {
                       label: 'Customer Name',
                       controller: controller.customerNameController,
                       required: true,
+                      readOnly: viewMode,
                     ),
                   ],
                 ),
@@ -87,8 +99,8 @@ class ExportMadeupsPage extends StatelessWidget {
                   'Product',
                   [
                     _rowWrap([
-                      CustomTextField(label: 'Product Name', controller: controller.productNameController, required: true),
-                      CustomTextField(label: 'Product Size', controller: controller.productSizeController),
+                      CustomTextField(label: 'Product Name', controller: controller.productNameController, required: true, readOnly: viewMode),
+                      CustomTextField(label: 'Product Size', controller: controller.productSizeController, readOnly: viewMode),
                     ]),
                   ],
                 ),
@@ -99,31 +111,31 @@ class ExportMadeupsPage extends StatelessWidget {
                   'Basic Information',
                   [
                     _rowWrap([
-                      CustomTextField(label: 'Quality', controller: controller.qualityController),
-                      NumericTextField(label: 'Warp Count', controller: controller.warpCountController),
-                      NumericTextField(label: 'Weft Count', controller: controller.weftCountController),
+                      CustomTextField(label: 'Quality', controller: controller.qualityController, readOnly: viewMode),
+                      NumericTextField(label: 'Warp Count', controller: controller.warpCountController, readOnly: viewMode),
+                      NumericTextField(label: 'Weft Count', controller: controller.weftCountController, readOnly: viewMode),
                     ]),
                     const SizedBox(height: 12),
                     _rowWrap([
-                      NumericTextField(label: 'Reeds', controller: controller.reedsController),
-                      NumericTextField(label: 'Picks', controller: controller.picksController),
-                      NumericTextField(label: 'Grey Width', controller: controller.greyWidthController),
+                      NumericTextField(label: 'Reeds', controller: controller.reedsController, readOnly: viewMode),
+                      NumericTextField(label: 'Picks', controller: controller.picksController, readOnly: viewMode),
+                      NumericTextField(label: 'Grey Width', controller: controller.greyWidthController, readOnly: viewMode),
                     ]),
                     const SizedBox(height: 12),
                     _rowWrap([
-                      NumericTextField(label: 'Finish Width', controller: controller.finishWidthController),
-                      CustomTextField(label: 'P/C Ratio', controller: controller.pcRatioController),
-                      CustomTextField(label: 'Loom', controller: controller.loomController),
+                      NumericTextField(label: 'Finish Width', controller: controller.finishWidthController, readOnly: viewMode),
+                      CustomTextField(label: 'P/C Ratio', controller: controller.pcRatioController, readOnly: viewMode),
+                      CustomTextField(label: 'Loom', controller: controller.loomController, readOnly: viewMode),
                     ]),
                     const SizedBox(height: 12),
                     _rowWrap([
-                      CustomTextField(label: 'Weave', controller: controller.weaveController),
-                      NumericTextField(label: 'Warp Rate/Lbs', controller: controller.warpRateLbsController),
-                      NumericTextField(label: 'Weft Rate/Lbs', controller: controller.weftRateLbsController),
+                      CustomTextField(label: 'Weave', controller: controller.weaveController, readOnly: viewMode),
+                      NumericTextField(label: 'Warp Rate/Lbs', controller: controller.warpRateLbsController, readOnly: viewMode),
+                      NumericTextField(label: 'Weft Rate/Lbs', controller: controller.weftRateLbsController, readOnly: viewMode),
                     ]),
                     const SizedBox(height: 12),
                     _rowWrap([
-                      NumericTextField(label: 'Conversion/Pick', controller: controller.conversionPickController),
+                      NumericTextField(label: 'Conversion/Pick', controller: controller.conversionPickController, readOnly: viewMode),
                       HighlightedNumericTextField(label: 'Warp Weight', controller: controller.warpWeightController, readOnly: true),
                       HighlightedNumericTextField(label: 'Weft Weight', controller: controller.weftWeightController, readOnly: true),
                     ]),
@@ -137,7 +149,7 @@ class ExportMadeupsPage extends StatelessWidget {
                     _rowWrap([
                       HighlightedNumericTextField(label: 'Conversion Charges', controller: controller.conversionChargesController, readOnly: true),
                       HighlightedNumericTextField(label: 'Fabric Price/Meter', controller: controller.fabricPriceMeterController, readOnly: true),
-                      NumericTextField(label: 'Mending/MT', controller: controller.mendingMTController),
+                      NumericTextField(label: 'Mending/MT', controller: controller.mendingMTController, readOnly: viewMode),
                     ]),
                   ],
                 ),
@@ -149,32 +161,32 @@ class ExportMadeupsPage extends StatelessWidget {
                   [
                     _rowWrap([
                       _buildProcessTypeDropdown(controller),
-                      NumericTextField(label: 'Process/Inch', controller: controller.processRateController),
+                      NumericTextField(label: 'Process/Inch', controller: controller.processRateController, readOnly: viewMode),
                       HighlightedNumericTextField(label: 'Process Charges', controller: controller.processChargesController, readOnly: true),
                     ]),
                     const SizedBox(height: 12),
                     _rowWrap([
-                      CustomTextField(label: 'Packing Type', controller: controller.packingTypeController),
-                      NumericTextField(label: 'Packing Charges/MT', controller: controller.packingChargesMTController),
-                      NumericTextField(label: 'Wastage %', controller: controller.wastagePercentController),
+                      CustomTextField(label: 'Packing Type', controller: controller.packingTypeController, readOnly: viewMode),
+                      NumericTextField(label: 'Packing Charges/MT', controller: controller.packingChargesMTController, readOnly: viewMode),
+                      NumericTextField(label: 'Wastage %', controller: controller.wastagePercentController, readOnly: viewMode),
                     ]),
                     const SizedBox(height: 12),
                     _rowWrap([
                       HighlightedNumericTextField(label: 'Finish Fabric Cost', controller: controller.finishFabricCostController, readOnly: true),
-                      NumericTextField(label: 'Consumption', controller: controller.consumptionController),
+                      NumericTextField(label: 'Consumption', controller: controller.consumptionController, readOnly: viewMode),
                       HighlightedNumericTextField(label: 'Consumption Price', controller: controller.consumptionPriceController, readOnly: true),
                     ]),
                     const SizedBox(height: 12),
                     _rowWrap([
-                      NumericTextField(label: 'Stitching', controller: controller.stitchingController),
-                      NumericTextField(label: 'Accessories', controller: controller.accessoriesController),
-                      NumericTextField(label: 'Poly Bag', controller: controller.polyBagController),
+                      NumericTextField(label: 'Stitching', controller: controller.stitchingController, readOnly: viewMode),
+                      NumericTextField(label: 'Accessories', controller: controller.accessoriesController, readOnly: viewMode),
+                      NumericTextField(label: 'Poly Bag', controller: controller.polyBagController, readOnly: viewMode),
                     ]),
                     const SizedBox(height: 12),
                     _rowWrap([
-                      NumericTextField(label: 'Miscellaneous', controller: controller.miscellaneousController),
-                      CustomTextField(label: 'Container Size', controller: controller.containerSizeController),
-                      NumericTextField(label: 'Container Capacity', controller: controller.containerCapacityController),
+                      NumericTextField(label: 'Miscellaneous', controller: controller.miscellaneousController, readOnly: viewMode),
+                      CustomTextField(label: 'Container Size', controller: controller.containerSizeController, readOnly: viewMode),
+                      NumericTextField(label: 'Container Capacity', controller: controller.containerCapacityController, readOnly: viewMode),
                     ]),
                   ],
                 ),
@@ -185,14 +197,14 @@ class ExportMadeupsPage extends StatelessWidget {
                   'Export Pricing',
                   [
                     _rowWrap([
-                      NumericTextField(label: 'Rate of Exchange', controller: controller.rateOfExchangeController),
+                      NumericTextField(label: 'Rate of Exchange', controller: controller.rateOfExchangeController, readOnly: viewMode),
                       HighlightedNumericTextField(label: 'FOB Price in PKR', controller: controller.fobPricePKRController, readOnly: true),
                       HighlightedNumericTextField(label: 'FOB Price in \$', controller: controller.fobPriceDollarController, readOnly: true),
                     ]),
                     const SizedBox(height: 12),
                     _rowWrap([
-                      NumericTextField(label: 'Freight in \$', controller: controller.freightInDollarController),
-                      CustomTextField(label: 'Port', controller: controller.rateController),
+                      NumericTextField(label: 'Freight in \$', controller: controller.freightInDollarController, readOnly: viewMode),
+                      CustomTextField(label: 'Port', controller: controller.rateController, readOnly: viewMode),
                       HighlightedNumericTextField(label: 'Freight Calculation \$', controller: controller.freightCalculationController, readOnly: true),
                     ]),
                   ],
@@ -205,12 +217,12 @@ class ExportMadeupsPage extends StatelessWidget {
                   [
                     _rowWrap([
                       HighlightedNumericTextField(label: 'C & F Price in \$', controller: controller.cfPriceInDollarController, readOnly: true),
-                      NumericTextField(label: 'Commission %', controller: controller.commissionController),
-                      NumericTextField(label: 'Profit %', controller: controller.profitController),
+                      NumericTextField(label: 'Commission %', controller: controller.commissionController, readOnly: viewMode),
+                      NumericTextField(label: 'Profit %', controller: controller.profitController, readOnly: viewMode),
                     ]),
                     const SizedBox(height: 12),
                     _rowWrap([
-                      NumericTextField(label: 'Overhead %', controller: controller.overheadController),
+                      NumericTextField(label: 'Overhead %', controller: controller.overheadController, readOnly: viewMode),
                       HighlightedNumericTextField(label: 'FOB Price Final', controller: controller.fobPriceFinalController, readOnly: true),
                       HighlightedNumericTextField(label: 'C & F Price Final', controller: controller.cfPriceFinalController, readOnly: true),
                     ]),
@@ -221,9 +233,10 @@ class ExportMadeupsPage extends StatelessWidget {
                 // Action Buttons
                 Obx(() => Row(
                   children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: controller.isLoading.value ? null : controller.saveQuotation,
+                    if (!viewMode) ...[
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: controller.isLoading.value ? null : controller.saveQuotation,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFDC143C),
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -252,6 +265,7 @@ class ExportMadeupsPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
+                    ],
                     Expanded(
                       child: ElevatedButton(
                         onPressed: controller.isLoading.value ? null : controller.generatePDF,
@@ -318,11 +332,22 @@ class ExportMadeupsPage extends StatelessWidget {
                     ),
                   );
                 }).toList(),
-                onChanged: controller.changeProcessType,
+                onChanged: viewMode ? null : controller.changeProcessType,
               ),
             )),
       ],
     );
+  }
+  
+  void _loadQuotationData(ExportMadeupsController controller, Quotation quotation) {
+    final details = quotation.details;
+    controller.customerNameController.text = quotation.customerName;
+    
+    // Map all fields from quotation details
+    if (details.containsKey('productName')) controller.productNameController.text = details['productName'].toString();
+    if (details.containsKey('productSize')) controller.productSizeController.text = details['productSize'].toString();
+    if (details.containsKey('quality')) controller.qualityController.text = details['quality'].toString();
+    // Add more field mappings as needed
   }
 }
 

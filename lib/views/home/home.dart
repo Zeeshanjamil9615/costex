@@ -21,51 +21,57 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use Get.find if controller exists, otherwise create it
-    final HomeController homeController =  Get.put(HomeController());
-
+    final HomeController homeController = Get.isRegistered<HomeController>()
+        ? Get.find<HomeController>()
+        : Get.put(HomeController(), permanent: true);
     final List<Map<String, dynamic>> dashboardCards = [
       {
-        'title': 'TOTAL CLIENTS',
-        'value': '4',
+        'title': 'TOTAL USERS',
+        'countKey': 'all_users',
         'subtitle': 'All Time',
         'icon': Icons.people_outline,
       },
       {
         'title': 'GREY FABRIC',
-        'value': '2',
+        'countKey': 'grey_fabric',
         'subtitle': 'All Time',
         'icon': Icons.inventory_2_outlined,
+        'fabricType': 'Grey Fabric',
       },
       {
         'title': 'EXPORT GREY FABRIC',
-        'value': '3',
+        'countKey': 'export_grey_fabric',
         'subtitle': 'All Time',
         'icon': Icons.archive_outlined,
+        'fabricType': 'Export Grey Fabric',
       },
       {
         'title': 'PROCESSED FABRICS',
-        'value': '3',
+        'countKey': 'export_processed_fabric',
         'subtitle': 'All Time',
         'icon': Icons.checkroom_outlined,
+        'fabricType': 'Export Processed Fabric',
       },
       {
         'title': 'MADEUPS COSTING',
-        'value': '2',
+        'countKey': 'export_madeups_fabric',
         'subtitle': 'All Time',
         'icon': Icons.article_outlined,
+        'fabricType': 'Export Madeups Fabric',
       },
       {
         'title': 'MULTI MADEUPS COSTING',
-        'value': '3',
+        'countKey': 'multi_madeups_costing',
         'subtitle': 'All Time',
         'icon': Icons.layers_outlined,
+        'fabricType': 'Export Multi Madeups Fabric',
       },
       {
         'title': 'TOWEL COSTING',
-        'value': '2',
+        'countKey': 'towel_costing',
         'subtitle': 'All Time',
         'icon': Icons.dry_cleaning_outlined,
+        'fabricType': 'Towel Costing Sheet',
       },
     ];
 
@@ -80,9 +86,9 @@ class HomePage extends StatelessWidget {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: const Text(
-          'COMPANY',
-          style: TextStyle(
+        title: Text(
+          homeController.companyName.toUpperCase(),
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -105,92 +111,121 @@ class HomePage extends StatelessWidget {
         ],
       ),
       drawer: const AppDrawer(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: dashboardCards.map((card) => _buildDashboardCard(card)).toList(),
-        ),
-      ),
+      body: Obx(() {
+        if (homeController.isCountsLoading.value &&
+            homeController.counts.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: dashboardCards
+                .map((card) => _buildDashboardCard(card, homeController))
+                .toList(),
+          ),
+        );
+      }),
     );
   }
 
-  Widget _buildDashboardCard(Map<String, dynamic> card) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.cardIconBackground,
-              borderRadius: BorderRadius.circular(10),
+  Widget _buildDashboardCard(
+      Map<String, dynamic> card, HomeController homeController) {
+    final String? fabricType = card['fabricType'] as String?;
+    final isClickable = fabricType != null;
+    final String? countKey = card['countKey'] as String?;
+    final bool isLoading =
+        homeController.isCountsLoading.value && homeController.counts.isEmpty;
+    final String displayValue = countKey != null
+        ? (homeController.counts[countKey]?.toString() ?? (isLoading ? '...' : '0'))
+        : (card['value']?.toString() ?? '0');
+
+    return GestureDetector(
+      onTap: isClickable
+          ? () {
+              // Navigate to MyQuotationsPage with the fabric type
+              Get.to(
+                () => MyQuotationsPage(initialFabricType: fabricType),
+                transition: Transition.rightToLeft,
+              );
+            }
+          : null,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
-            child: Icon(
-              card['icon'],
-              color: AppColors.cardIcon,
-              size: 28,
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.cardIconBackground,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                card['icon'],
+                color: AppColors.cardIcon,
+                size: 28,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    card['title'],
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    card['subtitle'],
+                    style: TextStyle(
+                      color: AppColors.textSecondary.withOpacity(0.7),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
               children: [
                 Text(
-                  card['title'],
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.5,
+                  displayValue,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 36,
+                    fontWeight: FontWeight.w300,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  card['subtitle'],
-                  style: TextStyle(
-                    color: AppColors.textSecondary.withOpacity(0.7),
-                    fontSize: 11,
+                if (isClickable) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: AppColors.textSecondary.withOpacity(0.5),
+                    size: 16,
                   ),
-                ),
+                ],
               ],
             ),
-          ),
-          Text(
-            card['value'],
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 36,
-              fontWeight: FontWeight.w300,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -219,9 +254,9 @@ class AppDrawer extends StatelessWidget {
                   child: const Icon(Icons.person, size: 32, color: Colors.white),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'COSTEX COMPANY',
-                  style: TextStyle(
+                Text(
+                  homeController.companyName.toUpperCase(),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

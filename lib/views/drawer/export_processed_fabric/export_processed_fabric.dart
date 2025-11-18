@@ -1,5 +1,6 @@
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/export_processed_fabric/export_processed_controller.dart';
+import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:costex_app/utils/colour.dart';
@@ -7,11 +8,21 @@ import 'package:costex_app/widget/custom_textfield.dart';
 import 'package:costex_app/views/home/home.dart';
 
 class ExportProcessedFabricPage extends StatelessWidget {
-  const ExportProcessedFabricPage({Key? key}) : super(key: key);
+  final Quotation? quotation;
+  final bool viewMode;
+  
+  const ExportProcessedFabricPage({Key? key, this.quotation, this.viewMode = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final ExportProcessedFabricController controller = Get.put(ExportProcessedFabricController());
+    
+    // Load quotation data if in view mode
+    if (viewMode && quotation != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadQuotationData(controller, quotation!);
+      });
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -89,6 +100,7 @@ class ExportProcessedFabricPage extends StatelessWidget {
                         label: 'Customer Name',
                         controller: controller.customerNameController,
                         required: true,
+                        readOnly: viewMode,
                       ),
                       const SizedBox(height: 20),
 
@@ -97,21 +109,21 @@ class ExportProcessedFabricPage extends StatelessWidget {
                         "Fabric Properties",
                         [
                           _inputWrap([
-                            CustomTextField(label: 'Quality', controller: controller.qualityController),
-                            NumericTextField(label: 'Warp Count', controller: controller.warpCountController),
-                            NumericTextField(label: 'Weft Count', controller: controller.weftCountController),
-                            NumericTextField(label: 'Reeds', controller: controller.reedsController),
-                            NumericTextField(label: 'Picks', controller: controller.picksController),
-                            NumericTextField(label: 'Grey Width', controller: controller.greyWidthController),
+                            CustomTextField(label: 'Quality', controller: controller.qualityController, readOnly: viewMode),
+                            NumericTextField(label: 'Warp Count', controller: controller.warpCountController, readOnly: viewMode),
+                            NumericTextField(label: 'Weft Count', controller: controller.weftCountController, readOnly: viewMode),
+                            NumericTextField(label: 'Reeds', controller: controller.reedsController, readOnly: viewMode),
+                            NumericTextField(label: 'Picks', controller: controller.picksController, readOnly: viewMode),
+                            NumericTextField(label: 'Grey Width', controller: controller.greyWidthController, readOnly: viewMode),
                           ]),
                           const SizedBox(height: 8),
                           _inputWrap([
-                            NumericTextField(label: 'Finish Width', controller: controller.finishWidthController),
-                            CustomTextField(label: 'P/C Ratio', controller: controller.pcRatioController),
-                            CustomTextField(label: 'Loom', controller: controller.loomController),
-                            CustomTextField(label: 'Weave', controller: controller.weaveController),
-                            NumericTextField(label: 'Warp Rate/Lbs', controller: controller.warpRateLbsController),
-                            NumericTextField(label: 'Weft Rate/Lbs', controller: controller.weftRateLbsController),
+                            NumericTextField(label: 'Finish Width', controller: controller.finishWidthController, readOnly: viewMode),
+                            CustomTextField(label: 'P/C Ratio', controller: controller.pcRatioController, readOnly: viewMode),
+                            CustomTextField(label: 'Loom', controller: controller.loomController, readOnly: viewMode),
+                            CustomTextField(label: 'Weave', controller: controller.weaveController, readOnly: viewMode),
+                            NumericTextField(label: 'Warp Rate/Lbs', controller: controller.warpRateLbsController, readOnly: viewMode),
+                            NumericTextField(label: 'Weft Rate/Lbs', controller: controller.weftRateLbsController, readOnly: viewMode),
                           ]),
                         ],
                       ),
@@ -123,7 +135,7 @@ class ExportProcessedFabricPage extends StatelessWidget {
                         [
                           _inputWrap([
                             // Conversion/Pick is INPUT field (not calculated)
-                            NumericTextField(label: 'Conversion/Pick', controller: controller.coversionPickController),
+                            NumericTextField(label: 'Conversion/Pick', controller: controller.coversionPickController, readOnly: viewMode),
                             HighlightedNumericTextField(label: 'Warp Weight', controller: controller.warpWeightController, readOnly: true),
                             HighlightedNumericTextField(label: 'Weft Weight', controller: controller.weftWeightController, readOnly: true),
                             HighlightedNumericTextField(label: 'Total Weight', controller: controller.totalWeightController, readOnly: true),
@@ -142,9 +154,9 @@ class ExportProcessedFabricPage extends StatelessWidget {
                           _inputWrap([
                             HighlightedNumericTextField(label: 'Conversion Charges', controller: controller.coversionChargesController, readOnly: true),
                             HighlightedNumericTextField(label: 'Grey Fabric Price', controller: controller.greyFabricPriceController, readOnly: true),
-                            NumericTextField(label: 'Mending/MT', controller: controller.mendingMTController),
+                            NumericTextField(label: 'Mending/MT', controller: controller.mendingMTController, readOnly: viewMode),
                             _buildProcessTypeDropdown(controller),
-                            Obx(() => NumericTextField(label: controller.processRateLabel, controller: controller.processRateController)),
+                            Obx(() => NumericTextField(label: controller.processRateLabel, controller: controller.processRateController, readOnly: viewMode)),
                             Obx(() => HighlightedNumericTextField(label: controller.processChargesLabel, controller: controller.processChargesController, readOnly: true)),
                           ]),
                         ],
@@ -156,11 +168,11 @@ class ExportProcessedFabricPage extends StatelessWidget {
                         "Packing & Container",
                         [
                           _inputWrap([
-                            CustomTextField(label: 'Packing Type', controller: controller.packingTypeController),
-                            NumericTextField(label: 'Packing Charges/MT', controller: controller.packingChargesMTController),
-                            NumericTextField(label: 'Wastage %', controller: controller.wastagePercentController),
-                            CustomTextField(label: 'Container Size', controller: controller.containerSizeController),
-                            NumericTextField(label: 'Container Capacity', controller: controller.containerCapacityController),
+                            CustomTextField(label: 'Packing Type', controller: controller.packingTypeController, readOnly: viewMode),
+                            NumericTextField(label: 'Packing Charges/MT', controller: controller.packingChargesMTController, readOnly: viewMode),
+                            NumericTextField(label: 'Wastage %', controller: controller.wastagePercentController, readOnly: viewMode),
+                            CustomTextField(label: 'Container Size', controller: controller.containerSizeController, readOnly: viewMode),
+                            NumericTextField(label: 'Container Capacity', controller: controller.containerCapacityController, readOnly: viewMode),
                             HighlightedNumericTextField(label: 'FOB Price in PKR', controller: controller.fobPricePKRController, readOnly: true),
                           ]),
                         ],
@@ -172,10 +184,10 @@ class ExportProcessedFabricPage extends StatelessWidget {
                         "Freight & Final Cost",
                         [
                           _inputWrap([
-                            NumericTextField(label: 'Rate of Exchange', controller: controller.rateOfExchangeController),
+                            NumericTextField(label: 'Rate of Exchange', controller: controller.rateOfExchangeController, readOnly: viewMode),
                             HighlightedNumericTextField(label: 'FOB Price in \$', controller: controller.fobPriceDollarController, readOnly: true),
-                            CustomTextField(label: 'Port', controller: controller.portController),
-                            NumericTextField(label: 'Freight in \$', controller: controller.freightInDollarController),
+                            CustomTextField(label: 'Port', controller: controller.portController, readOnly: viewMode),
+                            NumericTextField(label: 'Freight in \$', controller: controller.freightInDollarController, readOnly: viewMode),
                             HighlightedNumericTextField(label: 'Freight Calculation \$', controller: controller.freightCalculationController, readOnly: true),
                             HighlightedNumericTextField(label: 'C & F Price in \$', controller: controller.cfPriceInDollarController, readOnly: true),
                           ]),
@@ -188,9 +200,9 @@ class ExportProcessedFabricPage extends StatelessWidget {
                         "Commission & Profit",
                         [
                           _inputWrap([
-                            NumericTextField(label: 'Commission %', controller: controller.commissionController),
-                            NumericTextField(label: 'Profit %', controller: controller.profitController),
-                            NumericTextField(label: 'Overhead %', controller: controller.overheadController),
+                            NumericTextField(label: 'Commission %', controller: controller.commissionController, readOnly: viewMode),
+                            NumericTextField(label: 'Profit %', controller: controller.profitController, readOnly: viewMode),
+                            NumericTextField(label: 'Overhead %', controller: controller.overheadController, readOnly: viewMode),
                             HighlightedNumericTextField(label: 'FOB Price Final', controller: controller.fobPriceFinalController, readOnly: true),
                             HighlightedNumericTextField(label: 'C & F Price Final', controller: controller.cfPriceFinalController, readOnly: true),
                           ]),
@@ -201,40 +213,42 @@ class ExportProcessedFabricPage extends StatelessWidget {
                       // Action Buttons
                       Obx(() => Row(
                             children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: controller.isLoading.value
-                                      ? null
-                                      : controller.saveQuotation,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFDC143C),
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4),
+                              if (!viewMode) ...[
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: controller.isLoading.value
+                                        ? null
+                                        : controller.saveQuotation,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFDC143C),
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      elevation: 0,
+                                      disabledBackgroundColor: const Color(0xFFDC143C).withOpacity(0.5),
                                     ),
-                                    elevation: 0,
-                                    disabledBackgroundColor: const Color(0xFFDC143C).withOpacity(0.5),
+                                    child: controller.isLoading.value
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            ),
+                                          )
+                                        : const Text(
+                                            'SAVE QUOTATION',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                   ),
-                                  child: controller.isLoading.value
-                                      ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                          ),
-                                        )
-                                      : const Text(
-                                          'SAVE QUOTATION',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
                                 ),
-                              ),
-                              const SizedBox(width: 16),
+                                const SizedBox(width: 16),
+                              ],
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: controller.isLoading.value
@@ -306,11 +320,31 @@ class ExportProcessedFabricPage extends StatelessWidget {
                     ),
                   );
                 }).toList(),
-                onChanged: controller.changeProcessType,
+                onChanged: viewMode ? null : controller.changeProcessType,
               ),
             )),
       ],
     );
+  }
+  
+  void _loadQuotationData(ExportProcessedFabricController controller, Quotation quotation) {
+    final details = quotation.details;
+    controller.customerNameController.text = quotation.customerName;
+    
+    // Map all fields from quotation details
+    if (details.containsKey('quality')) controller.qualityController.text = details['quality'].toString();
+    if (details.containsKey('warpCount')) controller.warpCountController.text = details['warpCount'].toString();
+    if (details.containsKey('weftCount')) controller.weftCountController.text = details['weftCount'].toString();
+    if (details.containsKey('reeds')) controller.reedsController.text = details['reeds'].toString();
+    if (details.containsKey('picks')) controller.picksController.text = details['picks'].toString();
+    if (details.containsKey('greyWidth')) controller.greyWidthController.text = details['greyWidth'].toString();
+    if (details.containsKey('finishWidth')) controller.finishWidthController.text = details['finishWidth'].toString();
+    if (details.containsKey('pcRatio')) controller.pcRatioController.text = details['pcRatio'].toString();
+    if (details.containsKey('loom')) controller.loomController.text = details['loom'].toString();
+    if (details.containsKey('weave')) controller.weaveController.text = details['weave'].toString();
+    if (details.containsKey('warpRate')) controller.warpRateLbsController.text = details['warpRate'].toString();
+    if (details.containsKey('weftRate')) controller.weftRateLbsController.text = details['weftRate'].toString();
+    // Add more field mappings as needed
   }
 }
 

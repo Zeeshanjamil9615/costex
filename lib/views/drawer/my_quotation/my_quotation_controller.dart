@@ -9,6 +9,8 @@ class Quotation {
   final String quotationNo;
   final String dated;
   final String customerName;
+  final String username;
+  final String quality;
   final Map<String, dynamic> details;
 
   Quotation({
@@ -17,6 +19,8 @@ class Quotation {
     required this.quotationNo,
     required this.dated,
     required this.customerName,
+    required this.username,
+    required this.quality,
     required this.details,
   });
 }
@@ -71,6 +75,8 @@ class QuotationsController extends GetxController {
           quotationNo: 'QT-001',
           dated: '28-10-2025',
           customerName: 'Aarafat',
+          username: 'john_doe',
+          quality: '30x30/76x56 114',
           details: {
             'quality': '30x30/76x56 114',
             'warpCount': '30',
@@ -101,6 +107,8 @@ class QuotationsController extends GetxController {
           quotationNo: 'QT-002',
           dated: '10-08-2021',
           customerName: 'Gay Blevins',
+          username: 'jane_smith',
+          quality: '40x40/80x60 120',
           details: {
             'quality': '40x40/80x60 120',
             'warpCount': '40',
@@ -131,6 +139,8 @@ class QuotationsController extends GetxController {
           quotationNo: 'QT-003',
           dated: '15-09-2024',
           customerName: 'Sarah Johnson',
+          username: 'sarah_j',
+          quality: '50x50/90x70 130',
           details: {
             'quality': '50x50/90x70 130',
             'processType': 'Bleached',
@@ -146,6 +156,8 @@ class QuotationsController extends GetxController {
           quotationNo: 'QT-004',
           dated: '20-10-2025',
           customerName: 'Ahmed Khan',
+          username: 'ahmed_k',
+          quality: 'Bed Sheet 90x100',
           details: {
             'productType': 'Bed Sheet',
             'size': '90x100',
@@ -161,6 +173,8 @@ class QuotationsController extends GetxController {
           quotationNo: 'QT-005',
           dated: '22-10-2025',
           customerName: 'Maria Garcia',
+          username: 'maria_g',
+          quality: 'Bath Towel 27x54',
           details: {
             'towelType': 'Bath Towel',
             'size': '27x54',
@@ -200,6 +214,9 @@ class QuotationsController extends GetxController {
       filtered = filtered.where((q) {
         return q.quotationNo.toLowerCase().contains(query) ||
                q.customerName.toLowerCase().contains(query) ||
+               q.username.toLowerCase().contains(query) ||
+               q.fabricType.toLowerCase().contains(query) ||
+               q.quality.toLowerCase().contains(query) ||
                q.dated.contains(query);
       }).toList();
     }

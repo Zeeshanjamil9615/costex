@@ -110,6 +110,130 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> addUser({
+    required String companyId,
+    required String companyName,
+    required String fullName,
+    required String email,
+    required String address,
+    required String departmentName,
+    required String designation,
+    required String cellNumber,
+    required String password,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'addUser',
+        data: FormData.fromMap({
+          'company_id': companyId,
+          'company_name': companyName,
+          'full_name': fullName,
+          'email_address': email,
+          'address': address,
+          'dept_name': departmentName,
+          'designation': designation,
+          'password': password,
+          'cell_number': cellNumber,
+        }),
+      );
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to add user')
+            : error.message ?? 'Unable to add user',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getCompanyUsers({
+    required String companyId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'getCompanyUsers',
+        data: FormData.fromMap({'company_id': companyId}),
+      );
+      final parsed = _parseResponse(response);
+      final data = parsed['data'];
+      if (data is List) {
+        return data
+            .whereType<Map>()
+            .map((e) => e.map((key, value) => MapEntry(key.toString(), value)))
+            .toList();
+      }
+      return <Map<String, dynamic>>[];
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to fetch users')
+            : error.message ?? 'Unable to fetch users',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> updateUser({
+    required String userId,
+    required String fullName,
+    required String cellNumber,
+    required String address,
+    required String email,
+    required String departmentName,
+    required String designation,
+    required String password,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'updateUser',
+        data: FormData.fromMap({
+          'user_id': userId,
+          'full_name': fullName,
+          'cell_number': cellNumber,
+          'address': address,
+          'email_address': email,
+          'department_name': departmentName,
+          'designation_no': designation,
+          'password': password,
+        }),
+      );
+
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to update user')
+            : error.message ?? 'Unable to update user',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> getCounts({
+    required String companyId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'getCounts',
+        data: FormData.fromMap({'company_id': companyId}),
+      );
+
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to fetch counts')
+            : error.message ?? 'Unable to fetch counts',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
   Map<String, dynamic> _parseResponse(Response<dynamic> response) {
     if (response.statusCode != 200) {
       throw ApiException(

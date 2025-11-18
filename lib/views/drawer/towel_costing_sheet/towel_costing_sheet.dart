@@ -1,4 +1,5 @@
 import 'package:costex_app/views/auth/login/login.dart';
+import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:costex_app/utils/colour.dart';
@@ -7,11 +8,21 @@ import 'package:costex_app/views/home/home.dart';
 import 'towel_costing_controller.dart';
 
 class TowelCostingPage extends StatelessWidget {
-  const TowelCostingPage({Key? key}) : super(key: key);
+  final Quotation? quotation;
+  final bool viewMode;
+  
+  const TowelCostingPage({Key? key, this.quotation, this.viewMode = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final TowelCostingController controller = Get.put(TowelCostingController());
+    
+    // Load quotation data if in view mode
+    if (viewMode && quotation != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadQuotationData(controller, quotation!);
+      });
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -88,9 +99,10 @@ class TowelCostingPage extends StatelessWidget {
         ),
         child: Obx(() => Row(
               children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: controller.isLoading.value ? null : controller.saveQuotation,
+                if (!viewMode) ...[
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: controller.isLoading.value ? null : controller.saveQuotation,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFDC143C),
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -109,6 +121,7 @@ class TowelCostingPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
+                ],
                 Expanded(
                   child: ElevatedButton(
                     onPressed: controller.isLoading.value ? null : controller.generatePDF,
@@ -144,6 +157,7 @@ class TowelCostingPage extends StatelessWidget {
                         label: 'Date',
                         hintText: 'Month/Day/Year',
                         controller: c.dateController,
+                        readOnly: viewMode,
                       ),
                     ),
                     const SizedBox(width: 18),
@@ -152,6 +166,7 @@ class TowelCostingPage extends StatelessWidget {
                         label: 'Client Name',
                         hintText: 'Client Name',
                         controller: c.clientNameController,
+                        readOnly: viewMode,
                       ),
                     ),
                   ],
@@ -189,7 +204,7 @@ class TowelCostingPage extends StatelessWidget {
               ], 'Brand Name'),
               const SizedBox(height: 18),
               _prettyCard([
-                NumericTextField(label: 'GST %', controller: c.gstPercentController),
+                NumericTextField(label: 'GST %', controller: c.gstPercentController, readOnly: viewMode),
                 const SizedBox(height: 12),
                 HighlightedNumericTextField(label: 'Total Amount', controller: c.totalAmountController, readOnly: true),
               ], 'Totals'),
@@ -249,7 +264,7 @@ class TowelCostingPage extends StatelessWidget {
           children: [
             Expanded(flex: 1, child: Text(entry[0] as String, style: const TextStyle(fontSize: 13))),
             const SizedBox(width: 10),
-            Expanded(flex: 4, child: CustomTextField(hintText: entry[0] as String, controller: entry[1] as TextEditingController)),
+            Expanded(flex: 4, child: CustomTextField(hintText: entry[0] as String, controller: entry[1] as TextEditingController, readOnly: viewMode)),
           ],
         ),
         const SizedBox(height: 8)
@@ -320,7 +335,7 @@ class TowelCostingPage extends StatelessWidget {
             flex: 3,
             child: isCalculated
                 ? HighlightedNumericTextField(hintText: '0', controller: controller, readOnly: true)
-                : NumericTextField(hintText: '0', controller: controller),
+                : NumericTextField(hintText: '0', controller: controller, readOnly: viewMode),
           ),
         ],
       ),
@@ -412,7 +427,7 @@ class TowelCostingPage extends StatelessWidget {
                       flex: 5,
                       child: f.length > 2 && f[2] == true
                           ? HighlightedNumericTextField(hintText: '0', controller: f[1], readOnly: true)
-                          : NumericTextField(hintText: '0', controller: f[1]),
+                          : NumericTextField(hintText: '0', controller: f[1], readOnly: viewMode),
                     ),
                   ],
                 ),
@@ -468,7 +483,7 @@ class TowelCostingPage extends StatelessWidget {
             flex: 5,
             child: isCalc
                 ? HighlightedNumericTextField(hintText: '0', controller: controller, readOnly: true)
-                : NumericTextField(hintText: '0', controller: controller),
+                : NumericTextField(hintText: '0', controller: controller, readOnly: viewMode),
           ),
         ],
       ),
@@ -552,7 +567,7 @@ class TowelCostingPage extends StatelessWidget {
             flex: 3,
             child: isCalc
                 ? HighlightedNumericTextField(hintText: '0', controller: c, readOnly: true)
-                : NumericTextField(hintText: '0', controller: c),
+                : NumericTextField(hintText: '0', controller: c, readOnly: viewMode),
           ),
         ],
       ),
@@ -589,6 +604,7 @@ class TowelCostingPage extends StatelessWidget {
                           : NumericTextField(
                               hintText: '0',
                               controller: ctrls[i],
+                              readOnly: viewMode,
                             ),
                     ),
                   ),
@@ -598,5 +614,10 @@ class TowelCostingPage extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  void _loadQuotationData(TowelCostingController controller, Quotation quotation) {
+    controller.clientNameController.text = quotation.customerName;
+    // Add more field mappings as needed based on TowelCostingController fields
   }
 }

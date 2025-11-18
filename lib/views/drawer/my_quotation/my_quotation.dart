@@ -1,17 +1,33 @@
 // my_quotations_page.dart
 import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
-import 'package:costex_app/views/drawer/my_quotation/my_quotation_view.dart';
+import 'package:costex_app/views/drawer/grey_febric_costing_sheet/grey_febric_costing_sheet.dart';
+import 'package:costex_app/views/drawer/export_grey_febric/export_grey_febric.dart';
+import 'package:costex_app/views/drawer/export_processed_fabric/export_processed_fabric.dart';
+import 'package:costex_app/views/drawer/Export_Madeups_fabric/Export_Madeups_fabric.dart';
+import 'package:costex_app/views/drawer/export_multi_width_fabric/export_multi_width_fabric.dart';
+import 'package:costex_app/views/drawer/towel_costing_sheet/towel_costing_sheet.dart';
 import 'package:costex_app/views/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:costex_app/utils/colour.dart';
 
 class MyQuotationsPage extends StatelessWidget {
-  const MyQuotationsPage({Key? key}) : super(key: key);
+  final String? initialFabricType;
+  
+  const MyQuotationsPage({Key? key, this.initialFabricType}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final QuotationsController controller = Get.put(QuotationsController());
+    
+    // Set initial fabric type if provided
+    if (initialFabricType != null && initialFabricType!.isNotEmpty) {
+      // Use a post-frame callback to set the fabric type after the widget is built
+      // The ever() listener in the controller will automatically filter quotations
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.updateFabricType(initialFabricType);
+      });
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -200,7 +216,7 @@ class MyQuotationsPage extends StatelessWidget {
                         TextField(
                           onChanged: controller.updateSearchQuery,
                           decoration: InputDecoration(
-                            hintText: 'Search by quotation no, customer name...',
+                            hintText: 'Search by quotation no, customer name, username, type, quality...',
                             hintStyle: TextStyle(
                               color: AppColors.textSecondary.withOpacity(0.5),
                               fontSize: 14,
@@ -385,10 +401,7 @@ class MyQuotationsPage extends StatelessWidget {
                 const Spacer(),
                 ElevatedButton.icon(
                   onPressed: () {
-                    Get.to(
-                      () => ViewQuotationPage(quotation: quotation),
-                      transition: Transition.rightToLeft,
-                    );
+                    _navigateToQuotationScreen(quotation);
                   },
                   icon: const Icon(Icons.visibility, size: 16),
                   label: const Text('View'),
@@ -416,9 +429,15 @@ class MyQuotationsPage extends StatelessWidget {
               children: [
                 _buildDetailRow('Quotation No.', quotation.quotationNo),
                 const Divider(height: 24),
-                _buildDetailRow('Dated', quotation.dated),
+                _buildDetailRow('Date', quotation.dated),
+                const Divider(height: 24),
+                _buildDetailRow('Username', quotation.username),
                 const Divider(height: 24),
                 _buildDetailRow('Customer Name', quotation.customerName),
+                const Divider(height: 24),
+                _buildDetailRow('Type', quotation.fabricType),
+                const Divider(height: 24),
+                _buildDetailRow('Quality', quotation.quality),
               ],
             ),
           ),
@@ -455,5 +474,70 @@ class MyQuotationsPage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _navigateToQuotationScreen(Quotation quotation) {
+    switch (quotation.fabricType) {
+      case 'Grey Fabric':
+        Get.to(
+          () => GreyFabricCostingScreen(
+            quotation: quotation,
+            viewMode: true,
+          ),
+          transition: Transition.rightToLeft,
+        );
+        break;
+      case 'Export Grey Fabric':
+        Get.to(
+          () => ExportGreyPage(
+            quotation: quotation,
+            viewMode: true,
+          ),
+          transition: Transition.rightToLeft,
+        );
+        break;
+      case 'Export Processed Fabric':
+        Get.to(
+          () => ExportProcessedFabricPage(
+            quotation: quotation,
+            viewMode: true,
+          ),
+          transition: Transition.rightToLeft,
+        );
+        break;
+      case 'Export Madeups Fabric':
+        Get.to(
+          () => ExportMadeupsPage(
+            quotation: quotation,
+            viewMode: true,
+          ),
+          transition: Transition.rightToLeft,
+        );
+        break;
+      case 'Export Multi Madeups Fabric':
+        Get.to(
+          () => MultiMadeupsPage(
+            quotation: quotation,
+            viewMode: true,
+          ),
+          transition: Transition.rightToLeft,
+        );
+        break;
+      case 'Towel Costing Sheet':
+        Get.to(
+          () => TowelCostingPage(
+            quotation: quotation,
+            viewMode: true,
+          ),
+          transition: Transition.rightToLeft,
+        );
+        break;
+      default:
+        Get.snackbar(
+          'Error',
+          'Unknown fabric type: ${quotation.fabricType}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+    }
   }
 }

@@ -1,7 +1,12 @@
+import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
+import 'package:costex_app/views/drawer/adduser/alluser/all_user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AddUserController extends GetxController {
+  final ApiService _apiService = ApiService();
+  final SessionService _session = SessionService.instance;
   // Text Controllers
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
@@ -36,37 +41,40 @@ class AddUserController extends GetxController {
       try {
         isLoading.value = true;
 
-        // TODO: Implement API call here
-        // Example:
-        // final response = await ApiService.addUser({
-        //   'fullName': fullNameController.text,
-        //   'email': emailController.text,
-        //   'address': addressController.text,
-        //   'department': departmentController.text,
-        //   'designation': designationController.text,
-        //   'cellNumber': cellNumberController.text,
-        //   'password': passwordController.text,
-        // });
+        final companyId = _session.companyId;
+        final companyName = _session.companyName;
 
-        // Simulate API delay
-        await Future.delayed(const Duration(seconds: 2));
+        if (companyId == null) {
+          throw Exception('No company information found. Please login again.');
+        }
 
-        // Show success message
+        final response = await _apiService.addUser(
+          companyId: companyId,
+          companyName: companyName,
+          fullName: fullNameController.text.trim(),
+          email: emailController.text.trim(),
+          address: addressController.text.trim(),
+          departmentName: departmentController.text.trim(),
+          designation: designationController.text.trim(),
+          cellNumber: cellNumberController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+
         Get.snackbar(
           'Success',
-          'User added successfully',
+          response['message']?.toString() ?? 'User added successfully',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4CAF50),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
         );
 
-        // Clear form
         clearForm();
+        _notifyUsersPage();
       } catch (e) {
         Get.snackbar(
           'Error',
-          'Failed to add user: $e',
+          e.toString(),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
@@ -87,6 +95,12 @@ class AddUserController extends GetxController {
     designationController.clear();
     cellNumberController.clear();
     passwordController.clear();
+  }
+
+  void _notifyUsersPage() {
+    if (Get.isRegistered<AllUsersController>()) {
+      Get.find<AllUsersController>().refreshUsers();
+    }
   }
 
   // Validators

@@ -1,9 +1,14 @@
 // manage_user_page.dart
+import 'package:costex_app/api_service/api_service.dart';
 import 'package:costex_app/views/drawer/adduser/alluser/all_user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ManageUserController extends GetxController {
+  ManageUserController();
+
+  final ApiService _apiService = ApiService();
+
   late TextEditingController fullNameController;
   late TextEditingController emailController;
   late TextEditingController addressController;
@@ -15,14 +20,17 @@ class ManageUserController extends GetxController {
   final RxBool isLoading = false.obs;
   final formKey = GlobalKey<FormState>();
 
+  late User _user;
+
   void initializeControllers(User user) {
+    _user = user;
     fullNameController = TextEditingController(text: user.userName);
     emailController = TextEditingController(text: user.email);
     addressController = TextEditingController(text: user.address);
     departmentController = TextEditingController(text: user.department);
     designationController = TextEditingController(text: user.designation);
     cellNumberController = TextEditingController(text: user.cellNo);
-    passwordController = TextEditingController(text: user.password);
+    passwordController = TextEditingController();
   }
 
   @override
@@ -44,21 +52,42 @@ class ManageUserController extends GetxController {
 
     isLoading.value = true;
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final response = await _apiService.updateUser(
+        userId: _user.id.toString(),
+        fullName: fullNameController.text.trim(),
+        cellNumber: cellNumberController.text.trim(),
+        address: addressController.text.trim(),
+        email: emailController.text.trim(),
+        departmentName: departmentController.text.trim(),
+        designation: designationController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
-    isLoading.value = false;
+      Get.snackbar(
+        'Success',
+        response['message']?.toString() ?? 'User updated successfully',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 8,
+        icon: const Icon(Icons.check_circle, color: Colors.white),
+      );
 
-    Get.snackbar(
-      'Success',
-      'User updated successfully',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 8,
-      icon: const Icon(Icons.check_circle, color: Colors.white),
-    );
+      _refreshUsersList();
+    } catch (error) {
+      Get.snackbar(
+        'Error',
+        error.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> deleteUser() async {
@@ -83,25 +112,18 @@ class ManageUserController extends GetxController {
     );
 
     if (confirmed == true) {
-      isLoading.value = true;
-      
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-      
-      isLoading.value = false;
-
       Get.snackbar(
-        'Success',
-        'User deleted successfully',
-        backgroundColor: Colors.red,
+        'Notice',
+        'Deletion endpoint not provided yet.',
+        backgroundColor: Colors.orange,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 8,
-        icon: const Icon(Icons.delete, color: Colors.white),
       );
+    }
+  }
 
-      Get.back(); // Go back to users list
+  void _refreshUsersList() {
+    if (Get.isRegistered<AllUsersController>()) {
+      Get.find<AllUsersController>().refreshUsers();
     }
   }
 }
