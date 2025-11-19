@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:costex_app/utils/pdf_printer.dart';
+import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
 
 class ExportMadeupsController extends GetxController {
+  final ApiService _apiService = ApiService();
   // Text Controllers
   final customerNameController = TextEditingController();
   
@@ -311,14 +314,89 @@ class ExportMadeupsController extends GetxController {
     try {
       isLoading.value = true;
 
-      // TODO: Implement API call
-      await Future.delayed(const Duration(seconds: 2));
+      final companyId = SessionService.instance.companyId;
+      final companyName = SessionService.instance.companyName;
+
+      if (companyId == null || companyName.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'Company information not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFF44336),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(16),
+        );
+        return;
+      }
+
+      final payload = <String, dynamic>{
+        'company_id': companyId,
+        'company_name': companyName,
+        'customer_name': customerNameController.text.trim(),
+        'quality': qualityController.text.trim(),
+        'warp_count': warpCountController.text.trim(),
+        'weft_count': weftCountController.text.trim(),
+        'reeds': reedsController.text.trim(),
+        'picks': picksController.text.trim(),
+        'grey_width': greyWidthController.text.trim(),
+        'finish_width': finishWidthController.text.trim(),
+        'pc_ratio': pcRatioController.text.trim(),
+        'loom': loomController.text.trim(),
+        'weave': weaveController.text.trim(),
+        'warp_rate_lbs': warpRateLbsController.text.trim(),
+        'weft_rate_lbs': weftRateLbsController.text.trim(),
+        'conversion_pick': conversionPickController.text.trim(),
+        'warp_weight': warpWeightController.text.trim(),
+        'weft_weight': weftWeightController.text.trim(),
+        'total_weight': totalWeightController.text.trim(),
+        'warp_price': warpPriceController.text.trim(),
+        'weft_price': weftPriceController.text.trim(),
+        'conversion_charges': conversionChargesController.text.trim(),
+        'grey_fabric_price': fabricPriceMeterController.text.trim(),
+        'mending_mt': mendingMTController.text.trim(),
+        'packing_type': packingTypeController.text.trim(),
+        'packing_charges': packingChargesMTController.text.trim(),
+        'wastage': wastagePercentController.text.trim(),
+        'container_size': containerSizeController.text.trim(),
+        'container_capacity': containerCapacityController.text.trim(),
+        'fob_price_pkr': fobPricePKRController.text.trim(),
+        'exchange_rate': rateOfExchangeController.text.trim(),
+        'fob_price_dollar': fobPriceDollarController.text.trim(),
+        'freight_dollar': freightInDollarController.text.trim(),
+        'freight_calculation_dollar': freightCalculationController.text.trim(),
+        'c_f_price_dollar': cfPriceInDollarController.text.trim(),
+        'commission': commissionController.text.trim(),
+        'port': rateController.text.trim(),
+        'profit': profitController.text.trim(),
+        'overhead': overheadController.text.trim(),
+        'fob_final_price': fobPriceFinalController.text.trim(),
+        'c_f_final_price': cfPriceFinalController.text.trim(),
+      };
+
+      // Add process_type and process_inch if not "Process Type"
+      if (selectedProcessType.value != 'Process Type') {
+        payload['process_type'] = selectedProcessType.value;
+        payload['process_inch'] = processRateController.text.trim();
+      }
+
+      final response = await _apiService.saveExportMadeupsFabricQuote(payload: payload);
 
       Get.snackbar(
         'Success',
-        'Quotation saved successfully',
+        response['message']?.toString() ?? 'Quotation saved successfully',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4CAF50),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(16),
+      );
+    } on ApiException catch (e) {
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
         margin: const EdgeInsets.all(16),

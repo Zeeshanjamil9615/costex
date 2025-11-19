@@ -274,6 +274,46 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> saveExportProcessedFabricQuote({
+    required Map<String, dynamic> payload,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'saveExportProcessedFabricQuote',
+        data: FormData.fromMap(payload),
+      );
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to save export processed fabric quotation')
+            : error.message ?? 'Unable to save export processed fabric quotation',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> saveExportMadeupsFabricQuote({
+    required Map<String, dynamic> payload,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'saveExportMadeupsFabricQuote',
+        data: FormData.fromMap(payload),
+      );
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to save export madeups fabric quotation')
+            : error.message ?? 'Unable to save export madeups fabric quotation',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
   Map<String, dynamic> _parseResponse(Response<dynamic> response) {
     if (response.statusCode != 200) {
       throw ApiException(
