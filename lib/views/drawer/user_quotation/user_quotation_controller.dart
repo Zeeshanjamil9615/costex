@@ -1,57 +1,38 @@
-import 'dart:ui';
-
+import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
+import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart'
+    show Quotation;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
-
-// quotation_model.dart
-class Quotation {
-  final int id;
-  final String fabricType;
-  final String quotationNo;
-  final String dated;
-  final String userName;
-  final String customerName;
-  final Map<String, dynamic> details;
-
-  Quotation({
+class UserOption {
+  UserOption({
     required this.id,
-    required this.fabricType,
-    required this.quotationNo,
-    required this.dated,
-    required this.userName,
-    required this.customerName,
-    required this.details,
+    required this.name,
+    required this.value,
   });
+
+  final String id;
+  final String name;
+  final String value;
 }
 
-// quotations_controller.dart
-
 class UserQuotationController extends GetxController {
-  // Selected fabric type
+  final ApiService _apiService = ApiService();
+  final SessionService _session = SessionService.instance;
+
   final RxString selectedFabricType = ''.obs;
-  
-  // Selected user
-  final RxString selectedUser = 'All'.obs;
-  
-  // All quotations
+  final RxString selectedUser = ''.obs;
   final RxList<Quotation> allQuotations = <Quotation>[].obs;
-  
-  // Filtered quotations based on fabric type and user
   final RxList<Quotation> filteredQuotations = <Quotation>[].obs;
-  
-  // Search query
   final RxString searchQuery = ''.obs;
-  
-  // Loading state
   final RxBool isLoading = false.obs;
-  
-  // Entries per page
+  final RxBool isUsersLoading = false.obs;
   final RxInt entriesPerPage = 10.obs;
-  
-  // Available fabric types
-  final List<String> fabricTypes = [
+  final RxList<UserOption> userOptions = <UserOption>[].obs;
+
+  final List<String> fabricTypes = const [
+    'Choose Type',
     'Grey Fabric',
     'Export Grey Fabric',
     'Export Processed Fabric',
@@ -59,173 +40,52 @@ class UserQuotationController extends GetxController {
     'Export Multi Madeups Fabric',
     'Towel Costing Sheet',
   ];
-  
-  // Available users
-  final RxList<String> availableUsers = <String>['All'].obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadDummyQuotations();
-    
-    // Listen to changes
-    ever(selectedFabricType, (_) => filterQuotations());
-    ever(selectedUser, (_) => filterQuotations());
+    _loadUsers();
     ever(searchQuery, (_) => filterQuotations());
   }
 
-  void loadDummyQuotations() {
-    isLoading.value = true;
-    
-    Future.delayed(const Duration(milliseconds: 500), () {
-      allQuotations.value = [
-        Quotation(
-          id: 1,
-          fabricType: 'Grey Fabric',
-          quotationNo: 'QT-001',
-          dated: '28-10-2025',
-          userName: 'John Smith',
-          customerName: 'Aarafat',
-          details: {
-            'quality': '30x30/76x56 114',
-            'warpCount': '30',
-            'weftCount': '30',
-            'reeds': '76',
-            'picks': '56',
-            'greyWidth': '114',
-            'pcRatio': '5050',
-            'loom': 'suzler',
-            'weave': 'plain',
-            'warpRate': '300',
-            'weftRate': '300',
-            'coverationPick': '70',
-            'warpWeight': '0.3948',
-            'weftWeight': '0.2909',
-            'totalWeight': '0.6857',
-            'warpPrice': '118.44',
-            'weftPrice': '87.27',
-            'coverationCharges': '3920',
-            'greyFabricPrice': '4125.71',
-            'profit': '0',
-            'fabricPriceFinal': '4125.71',
-          },
-        ),
-        Quotation(
-          id: 2,
-          fabricType: 'Grey Fabric',
-          quotationNo: 'QT-002',
-          dated: '10-08-2021',
-          userName: 'Sarah Johnson',
-          customerName: 'Gay Blevins',
-          details: {
-            'quality': '40x40/80x60 120',
-            'warpCount': '40',
-            'weftCount': '40',
-            'reeds': '80',
-            'picks': '60',
-            'greyWidth': '120',
-            'pcRatio': '6040',
-            'loom': 'rapier',
-            'weave': 'twill',
-            'warpRate': '320',
-            'weftRate': '320',
-            'coverationPick': '75',
-            'warpWeight': '0.4200',
-            'weftWeight': '0.3150',
-            'totalWeight': '0.7350',
-            'warpPrice': '134.40',
-            'weftPrice': '100.80',
-            'coverationCharges': '4200',
-            'greyFabricPrice': '4435.20',
-            'profit': '0',
-            'fabricPriceFinal': '4435.20',
-          },
-        ),
-        Quotation(
-          id: 3,
-          fabricType: 'Export Processed Fabric',
-          quotationNo: 'QT-003',
-          dated: '15-09-2024',
-          userName: 'Ahmed Khan',
-          customerName: 'Sarah Johnson',
-          details: {
-            'quality': '50x50/90x70 130',
-            'processType': 'Bleached',
-            'finishedWidth': '58',
-            'gsm': '150',
-            'processRate': '450',
-            'totalPrice': '5200.50',
-          },
-        ),
-        Quotation(
-          id: 4,
-          fabricType: 'Export Madeups Fabric',
-          quotationNo: 'QT-004',
-          dated: '20-10-2025',
-          userName: 'John Smith',
-          customerName: 'Ahmed Khan',
-          details: {
-            'productType': 'Bed Sheet',
-            'size': '90x100',
-            'weight': '250',
-            'stitchingCharges': '150',
-            'packingCharges': '50',
-            'totalPrice': '3500.00',
-          },
-        ),
-        Quotation(
-          id: 5,
-          fabricType: 'Towel Costing Sheet',
-          quotationNo: 'QT-005',
-          dated: '22-10-2025',
-          userName: 'Sarah Johnson',
-          customerName: 'Maria Garcia',
-          details: {
-            'towelType': 'Bath Towel',
-            'size': '27x54',
-            'weight': '500',
-            'dyeingCharges': '200',
-            'totalPrice': '1800.00',
-          },
-        ),
-        Quotation(
-          id: 6,
-          fabricType: 'Export Grey Fabric',
-          quotationNo: 'QT-006',
-          dated: '01-11-2025',
-          userName: 'Ahmed Khan',
-          customerName: 'David Miller',
-          details: {
-            'quality': '35x35/70x65 110',
-            'warpCount': '35',
-            'weftCount': '35',
-            'reeds': '70',
-            'picks': '65',
-            'greyWidth': '110',
-            'totalPrice': '3800.50',
-          },
-        ),
-      ];
-      
-      // Extract unique users
-      Set<String> users = allQuotations.map((q) => q.userName).toSet();
-      availableUsers.value = ['All', ...users.toList()];
-      
-      filteredQuotations.value = allQuotations;
-      isLoading.value = false;
-    });
+  Future<void> _loadUsers() async {
+    final companyId = _session.companyId;
+    if (companyId == null || companyId.isEmpty) {
+      _showError('Session Expired', 'Company information not found. Please login again.');
+      return;
+    }
+
+    try {
+      isUsersLoading.value = true;
+      final response = await _apiService.getUsers(companyId: companyId);
+      final options = response
+          .where((user) => (user['value'] ?? '').toString().isNotEmpty)
+          .map((user) => UserOption(
+                id: user['id']?.toString() ?? '',
+                name: user['name']?.toString() ?? '',
+                value: user['value']?.toString() ?? '',
+              ))
+          .toList();
+      userOptions.assignAll(options);
+    } on ApiException catch (error) {
+      _showError('Error', error.message);
+    } catch (error) {
+      _showError('Error', 'Failed to load users: $error');
+    } finally {
+      isUsersLoading.value = false;
+    }
   }
 
   void updateFabricType(String? type) {
-    if (type != null) {
-      selectedFabricType.value = type;
+    if (type == null || type == 'Choose Type') {
+      selectedFabricType.value = '';
+      return;
     }
+    selectedFabricType.value = type;
   }
 
   void updateSelectedUser(String? user) {
-    if (user != null) {
-      selectedUser.value = user;
-    }
+    selectedUser.value = user ?? '';
   }
 
   void updateEntriesPerPage(int? entries) {
@@ -234,61 +94,284 @@ class UserQuotationController extends GetxController {
     }
   }
 
+  Future<void> showFabricRecords() async {
+    await _fetchUserQuotations();
+  }
+
+  Future<void> _fetchUserQuotations() async {
+    if (selectedFabricType.value.isEmpty) {
+      _showWarning('Selection Required', 'Please select a fabric type first.');
+      return;
+    }
+
+    if (selectedUser.value.isEmpty) {
+      _showWarning('Selection Required', 'Please select a user first.');
+      return;
+    }
+
+    final companyId = _session.companyId;
+    if (companyId == null || companyId.isEmpty) {
+      _showError('Session Expired', 'Company information not found. Please login again.');
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final response = await _apiService.getUserFabricRecords(
+        companyId: companyId,
+        fabricType: selectedFabricType.value,
+        username: selectedUser.value,
+      );
+
+      final records = response['records'];
+      if (records is! List || records.isEmpty) {
+        allQuotations.clear();
+        filteredQuotations.clear();
+        _showInfo('No Records', 'No quotations found for the selected filters.');
+        return;
+      }
+
+      final parsed = records
+          .whereType<Map>()
+          .map((record) => _mapRecordToQuotation(
+                selectedFabricType.value,
+                record.map((key, value) => MapEntry(key.toString(), value)),
+                response['table']?.toString(),
+              ))
+          .toList();
+
+      allQuotations.assignAll(parsed);
+      filterQuotations();
+    } on ApiException catch (error) {
+      _showError('Error', error.message);
+    } catch (error) {
+      _showError('Error', 'Failed to fetch quotations: $error');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   void filterQuotations() {
-    List<Quotation> filtered = allQuotations;
-    
-    // Filter by fabric type
-    if (selectedFabricType.value.isNotEmpty) {
-      filtered = filtered
-          .where((q) => q.fabricType == selectedFabricType.value)
-          .toList();
-    }
-    
-    // Filter by user
-    if (selectedUser.value != 'All') {
-      filtered = filtered
-          .where((q) => q.userName == selectedUser.value)
-          .toList();
-    }
-    
-    // Filter by search query
+    List<Quotation> filtered = List<Quotation>.from(allQuotations);
     if (searchQuery.value.isNotEmpty) {
       final query = searchQuery.value.toLowerCase();
-      filtered = filtered.where((q) {
-        return q.quotationNo.toLowerCase().contains(query) ||
-               q.customerName.toLowerCase().contains(query) ||
-               q.userName.toLowerCase().contains(query) ||
-               q.dated.contains(query);
+      filtered = filtered.where((quotation) {
+        final user = quotation.username.toLowerCase();
+        final customer = quotation.customerName.toLowerCase();
+        final number = quotation.quotationNo.toLowerCase();
+        final date = quotation.dated.toLowerCase();
+        return user.contains(query) || customer.contains(query) || number.contains(query) || date.contains(query);
       }).toList();
     }
-    
-    filteredQuotations.value = filtered;
+    filteredQuotations.assignAll(filtered);
   }
 
   void updateSearchQuery(String query) {
     searchQuery.value = query;
   }
 
-  void showFabricRecords() {
-    if (selectedFabricType.value.isEmpty) {
-      Get.snackbar(
-        'Selection Required',
-        'Please select a fabric type first',
-        backgroundColor: const Color(0xFFFF5722),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 8,
-      );
-      return;
-    }
-    filterQuotations();
-  }
-
   void resetFilter() {
     selectedFabricType.value = '';
-    selectedUser.value = 'All';
+    selectedUser.value = '';
     searchQuery.value = '';
-    filteredQuotations.value = allQuotations;
+    filteredQuotations.assignAll(allQuotations);
+  }
+
+  Quotation _mapRecordToQuotation(
+    String fabricType,
+    Map<String, dynamic> record, [
+    String? tableName,
+  ]) {
+    final normalized = _normalizeRecord(record);
+    final idValue = normalized['id']?.toString() ?? '';
+    final timestamp = normalized['timestamp']?.toString() ??
+        normalized['dated']?.toString() ??
+        '';
+    final userRaw = normalized['userName']?.toString() ??
+        normalized['user_name']?.toString() ??
+        '';
+
+    final displayUser = userRaw.contains(',')
+        ? userRaw.split(',').last.trim()
+        : userRaw;
+
+    final resolvedType = fabricType.isNotEmpty ? fabricType : _resolveFabricType(tableName);
+
+    final customerName = normalized['customerName']?.toString() ??
+        normalized['customer_name']?.toString() ??
+        '-';
+
+    final quality = normalized['quality']?.toString() ??
+        normalized['productName']?.toString() ??
+        normalized['qualityArray']?.toString() ??
+        '-';
+
+    return Quotation(
+      id: int.tryParse(idValue) ?? 0,
+      fabricType: resolvedType,
+      quotationNo: idValue.isNotEmpty ? 'QT-$idValue' : '-',
+      dated: timestamp.isNotEmpty ? timestamp.split(' ').first : '-',
+      customerName: customerName,
+      username: displayUser,
+      quality: quality,
+      details: normalized,
+    );
+  }
+
+  String _resolveFabricType(String? table) {
+    switch (table) {
+      case 'tbl_grey_fabric':
+        return 'Grey Fabric';
+      case 'tbl_export_grey_fabric':
+        return 'Export Grey Fabric';
+      case 'tbl_export_processed_fabric':
+        return 'Export Processed Fabric';
+      case 'tbl_export_madeups_fabric':
+        return 'Export Madeups Fabric';
+      case 'tbl_multi_madeups_costing':
+      case 'tbl_export_multi_fabric':
+        return 'Export Multi Madeups Fabric';
+      case 'tbl_towel_costing_sheet':
+        return 'Towel Costing Sheet';
+      default:
+        return 'Quotation';
+    }
+  }
+
+  Map<String, dynamic> _normalizeRecord(Map<String, dynamic> original) {
+    final Map<String, dynamic> newMap = Map.from(original);
+
+    original.forEach((key, value) {
+      final parts = key.split('_');
+      if (parts.length > 1) {
+        var camel = parts.first;
+        for (var i = 1; i < parts.length; i++) {
+          final segment = parts[i];
+          if (segment.isEmpty) continue;
+          camel += segment[0].toUpperCase() + segment.substring(1);
+        }
+        newMap[camel] = value;
+      }
+
+      switch (key) {
+        case 'wave':
+          newMap['weave'] = value;
+          break;
+        case 'user_name':
+          newMap['userName'] = value;
+          final split = value.toString().split(',');
+          if (split.length > 1) {
+            newMap['userDisplayName'] = split.last.trim();
+          }
+          break;
+        case 'customer_name':
+          newMap['customerName'] = value;
+          break;
+        case 'company_name':
+          newMap['companyName'] = value;
+          break;
+        case 'warp_rate_lbs':
+          newMap['warpRateLbs'] = value;
+          break;
+        case 'weft_rate_lbs':
+          newMap['weftRateLbs'] = value;
+          break;
+        case 'pc_ratio':
+          newMap['pcRatio'] = value;
+          break;
+        case 'grey_width':
+          newMap['greyWidth'] = value;
+          break;
+        case 'finish_width':
+          newMap['finishWidth'] = value;
+          break;
+        case 'mending_mt':
+          newMap['mendingMT'] = value;
+          break;
+        case 'packing_charges':
+          newMap['packingCharges'] = value;
+          break;
+        case 'packing_charges_mt':
+          newMap['packingChargesMT'] = value;
+          break;
+        case 'wastage':
+          newMap['wastagePercent'] = value;
+          break;
+        case 'container_size':
+          newMap['containerSize'] = value;
+          break;
+        case 'container_capacity':
+          newMap['containerCapacity'] = value;
+          break;
+        case 'exchange_rate':
+          newMap['rateOfExchange'] = value;
+          break;
+        case 'fob_price_pkr':
+          newMap['fobPricePKR'] = value;
+          break;
+        case 'fob_price_dollar':
+          newMap['fobPriceDollar'] = value;
+          break;
+        case 'freight_dollar':
+          newMap['freightInDollar'] = value;
+          break;
+        case 'freight_calculation_dollar':
+          newMap['freightCalculation'] = value;
+          break;
+        case 'c_f_price_dollar':
+          newMap['cfPriceInDollar'] = value;
+          break;
+        case 'commission':
+          newMap['commissionPercent'] = value;
+          break;
+        case 'profit':
+          newMap['profitPercent'] = value;
+          break;
+        case 'overhead':
+          newMap['overheadPercent'] = value;
+          break;
+        case 'fob_final_price':
+          newMap['fobPriceFinal'] = value;
+          break;
+        case 'c_f_final_price':
+          newMap['cfPriceFinal'] = value;
+          break;
+      }
+    });
+
+    return newMap;
+  }
+
+  void _showError(String title, String message) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFFF44336),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+    );
+  }
+
+  void _showWarning(String title, String message) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFFFF5722),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+    );
+  }
+
+  void _showInfo(String title, String message) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFF17a2b8),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+    );
   }
 }

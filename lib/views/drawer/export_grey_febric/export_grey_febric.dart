@@ -1,6 +1,7 @@
 import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/export_grey_febric/export_grey_febric_controller.dart';
+import 'package:costex_app/utils/detail_value_helper.dart';
 import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
 import 'package:costex_app/views/home/home.dart';
 import 'package:costex_app/widget/custom_textfield.dart';
@@ -360,24 +361,63 @@ class ExportGreyPage extends StatelessWidget {
   
   void _loadQuotationData(ExportGreyController controller, Quotation quotation) {
     final details = quotation.details;
-    controller.customerNameController.text = quotation.customerName;
-    
-    // Map all fields from quotation details
-    if (details.containsKey('quality')) controller.qualityController.text = details['quality'].toString();
-    if (details.containsKey('warpCount')) controller.warpCountController.text = details['warpCount'].toString();
-    if (details.containsKey('weftCount')) controller.weftCountController.text = details['weftCount'].toString();
-    if (details.containsKey('reeds')) controller.reedsController.text = details['reeds'].toString();
-    if (details.containsKey('picks')) controller.picksController.text = details['picks'].toString();
-    if (details.containsKey('greyWidth')) controller.greyWidthController.text = details['greyWidth'].toString();
-    if (details.containsKey('pcRatio')) controller.pcRatioController.text = details['pcRatio'].toString();
-    if (details.containsKey('loom')) controller.loomController.text = details['loom'].toString();
-    if (details.containsKey('weave')) controller.weaveController.text = details['weave'].toString();
-    if (details.containsKey('warpRate')) controller.warpRateController.text = details['warpRate'].toString();
-    if (details.containsKey('weftRate')) controller.weftRateController.text = details['weftRate'].toString();
-    if (details.containsKey('coversionPick') || details.containsKey('coverationPick')) {
-      controller.coversionPickController.text = (details['coversionPick'] ?? details['coverationPick']).toString();
-    }
-    // Add more field mappings as needed based on ExportGreyController fields
+    controller.customerNameController.text = detailValue(details, 'customerName') ?? quotation.customerName;
+
+    final mapping = <String, TextEditingController>{
+      'quality': controller.qualityController,
+      'warpCount': controller.warpCountController,
+      'weftCount': controller.weftCountController,
+      'reeds': controller.reedsController,
+      'picks': controller.picksController,
+      'greyWidth': controller.greyWidthController,
+      'pcRatio': controller.pcRatioController,
+      'loom': controller.loomController,
+      'weave': controller.weaveController,
+      'warpRate': controller.warpRateController,
+      'weftRate': controller.weftRateController,
+      'conversionPick': controller.coversionPickController,
+      'warpWeight': controller.warpWeightController,
+      'weftWeight': controller.weftWeightController,
+      'totalWeight': controller.totalWeightController,
+      'warpPrice': controller.warpPriceController,
+      'weftPrice': controller.weftPriceController,
+      'conversionCharges': controller.coversionChargesController,
+      'greyFabricPrice': controller.greyFabricPriceController,
+      'mendingMt': controller.mendingMTController,
+      'packingType': controller.packingTypeController,
+      'packingCharges': controller.packingChargesController,
+      'wastage': controller.wastageController,
+      'containerSize': controller.containerSizeController,
+      'containerCapacity': controller.containerCapacityController,
+      'fobPricePkr': controller.fobPricePKRController,
+      'exchangeRate': controller.rateOfExchangeController,
+      'fobPriceDollar': controller.fobPriceDollarController,
+      'freightDollar': controller.freightInDollarController,
+      'freightCalculation': controller.freightCalculationController,
+      'cFPriceDollar': controller.cfPriceController,
+      'commission': controller.commissionController,
+      'port': controller.portController,
+      'profitPercent': controller.profitPercentController,
+      'overheadPercent': controller.overheadPercentController,
+      'fobFinalPrice': controller.fobPriceFinalController,
+      'cFFinalPrice': controller.cfPriceFinalController,
+    };
+
+    final aliasMap = <String, List<String>>{
+      'weave': ['wave'],
+      'warpRate': ['warpRateLbs'],
+      'weftRate': ['weftRateLbs'],
+      'conversionPick': ['coversionPick', 'coverationPick'],
+      'mendingMt': ['mending', 'mending_mt'],
+      'profitPercent': ['profit'],
+      'overheadPercent': ['overhead'],
+      'freightCalculation': ['freightCalculationDollar'],
+      'cFPriceDollar': ['c_f_price_dollar'],
+      'fobFinalPrice': ['fobFinal'],
+      'cFFinalPrice': ['c_f_final_price'],
+    };
+
+    populateControllers(details, mapping, aliasMap: aliasMap);
   }
 
   Widget _buildCalculatedField(String label, TextEditingController controller) {

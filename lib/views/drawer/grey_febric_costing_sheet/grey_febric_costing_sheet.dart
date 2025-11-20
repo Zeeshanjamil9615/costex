@@ -7,6 +7,7 @@ import 'package:costex_app/views/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:costex_app/utils/colour.dart';
+import 'package:costex_app/utils/detail_value_helper.dart';
 
 class GreyFabricCostingScreen extends StatelessWidget {
   final Quotation? quotation;
@@ -369,25 +370,33 @@ class GreyFabricCostingScreen extends StatelessWidget {
   
   void _loadQuotationData(GreyFabricCostingController controller, Quotation quotation) {
     final details = quotation.details;
-    controller.customerNameController.text = quotation.customerName;
+    controller.customerNameController.text = detailValue(details, 'customerName') ?? quotation.customerName;
     controller.qualityController.text = quotation.quality;
-    
-    if (details.containsKey('warpCount')) controller.warpCountController.text = details['warpCount'].toString();
-    if (details.containsKey('weftCount')) controller.weftCountController.text = details['weftCount'].toString();
-    if (details.containsKey('reeds')) controller.reedsController.text = details['reeds'].toString();
-    if (details.containsKey('picks')) controller.picksController.text = details['picks'].toString();
-    if (details.containsKey('greyWidth')) controller.greyWidthController.text = details['greyWidth'].toString();
-    if (details.containsKey('pcRatio')) controller.pcRatioController.text = details['pcRatio'].toString();
-    if (details.containsKey('loom')) controller.loomController.text = details['loom'].toString();
-    if (details.containsKey('weave')) controller.weaveController.text = details['weave'].toString();
-    if (details.containsKey('warpRate')) controller.warpRateController.text = details['warpRate'].toString();
-    if (details.containsKey('weftRate')) controller.weftRateController.text = details['weftRate'].toString();
-    if (details.containsKey('coverationPick') || details.containsKey('coversionPicks')) {
-      controller.coversionPicksController.text = (details['coverationPick'] ?? details['coversionPicks']).toString();
-    }
-    if (details.containsKey('profit') || details.containsKey('profitPercent')) {
-      controller.profitPercentController.text = (details['profit'] ?? details['profitPercent']).toString();
-    }
+
+    final mapping = <String, TextEditingController>{
+      'warpCount': controller.warpCountController,
+      'weftCount': controller.weftCountController,
+      'reeds': controller.reedsController,
+      'picks': controller.picksController,
+      'greyWidth': controller.greyWidthController,
+      'pcRatio': controller.pcRatioController,
+      'loom': controller.loomController,
+      'weave': controller.weaveController,
+      'warpRate': controller.warpRateController,
+      'weftRate': controller.weftRateController,
+      'conversionPick': controller.coversionPicksController,
+      'profitPercent': controller.profitPercentController,
+    };
+
+    final aliasMap = <String, List<String>>{
+      'weave': ['wave'],
+      'warpRate': ['warpRateLbs'],
+      'weftRate': ['weftRateLbs'],
+      'conversionPick': ['coverationPick', 'coversionPicks'],
+      'profitPercent': ['profit'],
+    };
+
+    populateControllers(details, mapping, aliasMap: aliasMap);
   }
 
   Widget _buildCalculatedFieldWithGetter(String label, double Function() getValue) {

@@ -1,5 +1,6 @@
 import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/views/auth/login/login.dart';
+import 'package:costex_app/utils/detail_value_helper.dart';
 import 'package:costex_app/views/drawer/export_multi_width_fabric/export_multi_width_controller.dart';
 import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,19 @@ class MultiMadeupsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MultiMadeupsController controller = Get.put(MultiMadeupsController());
+    final MultiMadeupsController controller = viewMode
+        ? (Get.isRegistered<MultiMadeupsController>(tag: 'multi_madeups_view')
+            ? Get.find<MultiMadeupsController>(tag: 'multi_madeups_view')
+            : Get.put(
+                MultiMadeupsController(viewMode: true),
+                tag: 'multi_madeups_view',
+              ))
+        : (Get.isRegistered<MultiMadeupsController>(tag: 'multi_madeups_edit')
+            ? Get.find<MultiMadeupsController>(tag: 'multi_madeups_edit')
+            : Get.put(
+                MultiMadeupsController(),
+                tag: 'multi_madeups_edit',
+              ));
     
     // Load quotation data if in view mode
     if (viewMode && quotation != null) {
@@ -691,9 +704,137 @@ class MultiMadeupsPage extends StatelessWidget {
 // FABRIC TAB - FIXED: All calculated fields now use HighlightedNumericTextField with readOnly: true
 
   void _loadQuotationData(MultiMadeupsController controller, Quotation quotation) {
-    controller.customerNameController.text = quotation.customerName;
-    // Add more field mappings as needed based on MultiMadeupsController fields
-    // final details = quotation.details; // Use this to map additional fields when needed
+    final details = quotation.details;
+    controller.customerNameController.text = detailValue(details, 'customerName') ?? quotation.customerName;
+
+    List<String> getList(String key, {List<String>? aliases}) =>
+        detailList(details, key, aliases: aliases);
+
+    void assign(List<TextEditingController> ctrls, List<String> values) =>
+        setControllersFromList(ctrls, values);
+
+    final warpControllers = [controller.warp1Controller, controller.warp2Controller, controller.warp3Controller, controller.warp4Controller];
+    final weftControllers = [controller.weft1Controller, controller.weft2Controller, controller.weft3Controller, controller.weft4Controller];
+    final reedControllers = [controller.reed1Controller, controller.reed2Controller, controller.reed3Controller, controller.reed4Controller];
+    final pickControllers = [controller.pick1Controller, controller.pick2Controller, controller.pick3Controller, controller.pick4Controller];
+    final greyWidthControllers = [controller.greyWidth1Controller, controller.greyWidth2Controller, controller.greyWidth3Controller, controller.greyWidth4Controller];
+    final finishWidthControllers = [controller.finishWidth1Controller, controller.finishWidth2Controller, controller.finishWidth3Controller, controller.finishWidth4Controller];
+
+    assign(warpControllers, getList('warpCounts'));
+    assign(weftControllers, getList('weftCounts'));
+    assign(reedControllers, getList('reeds'));
+    assign(pickControllers, getList('picks'));
+    assign(greyWidthControllers, getList('greyWidths'));
+    assign(finishWidthControllers, getList('fabricWidths', aliases: ['finishWidths']));
+
+    final qualityControllers = [controller.quality1Controller, controller.quality2Controller, controller.quality3Controller, controller.quality4Controller];
+    final loomControllers = [controller.loom1Controller, controller.loom2Controller, controller.loom3Controller, controller.loom4Controller];
+    final weaveControllers = [controller.weave1Controller, controller.weave2Controller, controller.weave3Controller, controller.weave4Controller];
+    final warpRateControllers = [controller.warpRateLbs1Controller, controller.warpRateLbs2Controller, controller.warpRateLbs3Controller, controller.warpRateLbs4Controller];
+    final weftRateControllers = [controller.weftRateLbs1Controller, controller.weftRateLbs2Controller, controller.weftRateLbs3Controller, controller.weftRateLbs4Controller];
+    final conversionPickControllers = [controller.conversionPick1Controller, controller.conversionPick2Controller, controller.conversionPick3Controller, controller.conversionPick4Controller];
+    final warpWeightControllers = [controller.warpWeight1Controller, controller.warpWeight2Controller, controller.warpWeight3Controller, controller.warpWeight4Controller];
+    final weftWeightControllers = [controller.weftWeight1Controller, controller.weftWeight2Controller, controller.weftWeight3Controller, controller.weftWeight4Controller];
+    final totalWeightControllers = [controller.totalWeight1Controller, controller.totalWeight2Controller, controller.totalWeight3Controller, controller.totalWeight4Controller];
+    final warpPriceControllers = [controller.warpPrice1Controller, controller.warpPrice2Controller, controller.warpPrice3Controller, controller.warpPrice4Controller];
+    final weftPriceControllers = [controller.weftPrice1Controller, controller.weftPrice2Controller, controller.weftPrice3Controller, controller.weftPrice4Controller];
+    final conversionControllers = [controller.conversion1Controller, controller.conversion2Controller, controller.conversion3Controller, controller.conversion4Controller];
+    final greyFabricPriceControllers = [controller.greyFabricPrice1Controller, controller.greyFabricPrice2Controller, controller.greyFabricPrice3Controller, controller.greyFabricPrice4Controller];
+    final mendingControllers = [controller.mendingMT1Controller, controller.mendingMT2Controller, controller.mendingMT3Controller, controller.mendingMT4Controller];
+    final processingInchControllers = [controller.processinginch1Controller, controller.processinginch2Controller, controller.processinginch3Controller, controller.processinginch4Controller];
+    final processingChargeControllers = [controller.processingCharges1Controller, controller.processingCharges2Controller, controller.processingCharges3Controller, controller.processingCharges4Controller];
+    final wastageControllers = [controller.wastage1Controller, controller.wastage2Controller, controller.wastage3Controller, controller.wastage4Controller];
+    final finishFabricCostControllers = [controller.finishFabricCost1Controller, controller.finishFabricCost2Controller, controller.finishFabricCost3Controller, controller.finishFabricCost4Controller];
+
+    assign(qualityControllers, getList('qualityArray'));
+    assign(loomControllers, getList('loomArray'));
+    assign(weaveControllers, getList('weaveArray'));
+    assign(warpRateControllers, getList('warpRates'));
+    assign(weftRateControllers, getList('weftRates'));
+    assign(conversionPickControllers, getList('conversionPicks'));
+    assign(warpWeightControllers, getList('warpWeights'));
+    assign(weftWeightControllers, getList('weftWeights'));
+    assign(totalWeightControllers, getList('totalWeights'));
+    assign(warpPriceControllers, getList('warpPrices'));
+    assign(weftPriceControllers, getList('weftPrices'));
+    assign(conversionControllers, getList('conversions', aliases: ['conversionCharges']));
+    assign(greyFabricPriceControllers, getList('greyFabricPrices'));
+    assign(mendingControllers, getList('mendingMts'));
+    assign(processingInchControllers, getList('processingInches'));
+    assign(processingChargeControllers, getList('processingCharges'));
+    assign(wastageControllers, getList('wastages'));
+    assign(finishFabricCostControllers, getList('finishFabricCosts'));
+
+    final summaryProductNames = getList('productNames');
+    if (summaryProductNames.isNotEmpty) {
+      assign(
+        [controller.generalProductName1Controller, controller.generalProductName2Controller, controller.generalProductName3Controller, controller.generalProductName4Controller],
+        summaryProductNames,
+      );
+    } else {
+      assign(
+        [controller.generalProductName1Controller, controller.generalProductName2Controller, controller.generalProductName3Controller, controller.generalProductName4Controller],
+        getList('topProductNames'),
+      );
+    }
+
+    assign([controller.total1Controller, controller.total2Controller, controller.total3Controller, controller.total4Controller], getList('allTotals'));
+
+    final consumptionRows = <List<TextEditingController>>[];
+    for (int product = 1; product <= 4; product++) {
+      for (int row = 1; row <= 4; row++) {
+        consumptionRows.add(_getConsumptionControllers(controller, product, row));
+      }
+    }
+
+    void assignRowField(int fieldIndex, List<String> values) {
+      for (int i = 0; i < consumptionRows.length && i < values.length; i++) {
+        final value = values[i].trim();
+        if (value.isEmpty) continue;
+        consumptionRows[i][fieldIndex].text = value;
+      }
+    }
+
+    assignRowField(0, getList('allProductNames'));
+    assignRowField(1, getList('allSizes1', aliases: ['all_sizes_1']));
+    assignRowField(2, getList('allSizes2', aliases: ['all_sizes_2']));
+    assignRowField(3, getList('allCutSizes'));
+    assignRowField(4, getList('allGw'));
+    assignRowField(5, getList('allFw'));
+    assignRowField(6, getList('allPcs'));
+    assignRowField(7, getList('allConsmptions', aliases: ['all_consmptions', 'allConsumptions']));
+    assignRowField(8, getList('allConsumptionPrices'));
+
+    assign([controller.consumptionPrice1Controller, controller.consumptionPrice2Controller, controller.consumptionPrice3Controller, controller.consumptionPrice4Controller], getList('consumptionPrices'));
+    assign([controller.stitching1Controller, controller.stitching2Controller, controller.stitching3Controller, controller.stitching4Controller], getList('stitchingArray'));
+    assign([controller.accessories1Controller, controller.accessories2Controller, controller.accessories3Controller, controller.accessories4Controller], getList('accessoriesArray'));
+    assign([controller.polyBag1Controller, controller.polyBag2Controller, controller.polyBag3Controller, controller.polyBag4Controller], getList('polyBags'));
+    assign([controller.miscellaneous1Controller, controller.miscellaneous2Controller, controller.miscellaneous3Controller, controller.miscellaneous4Controller], getList('miscsArray'));
+    assign([controller.packingCharges1Controller, controller.packingCharges2Controller, controller.packingCharges3Controller, controller.packingCharges4Controller], getList('packingCharges'));
+
+    assign([controller.containerSize1Controller, controller.containerSize2Controller, controller.containerSize3Controller, controller.containerSize4Controller], getList('containerSizes'));
+    assign([controller.containerCapacity1Controller, controller.containerCapacity2Controller, controller.containerCapacity3Controller, controller.containerCapacity4Controller], getList('containerCapacities'));
+    assign([controller.rateOfExchange1Controller, controller.rateOfExchange2Controller, controller.rateOfExchange3Controller, controller.rateOfExchange4Controller], getList('exchangeRates'));
+    assign([controller.fobPricePKR1Controller, controller.fobPricePKR2Controller, controller.fobPricePKR3Controller, controller.fobPricePKR4Controller], getList('fobPricesPkr'));
+    assign([controller.fobPriceDollar1Controller, controller.fobPriceDollar2Controller, controller.fobPriceDollar3Controller, controller.fobPriceDollar4Controller], getList('fobPricesDollar'));
+    assign([controller.freightDollar1Controller, controller.freightDollar2Controller, controller.freightDollar3Controller, controller.freightDollar4Controller], getList('frieghtDollars', aliases: ['freightDollars']));
+    assign([controller.port1Controller, controller.port2Controller, controller.port3Controller, controller.port4Controller], getList('ports'));
+    assign([controller.freightCalculation1Controller, controller.freightCalculation2Controller, controller.freightCalculation3Controller, controller.freightCalculation4Controller], getList('freightCalculations'));
+    assign([controller.cfPriceDollar1Controller, controller.cfPriceDollar2Controller, controller.cfPriceDollar3Controller, controller.cfPriceDollar4Controller], getList('cfPrices'));
+    assign([controller.profitPercent1Controller, controller.profitPercent2Controller, controller.profitPercent3Controller, controller.profitPercent4Controller], getList('profitAge', aliases: ['profitPercentages']));
+    assign([controller.commissionPercent1Controller, controller.commissionPercent2Controller, controller.commissionPercent3Controller, controller.commissionPercent4Controller], getList('commissions'));
+    assign([controller.overheadPercent1Controller, controller.overheadPercent2Controller, controller.overheadPercent3Controller, controller.overheadPercent4Controller], getList('overheads'));
+    assign([controller.fobPriceFinal1Controller, controller.fobPriceFinal2Controller, controller.fobPriceFinal3Controller, controller.fobPriceFinal4Controller], getList('fobFinalPrices'));
+    assign([controller.cfPriceFinal1Controller, controller.cfPriceFinal2Controller, controller.cfPriceFinal3Controller, controller.cfPriceFinal4Controller], getList('cfFinalPrices'));
+
+    final fobTotal = detailValue(details, 'fobTotalDuvetset');
+    if (fobTotal != null && fobTotal.isNotEmpty) {
+      controller.fobTotalDuvetSet1Controller.text = fobTotal;
+    }
+    final cfTotal = detailValue(details, 'cfTotalDuvetset');
+    if (cfTotal != null && cfTotal.isNotEmpty) {
+      controller.cfTotalDuvetSet1Controller.text = cfTotal;
+    }
   }
 
   Widget _buildFabricVertical(MultiMadeupsController c, bool viewMode) {

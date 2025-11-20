@@ -17,65 +17,80 @@ import 'home_controller.dart';
 
 // Import your new pages
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final HomeController homeController = Get.isRegistered<HomeController>()
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  late final HomeController homeController;
+
+  final List<Map<String, dynamic>> dashboardCards = [
+    {
+      'title': 'TOTAL USERS',
+      'countKey': 'all_users',
+      'subtitle': 'All Time',
+      'icon': Icons.people_outline,
+    },
+    {
+      'title': 'GREY FABRIC',
+      'countKey': 'grey_fabric',
+      'subtitle': 'All Time',
+      'icon': Icons.inventory_2_outlined,
+      'fabricType': 'Grey Fabric',
+    },
+    {
+      'title': 'EXPORT GREY FABRIC',
+      'countKey': 'export_grey_fabric',
+      'subtitle': 'All Time',
+      'icon': Icons.archive_outlined,
+      'fabricType': 'Export Grey Fabric',
+    },
+    {
+      'title': 'PROCESSED FABRICS',
+      'countKey': 'export_processed_fabric',
+      'subtitle': 'All Time',
+      'icon': Icons.checkroom_outlined,
+      'fabricType': 'Export Processed Fabric',
+    },
+    {
+      'title': 'MADEUPS COSTING',
+      'countKey': 'export_madeups_fabric',
+      'subtitle': 'All Time',
+      'icon': Icons.article_outlined,
+      'fabricType': 'Export Madeups Fabric',
+    },
+    {
+      'title': 'MULTI MADEUPS COSTING',
+      'countKey': 'multi_madeups_costing',
+      'subtitle': 'All Time',
+      'icon': Icons.layers_outlined,
+      'fabricType': 'Export Multi Madeups Fabric',
+    },
+    {
+      'title': 'TOWEL COSTING',
+      'countKey': 'towel_costing',
+      'subtitle': 'All Time',
+      'icon': Icons.dry_cleaning_outlined,
+      'fabricType': 'Towel Costing Sheet',
+    },
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    homeController = Get.isRegistered<HomeController>()
         ? Get.find<HomeController>()
         : Get.put(HomeController(), permanent: true);
-    final List<Map<String, dynamic>> dashboardCards = [
-      {
-        'title': 'TOTAL USERS',
-        'countKey': 'all_users',
-        'subtitle': 'All Time',
-        'icon': Icons.people_outline,
-      },
-      {
-        'title': 'GREY FABRIC',
-        'countKey': 'grey_fabric',
-        'subtitle': 'All Time',
-        'icon': Icons.inventory_2_outlined,
-        'fabricType': 'Grey Fabric',
-      },
-      {
-        'title': 'EXPORT GREY FABRIC',
-        'countKey': 'export_grey_fabric',
-        'subtitle': 'All Time',
-        'icon': Icons.archive_outlined,
-        'fabricType': 'Export Grey Fabric',
-      },
-      {
-        'title': 'PROCESSED FABRICS',
-        'countKey': 'export_processed_fabric',
-        'subtitle': 'All Time',
-        'icon': Icons.checkroom_outlined,
-        'fabricType': 'Export Processed Fabric',
-      },
-      {
-        'title': 'MADEUPS COSTING',
-        'countKey': 'export_madeups_fabric',
-        'subtitle': 'All Time',
-        'icon': Icons.article_outlined,
-        'fabricType': 'Export Madeups Fabric',
-      },
-      {
-        'title': 'MULTI MADEUPS COSTING',
-        'countKey': 'multi_madeups_costing',
-        'subtitle': 'All Time',
-        'icon': Icons.layers_outlined,
-        'fabricType': 'Export Multi Madeups Fabric',
-      },
-      {
-        'title': 'TOWEL COSTING',
-        'countKey': 'towel_costing',
-        'subtitle': 'All Time',
-        'icon': Icons.dry_cleaning_outlined,
-        'fabricType': 'Towel Costing Sheet',
-      },
-    ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      homeController.fetchCounts();
+    });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -119,20 +134,22 @@ class HomePage extends StatelessWidget {
             child: CircularProgressIndicator(),
           );
         }
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: dashboardCards
-                .map((card) => _buildDashboardCard(card, homeController))
-                .toList(),
+        return RefreshIndicator(
+          onRefresh: () => homeController.fetchCounts(),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children:
+                  dashboardCards.map(_buildDashboardCard).toList(),
+            ),
           ),
         );
       }),
     );
   }
 
-  Widget _buildDashboardCard(
-      Map<String, dynamic> card, HomeController homeController) {
+  Widget _buildDashboardCard(Map<String, dynamic> card) {
     final String? fabricType = card['fabricType'] as String?;
     final isClickable = fabricType != null;
     final String? countKey = card['countKey'] as String?;
@@ -237,7 +254,9 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final HomeController homeController = Get.put(HomeController());
+    final HomeController homeController = Get.isRegistered<HomeController>()
+        ? Get.find<HomeController>()
+        : Get.put(HomeController(), permanent: true);
 
     return Drawer(
       backgroundColor: AppColors.sidebarBackground,

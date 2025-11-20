@@ -1,9 +1,14 @@
 import 'dart:math';
+import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
+import 'package:costex_app/utils/pdf_printer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:costex_app/utils/pdf_printer.dart';
 
 class TowelCostingController extends GetxController with GetSingleTickerProviderStateMixin {
+  final ApiService _apiService = ApiService();
+  final SessionService _session = SessionService.instance;
+
   late TabController tabController;
   
   // COSTING TAB - Header Fields
@@ -739,14 +744,54 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
   }
   
   Future<void> saveQuotation() async {
+    if (clientNameController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Validation',
+        'Please enter client name before saving.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFFFC107),
+        colorText: Colors.black87,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
+    final companyId = _session.companyId;
+    final companyName = _session.companyName.trim();
+    if (companyId == null || companyName.isEmpty) {
+      Get.snackbar(
+        'Session Expired',
+        'Company information missing. Please login again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFF44336),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
+    // Ensure derived values (amounts/totals) are up to date before sending.
+    _calculateAll();
+
+    final payload = _buildPayload(companyId, companyName);
+
     try {
       isLoading.value = true;
-      await Future.delayed(const Duration(seconds: 2));
+      final response = await _apiService.saveTowelCostingSheet(payload: payload);
       Get.snackbar(
         'Success',
-        'Quotation saved successfully',
+        response['message']?.toString() ?? 'Towel Costing Sheet saved Successfully',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4CAF50),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+    } on ApiException catch (error) {
+      Get.snackbar(
+        'Error',
+        error.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
         margin: const EdgeInsets.all(16),
       );
@@ -763,6 +808,133 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
       isLoading.value = false;
     }
   }
+
+  Map<String, dynamic> _buildPayload(String companyId, String companyName) {
+    final waistageProcess = waistageCostProcessController.text.trim();
+    final payload = <String, dynamic>{
+      'company_id': companyId,
+      'company_name': companyName,
+      'client_name': _text(clientNameController),
+      'costsheet_date': _text(dateController),
+      'count': _text(pileCountController),
+      'rate': _text(pileRateController),
+      'age': _text(pileAgeController),
+      'amount': _text(pileAmountController),
+      'gst': _text(gstPercentController),
+      'tamount': _text(totalAmountController),
+      'brand_pile': _text(pileNameController),
+      'weft_count': _text(weftCountController),
+      'weft_rate': _text(weftRateController),
+      'weft_age': _text(weftAgeController),
+      'weft_amount': _text(weftAmountController),
+      'brand_weft': _text(weftNameController),
+      'ground_count': _text(groundCountController),
+      'ground_rate': _text(groundRateController),
+      'ground_age': _text(groundAgeController),
+      'ground_amount': _text(groundAmountController),
+      'brand_ground': _text(groundNameController),
+      'fancy_count': _text(fancyCountController),
+      'fancy_rate': _text(fancyRateController),
+      'fancy_age': _text(fancyAgeController),
+      'fancy_amount': _text(fancyAmountController),
+      'brand_fancy': _text(fancyNameController),
+      'grey_yarn': _text(yarnController),
+      'grey_waistage': _text(waistage4Controller),
+      'yarn_total': _text(yarnTotalController),
+      'waving_charges': _text(wavingChargesController),
+      'gfip': _text(greyFabricInPoundController),
+      'gfik': _text(greyFabricInKgController),
+      'viscous': _text(viscousSizingController),
+      'y_freight': _text(yarnFreightController),
+      'grey_total': _text(greyTotalController),
+      'valour_charges': _text(valourChargesController),
+      'sharing_waistage': _text(waistageShareController),
+      'sharing_cost': _text(totalCostShareController),
+      'waistage_cost': _text(waistageCostController),
+      'waistage_vfabric': _text(valourFabricController),
+      'processing': _text(processingController),
+      'processing_waist': _text(waistageProcessController),
+      'processing_tcost': _text(totalCostProcessController),
+      'processing_wcost1': _text(waistageCostProcessController),
+      'processing_dfabric': _text(dyedFabricController),
+      'sc_stitching': _text(stitchingTowelController),
+      'scb': _text(bPercentTowelController),
+      'sc_tcost': _text(totalCostTowelController),
+      'sc_wcost': _text(waistageCostTowelController),
+      'sc_trate': _text(towelRateController),
+      'sc_length': _text(lengthBathrobe1Controller),
+      'sc_sleeve': _text(sleeveBathrobe1Controller),
+      'sc_lmargin': _text(lengthMarginBathrobe1Controller),
+      'sc_smargin': _text(sleeveMarginBathrobe1Controller),
+      'sc_pockets': _text(pocketsBathrobe1Controller),
+      'sc_cwaste': _text(cuttingWasteBathrobe1Controller),
+      'sc_fconsumption': _text(fabricCounsumptionBathrobe1Controller),
+      'sc_gsm': _text(gsmBathrobe1Controller),
+      'sc_wtmtr': _text(wtMtrBathrobe1Controller),
+      'processing_wcost': waistageProcess,
+      'sc_fcost': _text(fabricCostBathrobe1Controller),
+      'sc_labour': _text(labourBathrobe1Controller),
+      'scbp': _text(bPercentBathrobe1Controller),
+      'sc_totalcost': _text(totalCostBathrobe1Controller),
+      'sc_bcost': _text(bCostBathrobe1Controller),
+      'sc_brate': _text(bathrobeRateBathrobe1Controller),
+      's_length': _text(lengthBathrobe2Controller),
+      's_lmargin': _text(lengthMarginBathrobe2Controller),
+      's_fuse': _text(fabricUseBathrobe2Controller),
+      's_cwaste': _text(cuttingWasteBathrobe2Controller),
+      's_fcounsumption': _text(fabricCounsumptionBathrobe2Controller),
+      's_gsm': _text(gsmBathrobe2Controller),
+      's_wtmtr': _text(wtMtrBathrobe2Controller),
+      's_wtpc': _text(wtPcBathrobe2Controller),
+      's_fcost': _text(fabricCostBathrobe2Controller),
+      's_labour': _text(labourBathrobe2Controller),
+      'sb': _text(bPercentBathrobe2Controller),
+      's_tcost': _text(totalCostBathrobe2Controller),
+      's_bcost': _text(bCostBathrobe2Controller),
+      's_br': _text(bathrobeRateBathrobe2Controller),
+      'process': _text(freightKgController),
+      'tprofit': _text(profitPercentTowelController),
+      't_xfactory': _text(exFactoryTowelController),
+      'b_processing': _text(profitPercentBathrobe1Controller),
+      'b_profit': _text(profitAmountBathrobe1Controller),
+      'b_xfactory': _text(exFactoryBathrobe1Controller),
+      'b2_processing': _text(profitPercentBathrobe2Controller),
+      'b2_profit': _text(profitAmountBathrobe2Controller),
+      'b2_xfactory': _text(exFactoryBathrobe2Controller),
+      'e_fkg': _text(freightKgController),
+      'e_st': _text(subTotalKgController),
+      'e_profit': _text(profitPercentKgController),
+      'ep': _text(profitPercentTotalKgController),
+      'et': _text(totalKgController),
+      'e_usrate': _text(usdRateKgController),
+      'e_dolor': _text(dollarKgController),
+      'bank_charges1': _text(bankChargesPercentKgController),
+      'bank_percent': _text(bankPercentTotalKgController),
+      'gst_charges1': _text(gst17PercentKgController),
+      'gst_percent1': _text(gst17TotalKgController),
+      'overhead_charges': _text(overheadChargesPercentKgController),
+      'overhead_percent': _text(overheadTotalKgController),
+      'commission_charges': _text(commissionPercentKgController),
+      'commission_percent': _text(commissionPercentTotalKgController),
+      'e_fpc': _text(freightPcController),
+      'e_subt': _text(subTotalPcController),
+      'e_prof': _text(profitPercentPcController),
+      'e_p': _text(profitAmountPcController),
+      'e_t': _text(totalPcController),
+      'eusrate': _text(usdRatePcController),
+      'edolor': _text(dollarPcController),
+      'fpc': _text(freightPc2Controller),
+      'subt': _text(subTotalPc2Controller),
+      'eprfit': _text(profitPercentPc2Controller),
+      'etotal': _text(intermediateTotal2Controller),
+      'ett': _text(totalPc2Controller),
+      'ur': _text(usdRatePc2Controller),
+      'ed': _text(dollarPc2Controller),
+    };
+    return payload;
+  }
+
+  String _text(TextEditingController controller) => controller.text.trim();
   
   Future<void> generatePDF() async {
     try {

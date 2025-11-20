@@ -1,8 +1,17 @@
+import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:costex_app/utils/pdf_printer.dart';
 
-class MultiMadeupsController extends GetxController with GetSingleTickerProviderStateMixin {
+class MultiMadeupsController extends GetxController
+    with GetSingleTickerProviderStateMixin {
+  MultiMadeupsController({this.viewMode = false});
+
+  final bool viewMode;
+
+  final ApiService _apiService = ApiService();
+  final SessionService _session = SessionService.instance;
   late TabController tabController;
   final customerNameController = TextEditingController();
   final formKey = GlobalKey<FormState>();
@@ -423,7 +432,9 @@ class MultiMadeupsController extends GetxController with GetSingleTickerProvider
     super.onInit();
     tabController = TabController(length: 4, vsync: this);
     _initializeCalculatedFields();
-    _setupListeners();
+    if (!viewMode) {
+      _setupListeners();
+    }
   }
   
   // FIXED: Comprehensive initialization of all calculated fields
@@ -1109,6 +1120,8 @@ class MultiMadeupsController extends GetxController with GetSingleTickerProvider
       default: return greyFabricPrice1Controller;
     }
   }
+
+  String _text(TextEditingController controller) => controller.text.trim();
   
   void _calculateGrandTotals() {
     final fobTotal = _parseDouble(fobPriceDollar1Controller.text) +
@@ -1136,16 +1149,201 @@ class MultiMadeupsController extends GetxController with GetSingleTickerProvider
   }
   
   Future<void> saveQuotation() async {
-    try {
-      if (customerNameController.text.trim().isEmpty) {
-        Get.snackbar('Validation', 'Please enter customer name before saving.', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFFFFC107), colorText: Colors.black, margin: const EdgeInsets.all(16));
-        return;
+    if (customerNameController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Validation',
+        'Please enter customer name before saving.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFFFC107),
+        colorText: Colors.black,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
+    final companyId = _session.companyId;
+    final companyName = _session.companyName;
+    if (companyId == null || companyName.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Company information not found. Please login again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFF44336),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
+    final payload = <String, dynamic>{
+      'company_id': companyId,
+      'company_name': companyName,
+      'customer_name': _text(customerNameController),
+    };
+
+    final warpControllers = [warp1Controller, warp2Controller, warp3Controller, warp4Controller];
+    final weftControllers = [weft1Controller, weft2Controller, weft3Controller, weft4Controller];
+    final reedControllers = [reed1Controller, reed2Controller, reed3Controller, reed4Controller];
+    final pickControllers = [pick1Controller, pick2Controller, pick3Controller, pick4Controller];
+    final greyWidthControllers = [greyWidth1Controller, greyWidth2Controller, greyWidth3Controller, greyWidth4Controller];
+    final finishWidthControllers = [finishWidth1Controller, finishWidth2Controller, finishWidth3Controller, finishWidth4Controller];
+
+    for (int i = 0; i < 4; i++) {
+      final idx = i + 1;
+      payload['warp_$idx'] = _text(warpControllers[i]);
+      payload['weft_$idx'] = _text(weftControllers[i]);
+      payload['reed_$idx'] = _text(reedControllers[i]);
+      payload['pick_$idx'] = _text(pickControllers[i]);
+      payload['grey_width_$idx'] = _text(greyWidthControllers[i]);
+      payload['finish_width_$idx'] = _text(finishWidthControllers[i]);
+    }
+
+    final generalProductControllers = [
+      generalProductName1Controller,
+      generalProductName2Controller,
+      generalProductName3Controller,
+      generalProductName4Controller,
+    ];
+
+    for (int group = 1; group <= 4; group++) {
+      final generalValue = _text(generalProductControllers[group - 1]);
+      payload['product_name$group'] = generalValue;
+      payload['r${group}_name0'] = generalValue;
+      payload['r${group}_total'] = _text(_getTotalController(group));
+
+      for (int row = 1; row <= 4; row++) {
+        final ctrls = _getConsumptionRowControllers(group, row);
+        payload['r${group}_name$row'] = ctrls.isNotEmpty ? _text(ctrls[0]) : '';
+        payload['r${group}_size${row}_1'] = ctrls.length > 1 ? _text(ctrls[1]) : '';
+        payload['r${group}_size${row}_2'] = ctrls.length > 2 ? _text(ctrls[2]) : '';
+        payload['r${group}_size${row}_3'] = '';
+        payload['r${group}_cutsize$row'] = ctrls.length > 3 ? _text(ctrls[3]) : '';
+        payload['r${group}_gw$row'] = ctrls.length > 4 ? _text(ctrls[4]) : '';
+        payload['r${group}_fw$row'] = ctrls.length > 5 ? _text(ctrls[5]) : '';
+        payload['r${group}_pcs$row'] = ctrls.length > 6 ? _text(ctrls[6]) : '';
+        payload['r${group}_consump$row'] = ctrls.length > 7 ? _text(ctrls[7]) : '';
+        payload['r${group}_consump_price$row'] = ctrls.length > 8 ? _text(ctrls[8]) : '';
       }
+    }
+
+    final qualities = [quality1Controller, quality2Controller, quality3Controller, quality4Controller];
+    final looms = [loom1Controller, loom2Controller, loom3Controller, loom4Controller];
+    final weaves = [weave1Controller, weave2Controller, weave3Controller, weave4Controller];
+    final warpRates = [warpRateLbs1Controller, warpRateLbs2Controller, warpRateLbs3Controller, warpRateLbs4Controller];
+    final weftRates = [weftRateLbs1Controller, weftRateLbs2Controller, weftRateLbs3Controller, weftRateLbs4Controller];
+    final conversionPicks = [conversionPick1Controller, conversionPick2Controller, conversionPick3Controller, conversionPick4Controller];
+    final warpWeights = [warpWeight1Controller, warpWeight2Controller, warpWeight3Controller, warpWeight4Controller];
+    final weftWeights = [weftWeight1Controller, weftWeight2Controller, weftWeight3Controller, weftWeight4Controller];
+    final totalWeights = [totalWeight1Controller, totalWeight2Controller, totalWeight3Controller, totalWeight4Controller];
+    final warpPrices = [warpPrice1Controller, warpPrice2Controller, warpPrice3Controller, warpPrice4Controller];
+    final weftPrices = [weftPrice1Controller, weftPrice2Controller, weftPrice3Controller, weftPrice4Controller];
+    final conversions = [conversion1Controller, conversion2Controller, conversion3Controller, conversion4Controller];
+    final greyFabricPrices = [greyFabricPrice1Controller, greyFabricPrice2Controller, greyFabricPrice3Controller, greyFabricPrice4Controller];
+    final mendingMTs = [mendingMT1Controller, mendingMT2Controller, mendingMT3Controller, mendingMT4Controller];
+    final processingInches = [processinginch1Controller, processinginch2Controller, processinginch3Controller, processinginch4Controller];
+    final processingCharges = [processingCharges1Controller, processingCharges2Controller, processingCharges3Controller, processingCharges4Controller];
+    final wastageControllers = [wastage1Controller, wastage2Controller, wastage3Controller, wastage4Controller];
+    final finishFabricCosts = [finishFabricCost1Controller, finishFabricCost2Controller, finishFabricCost3Controller, finishFabricCost4Controller];
+
+    for (int i = 0; i < 4; i++) {
+      final idx = i + 1;
+      payload['quality_$idx'] = _text(qualities[i]);
+      payload['loom_$idx'] = _text(looms[i]);
+      payload['weave_$idx'] = _text(weaves[i]);
+      payload['warp_rate$idx'] = _text(warpRates[i]);
+      payload['weft_rate$idx'] = _text(weftRates[i]);
+      payload['conversion_pick$idx'] = _text(conversionPicks[i]);
+      payload['warp_weight$idx'] = _text(warpWeights[i]);
+      payload['weft_weight$idx'] = _text(weftWeights[i]);
+      payload['total_weight$idx'] = _text(totalWeights[i]);
+      payload['warp_price$idx'] = _text(warpPrices[i]);
+      payload['weft_price$idx'] = _text(weftPrices[i]);
+      payload['conversion$idx'] = _text(conversions[i]);
+      payload['grey_fabric_price$idx'] = _text(greyFabricPrices[i]);
+      payload['mending_mt$idx'] = _text(mendingMTs[i]);
+      payload['processing_inch$idx'] = _text(processingInches[i]);
+      payload['processing_charges$idx'] = _text(processingCharges[i]);
+      payload['wastage$idx'] = _text(wastageControllers[i]);
+      payload['finish_fabric_cost$idx'] = _text(finishFabricCosts[i]);
+    }
+
+    final consumptionPrices = [consumptionPrice1Controller, consumptionPrice2Controller, consumptionPrice3Controller, consumptionPrice4Controller];
+    final stitchingControllers = [stitching1Controller, stitching2Controller, stitching3Controller, stitching4Controller];
+    final accessoriesControllers = [accessories1Controller, accessories2Controller, accessories3Controller, accessories4Controller];
+    final polyBagControllers = [polyBag1Controller, polyBag2Controller, polyBag3Controller, polyBag4Controller];
+    final miscControllers = [miscellaneous1Controller, miscellaneous2Controller, miscellaneous3Controller, miscellaneous4Controller];
+    final packingChargeControllers = [packingCharges1Controller, packingCharges2Controller, packingCharges3Controller, packingCharges4Controller];
+    final containerSizeControllers = [containerSize1Controller, containerSize2Controller, containerSize3Controller, containerSize4Controller];
+    final containerCapacityControllers = [containerCapacity1Controller, containerCapacity2Controller, containerCapacity3Controller, containerCapacity4Controller];
+    final exchangeRateControllers = [rateOfExchange1Controller, rateOfExchange2Controller, rateOfExchange3Controller, rateOfExchange4Controller];
+    final fobPricePkrControllers = [fobPricePKR1Controller, fobPricePKR2Controller, fobPricePKR3Controller, fobPricePKR4Controller];
+    final fobPriceDollarControllers = [fobPriceDollar1Controller, fobPriceDollar2Controller, fobPriceDollar3Controller, fobPriceDollar4Controller];
+    final freightDollarControllers = [freightDollar1Controller, freightDollar2Controller, freightDollar3Controller, freightDollar4Controller];
+    final portControllers = [port1Controller, port2Controller, port3Controller, port4Controller];
+    final freightCalculationControllers = [freightCalculation1Controller, freightCalculation2Controller, freightCalculation3Controller, freightCalculation4Controller];
+    final cfPriceControllers = [cfPriceDollar1Controller, cfPriceDollar2Controller, cfPriceDollar3Controller, cfPriceDollar4Controller];
+    final profitPercentControllers = [profitPercent1Controller, profitPercent2Controller, profitPercent3Controller, profitPercent4Controller];
+    final commissionPercentControllers = [commissionPercent1Controller, commissionPercent2Controller, commissionPercent3Controller, commissionPercent4Controller];
+    final overheadControllers = [overheadPercent1Controller, overheadPercent2Controller, overheadPercent3Controller, overheadPercent4Controller];
+    final fobPriceFinalControllers = [fobPriceFinal1Controller, fobPriceFinal2Controller, fobPriceFinal3Controller, fobPriceFinal4Controller];
+    final cfPriceFinalControllers = [cfPriceFinal1Controller, cfPriceFinal2Controller, cfPriceFinal3Controller, cfPriceFinal4Controller];
+
+    for (int i = 0; i < 4; i++) {
+      final idx = i + 1;
+      payload['consumption_price$idx'] = _text(consumptionPrices[i]);
+      payload['stitching$idx'] = _text(stitchingControllers[i]);
+      payload['accessories$idx'] = _text(accessoriesControllers[i]);
+      payload['poly_bag$idx'] = _text(polyBagControllers[i]);
+      payload['misc_$idx'] = _text(miscControllers[i]);
+      payload['packing_charges$idx'] = _text(packingChargeControllers[i]);
+      payload['container_size$idx'] = _text(containerSizeControllers[i]);
+      payload['container_capacity$idx'] = _text(containerCapacityControllers[i]);
+      payload['exchange_rate$idx'] = _text(exchangeRateControllers[i]);
+      payload['fob_price_pkr$idx'] = _text(fobPricePkrControllers[i]);
+      payload['fob_price_dolar$idx'] = _text(fobPriceDollarControllers[i]);
+      payload['friehgt_dolar$idx'] = _text(freightDollarControllers[i]);
+      payload['port_$idx'] = _text(portControllers[i]);
+      payload['freight_cal$idx'] = _text(freightCalculationControllers[i]);
+      payload['cf_price$idx'] = _text(cfPriceControllers[i]);
+      payload['profit_percent$idx'] = _text(profitPercentControllers[i]);
+      payload['commission_percent$idx'] = _text(commissionPercentControllers[i]);
+      payload['overhead$idx'] = _text(overheadControllers[i]);
+      payload['fob_price_final$idx'] = _text(fobPriceFinalControllers[i]);
+      payload['cf_final_price$idx'] = _text(cfPriceFinalControllers[i]);
+    }
+
+    payload['fob_total_duvetset'] = _text(fobTotalDuvetSet1Controller);
+    payload['cf_total_duvetset'] = _text(cfTotalDuvetSet1Controller);
+
+    try {
       isLoading.value = true;
-      await Future.delayed(const Duration(seconds: 2));
-      Get.snackbar('Success', 'Quotation saved successfully', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: const EdgeInsets.all(16));
+      final response = await _apiService.saveMultiMadeupsFabricQuote(payload: payload);
+      Get.snackbar(
+        'Success',
+        response['message']?.toString() ?? 'Quotation saved successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF4CAF50),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+    } on ApiException catch (error) {
+      Get.snackbar(
+        'Error',
+        error.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFF44336),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
     } catch (e) {
-      Get.snackbar('Error', 'Failed to save: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: const EdgeInsets.all(16));
+      Get.snackbar(
+        'Error',
+        'Failed to save: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFF44336),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
     } finally {
       isLoading.value = false;
     }

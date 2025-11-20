@@ -1,12 +1,20 @@
 // my_quotations_page.dart
 import 'package:costex_app/services/session_service.dart';
+import 'package:costex_app/utils/colour.dart';
 import 'package:costex_app/views/auth/login/login.dart';
+import 'package:costex_app/views/drawer/Export_Madeups_fabric/Export_Madeups_fabric.dart';
+import 'package:costex_app/views/drawer/export_grey_febric/export_grey_febric.dart';
+import 'package:costex_app/views/drawer/export_multi_width_fabric/export_multi_width_fabric.dart';
+import 'package:costex_app/views/drawer/export_processed_fabric/export_processed_fabric.dart';
+import 'package:costex_app/views/drawer/grey_febric_costing_sheet/grey_febric_costing_sheet.dart';
+import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart'
+    as mq;
+import 'package:costex_app/views/drawer/towel_costing_sheet/towel_costing_sheet.dart';
 import 'package:costex_app/views/drawer/user_quotation/user_quotation_controller.dart';
 import 'package:costex_app/views/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:costex_app/utils/colour.dart';
-
+  
 class UserQuotation extends StatelessWidget {
   const UserQuotation({Key? key}) : super(key: key);
 
@@ -105,7 +113,7 @@ class UserQuotation extends StatelessWidget {
                               value: controller.selectedFabricType.value.isEmpty
                                   ? null
                                   : controller.selectedFabricType.value,
-                              hint: const Text('Grey Fabric'),
+                              hint: const Text('Select Fabric Type'),
                               decoration: const InputDecoration(
                                 contentPadding: EdgeInsets.symmetric(
                                   horizontal: 12,
@@ -117,7 +125,7 @@ class UserQuotation extends StatelessWidget {
                               ),
                               items: controller.fabricTypes
                                   .map((type) => DropdownMenuItem(
-                                        value: type,
+                                        value: type == 'Choose Type' ? '' : type,
                                         child: Text(
                                           type,
                                           style: const TextStyle(fontSize: 14),
@@ -162,28 +170,46 @@ class UserQuotation extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Obx(() => DropdownButtonFormField<String>(
-                              value: controller.selectedUser.value,
-                              decoration: const InputDecoration(
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
+                        Obx(() {
+                              if (controller.isUsersLoading.value) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                );
+                              }
+                              return DropdownButtonFormField<String>(
+                                value: controller.selectedUser.value.isEmpty
+                                    ? null
+                                    : controller.selectedUser.value,
+                                hint: const Text('Select User'),
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  border: InputBorder.none,
+                                  filled: true,
+                                  fillColor: Colors.white,
                                 ),
-                                border: InputBorder.none,
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                              items: controller.availableUsers
-                                  .map((user) => DropdownMenuItem(
-                                        value: user,
+                                items: controller.userOptions
+                                    .map(
+                                      (user) => DropdownMenuItem(
+                                        value: user.value,
                                         child: Text(
-                                          user,
+                                          user.name,
                                           style: const TextStyle(fontSize: 14),
                                         ),
-                                      ))
-                                  .toList(),
-                              onChanged: controller.updateSelectedUser,
-                            )),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: controller.updateSelectedUser,
+                              );
+                            }),
                       ],
                     ),
                   ),
@@ -192,25 +218,36 @@ class UserQuotation extends StatelessWidget {
                   // Fabric Records Button
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: controller.showFabricRecords,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFDC3545),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Fabric Records',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                    child: Obx(() => ElevatedButton(
+                          onPressed: controller.isLoading.value
+                              ? null
+                              : controller.showFabricRecords,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFDC3545),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: controller.isLoading.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : const Text(
+                                  'Find Records',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                        )),
                   ),
                 ],
               ),
@@ -225,7 +262,6 @@ class UserQuotation extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -238,7 +274,8 @@ class UserQuotation extends StatelessWidget {
                         ),
                       ),
                       Obx(() => controller.selectedFabricType.value.isNotEmpty ||
-                              controller.selectedUser.value != 'All'
+                              controller.selectedUser.value.isNotEmpty ||
+                              controller.searchQuery.value.isNotEmpty
                           ? TextButton.icon(
                               onPressed: controller.resetFilter,
                               icon: const Icon(Icons.clear, size: 16),
@@ -255,321 +292,262 @@ class UserQuotation extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
-                  // Show entries and Search
-                  Row(
-                    children: [
-                      const Text(
-                        'Show',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textPrimary,
+                  TextField(
+                    onChanged: controller.updateSearchQuery,
+                    decoration: InputDecoration(
+                      hintText: 'Search by quotation no, customer, user...',
+                      hintStyle: TextStyle(
+                        color: AppColors.textSecondary.withOpacity(0.5),
+                        fontSize: 14,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: AppColors.textSecondary,
+                      ),
+                      suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              onPressed: () => controller.updateSearchQuery(''),
+                            )
+                          : const SizedBox.shrink()),
+                      filled: true,
+                      fillColor: Colors.grey[50],
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Obx(() => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey[300]!),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: DropdownButton<int>(
-                              value: controller.entriesPerPage.value,
-                              underline: const SizedBox(),
-                              items: [10, 25, 50, 100]
-                                  .map((value) => DropdownMenuItem(
-                                        value: value,
-                                        child: Text(
-                                          value.toString(),
-                                          style: const TextStyle(fontSize: 14),
-                                        ),
-                                      ))
-                                  .toList(),
-                              onChanged: controller.updateEntriesPerPage,
-                            ),
-                          )),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'entries',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      Expanded(
-                        child: TextField(
-                          onChanged: controller.updateSearchQuery,
-                          decoration: InputDecoration(
-                            hintText: 'Search',
-                            hintStyle: TextStyle(
-                              color: AppColors.textSecondary.withOpacity(0.5),
-                              fontSize: 14,
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              color: AppColors.textSecondary,
-                              size: 20,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 8,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(4),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(4),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(4),
-                              borderSide: const BorderSide(
-                                color: AppColors.primary,
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  
-                  // Table
-                  Obx(() {
-                    if (controller.isLoading.value) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(32),
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      );
-                    }
-
-                    if (controller.filteredQuotations.isEmpty) {
-                      return Container(
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey[300]!),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'No data available in table',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey[300]!),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: DataTable(
-                          headingRowColor: MaterialStateProperty.all(
-                            Colors.grey[100],
-                          ),
-                          columns: const [
-                            DataColumn(
-                              label: Text(
-                                'Quotation No.',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Dated',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'User Name',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Customer Name',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Action',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                          rows: controller.filteredQuotations
-                              .map(
-                                (quotation) => DataRow(
-                                  cells: [
-                                    DataCell(
-                                      Text(
-                                        quotation.quotationNo,
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Text(
-                                        quotation.dated,
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Text(
-                                        quotation.userName,
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Text(
-                                        quotation.customerName,
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ElevatedButton.icon(
-                                        onPressed: () {
-                                          // Get.to(
-                                          //   () => ViewQuotationPage(
-                                          //       quotation: quotation),
-                                          //   transition: Transition.rightToLeft,
-                                          // );
-                                        },
-                                        icon: const Icon(Icons.visibility,
-                                            size: 14),
-                                        label: const Text('View'),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              const Color(0xFF17a2b8),
-                                          foregroundColor: Colors.white,
-                                          elevation: 0,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 6,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(4),
-                                          ),
-                                          textStyle: const TextStyle(
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                    );
-                  }),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Footer
-                  Obx(() {
-                    if (controller.filteredQuotations.isEmpty) {
-                      return Text(
-                        'Showing 0 to 0 of 0 entries',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[700],
-                        ),
-                      );
-                    }
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Showing 1 to ${controller.filteredQuotations.length} of ${controller.filteredQuotations.length} entries',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            TextButton(
-                              onPressed: null,
-                              child: Text(
-                                'Previous',
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text(
-                                '1',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: null,
-                              child: Text(
-                                'Next',
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  }),
                 ],
               ),
             ),
+
+            const SizedBox(height: 12),
+
+            Obx(() {
+              if (controller.isLoading.value) {
+                return const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                );
+              }
+
+              if (controller.filteredQuotations.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 48),
+                  child: Column(
+                    children: [
+                      Icon(Icons.description_outlined,
+                          size: 64, color: Colors.grey[400]),
+                      const SizedBox(height: 12),
+                      Text(
+                        controller.selectedFabricType.value.isEmpty
+                            ? 'No quotations found'
+                            : 'No quotations for ${controller.selectedFabricType.value}',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: controller.filteredQuotations.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final quotation = controller.filteredQuotations[index];
+                  return _buildQuotationCard(quotation, index);
+                },
+              );
+            }),
           ],
         ),
       ),
     );
+  }
+}
+
+Widget _buildQuotationCard(mq.Quotation quotation, int index) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey[300]!),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.03),
+          blurRadius: 4,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              ElevatedButton.icon(
+                onPressed: () => _navigateToQuotationScreen(quotation),
+                icon: const Icon(Icons.visibility, size: 16),
+                label: const Text('View'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF17a2b8),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _buildDetailRow('Quotation No.', quotation.quotationNo),
+              const Divider(height: 24),
+              _buildDetailRow('Date', quotation.dated),
+              const Divider(height: 24),
+              _buildDetailRow('Username', quotation.username),
+              const Divider(height: 24),
+              _buildDetailRow('Customer Name', quotation.customerName),
+              const Divider(height: 24),
+              _buildDetailRow('Type', quotation.fabricType),
+              const Divider(height: 24),
+              _buildDetailRow('Quality', quotation.quality),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildDetailRow(String label, String value) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Expanded(
+        flex: 2,
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      Expanded(
+        flex: 3,
+        child: Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+void _navigateToQuotationScreen(mq.Quotation quotation) {
+  switch (quotation.fabricType) {
+    case 'Grey Fabric':
+      Get.to(
+        () => GreyFabricCostingScreen(quotation: quotation, viewMode: true),
+        transition: Transition.rightToLeft,
+      );
+      break;
+    case 'Export Grey Fabric':
+      Get.to(
+        () => ExportGreyPage(quotation: quotation, viewMode: true),
+        transition: Transition.rightToLeft,
+      );
+      break;
+    case 'Export Processed Fabric':
+      Get.to(
+        () => ExportProcessedFabricPage(quotation: quotation, viewMode: true),
+        transition: Transition.rightToLeft,
+      );
+      break;
+    case 'Export Madeups Fabric':
+      Get.to(
+        () => ExportMadeupsPage(quotation: quotation, viewMode: true),
+        transition: Transition.rightToLeft,
+      );
+      break;
+    case 'Export Multi Madeups Fabric':
+      Get.to(
+        () => MultiMadeupsPage(quotation: quotation, viewMode: true),
+        transition: Transition.rightToLeft,
+      );
+      break;
+    case 'Towel Costing Sheet':
+      Get.to(
+        () => TowelCostingPage(quotation: quotation, viewMode: true),
+        transition: Transition.rightToLeft,
+      );
+      break;
+    default:
+      Get.snackbar(
+        'Error',
+        'Unknown fabric type: ${quotation.fabricType}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
   }
 }

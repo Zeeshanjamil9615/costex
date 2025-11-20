@@ -1,6 +1,7 @@
 import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
+import 'package:costex_app/utils/detail_value_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:costex_app/utils/colour.dart';
@@ -618,7 +619,195 @@ class TowelCostingPage extends StatelessWidget {
   }
   
   void _loadQuotationData(TowelCostingController controller, Quotation quotation) {
-    controller.clientNameController.text = quotation.customerName;
-    // Add more field mappings as needed based on TowelCostingController fields
+    final details = quotation.details;
+
+    String? _clean(String? value) {
+      if (value == null) return null;
+      final cleaned = value.replaceAll('\n', ' ').replaceAll('\r', ' ').trim();
+      if (cleaned.isEmpty) return null;
+      final lower = cleaned.toLowerCase();
+      if (lower == 'nan' || lower == 'null' || lower == 'undefined') return null;
+      return cleaned;
+    }
+
+    void setValue(TextEditingController ctrl, String? value) {
+      final sanitized = _clean(value);
+      if (sanitized != null) ctrl.text = sanitized;
+    }
+
+    void assignSeries(String key, List<TextEditingController> ctrls) {
+      final values = detailList(details, key, delimiter: '-');
+      setControllersFromList(ctrls, values);
+    }
+
+    controller.clientNameController.text = _clean(detailValue(details, 'customerName')) ?? quotation.customerName;
+    setValue(controller.dateController, detailValue(details, 'costDate'));
+
+    assignSeries('pile', [
+      controller.pileCountController,
+      controller.pileRateController,
+      controller.pileAgeController,
+      controller.pileAmountController,
+    ]);
+    assignSeries('weft', [
+      controller.weftCountController,
+      controller.weftRateController,
+      controller.weftAgeController,
+      controller.weftAmountController,
+    ]);
+    assignSeries('ground', [
+      controller.groundCountController,
+      controller.groundRateController,
+      controller.groundAgeController,
+      controller.groundAmountController,
+    ]);
+    assignSeries('fancy', [
+      controller.fancyCountController,
+      controller.fancyRateController,
+      controller.fancyAgeController,
+      controller.fancyAmountController,
+    ]);
+
+    setValue(controller.pileNameController, detailValue(details, 'bPile'));
+    setValue(controller.weftNameController, detailValue(details, 'bWeft'));
+    setValue(controller.groundNameController, detailValue(details, 'bGround'));
+    setValue(controller.fancyNameController, detailValue(details, 'bFancy'));
+
+    setValue(controller.gstPercentController, detailValue(details, 'gst'));
+    setValue(controller.totalAmountController, detailValue(details, 'tgst'));
+
+    assignSeries('greyFebricCost', [
+      controller.yarnController,
+      controller.waistage4Controller,
+      controller.yarnTotalController,
+      controller.wavingChargesController,
+      controller.greyFabricInPoundController,
+      controller.greyFabricInKgController,
+      controller.viscousSizingController,
+      controller.yarnFreightController,
+      controller.greyTotalController,
+    ]);
+
+    assignSeries('sharingCost', [
+      controller.valourChargesController,
+      controller.waistageShareController,
+      controller.totalCostShareController,
+      controller.waistageCostController,
+      controller.valourFabricController,
+    ]);
+
+    assignSeries('processingCost', [
+      controller.processingController,
+      controller.waistageProcessController,
+      controller.totalCostProcessController,
+      controller.waistageCostProcessController,
+      controller.dyedFabricController,
+    ]);
+
+    assignSeries('towelStitching', [
+      controller.stitchingTowelController,
+      controller.bPercentTowelController,
+      controller.totalCostTowelController,
+      controller.waistageCostTowelController,
+      controller.towelRateController,
+    ]);
+
+    assignSeries('bathrobeStitchOne', [
+      controller.lengthBathrobe1Controller,
+      controller.sleeveBathrobe1Controller,
+      controller.lengthMarginBathrobe1Controller,
+      controller.sleeveMarginBathrobe1Controller,
+      controller.pocketsBathrobe1Controller,
+      controller.cuttingWasteBathrobe1Controller,
+      controller.fabricCounsumptionBathrobe1Controller,
+      controller.gsmBathrobe1Controller,
+      controller.wtMtrBathrobe1Controller,
+      controller.wtPcBathrobe1Controller,
+      controller.fabricCostBathrobe1Controller,
+      controller.labourBathrobe1Controller,
+      controller.bPercentBathrobe1Controller,
+      controller.totalCostBathrobe1Controller,
+      controller.bCostBathrobe1Controller,
+      controller.bathrobeRateBathrobe1Controller,
+    ]);
+
+    assignSeries('bathrobeStitchTwo', [
+      controller.lengthBathrobe2Controller,
+      controller.lengthMarginBathrobe2Controller,
+      controller.fabricUseBathrobe2Controller,
+      controller.cuttingWasteBathrobe2Controller,
+      controller.fabricCounsumptionBathrobe2Controller,
+      controller.gsmBathrobe2Controller,
+      controller.wtMtrBathrobe2Controller,
+      controller.wtPcBathrobe2Controller,
+      controller.fabricCostBathrobe2Controller,
+      controller.labourBathrobe2Controller,
+      controller.bPercentBathrobe2Controller,
+      controller.totalCostBathrobe2Controller,
+      controller.bCostBathrobe2Controller,
+      controller.bathrobeRateBathrobe2Controller,
+    ]);
+
+    assignSeries('towel', [
+      controller.profitPercentTowelController,
+      controller.profitAmountTowelController,
+      controller.exFactoryTowelController,
+    ]);
+    assignSeries('bathrobeOne', [
+      controller.profitPercentBathrobe1Controller,
+      controller.profitAmountBathrobe1Controller,
+      controller.exFactoryBathrobe1Controller,
+    ]);
+    assignSeries('bathrobeTwo', [
+      controller.profitPercentBathrobe2Controller,
+      controller.profitAmountBathrobe2Controller,
+      controller.exFactoryBathrobe2Controller,
+    ]);
+
+    final freightKgControllers = [
+      controller.freightKgController,
+      controller.subTotalKgController,
+      controller.bankChargesPercentKgController,
+      controller.bankPercentTotalKgController,
+      controller.gst17PercentKgController,
+      controller.gst17TotalKgController,
+      controller.overheadChargesPercentKgController,
+      controller.overheadTotalKgController,
+      controller.profitPercentKgController,
+      controller.profitPercentTotalKgController,
+      controller.commissionPercentKgController,
+      controller.commissionPercentTotalKgController,
+      controller.totalKgController,
+      controller.usdRateKgController,
+      controller.dollarKgController,
+    ];
+    final freightKgValues = [
+      ...detailList(details, 'freightKg', delimiter: '-'),
+      ...detailList(details, 'extraCharges', delimiter: '-'),
+    ];
+    setControllersFromList(freightKgControllers, freightKgValues);
+
+    assignSeries('freightPcOne', [
+      controller.freightPcController,
+      controller.subTotalPcController,
+      controller.profitPercentPcController,
+      controller.profitAmountPcController,
+      controller.totalPcController,
+      controller.usdRatePcController,
+      controller.dollarPcController,
+    ]);
+
+    assignSeries('freightPcTwo', [
+      controller.freightPc2Controller,
+      controller.subTotalPc2Controller,
+      controller.bankChargesPc2Controller,
+      controller.gstPercentPc2Controller,
+      controller.profitPercentPc2Controller,
+      controller.commissionPc2Controller,
+      controller.intermediateTotal2Controller,
+      controller.totalPc2Controller,
+      controller.usdRatePc2Controller,
+      controller.dollarPc2Controller,
+    ]);
   }
 }

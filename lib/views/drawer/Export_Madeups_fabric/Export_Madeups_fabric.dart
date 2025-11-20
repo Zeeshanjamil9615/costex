@@ -1,6 +1,7 @@
 import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/views/auth/login/login.dart';
 import 'package:costex_app/views/drawer/Export_Madeups_fabric/Export_Madeups_controller.dart';
+import 'package:costex_app/utils/detail_value_helper.dart';
 import 'package:costex_app/views/drawer/my_quotation/my_quotation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -342,13 +343,82 @@ class ExportMadeupsPage extends StatelessWidget {
   
   void _loadQuotationData(ExportMadeupsController controller, Quotation quotation) {
     final details = quotation.details;
-    controller.customerNameController.text = quotation.customerName;
-    
-    // Map all fields from quotation details
-    if (details.containsKey('productName')) controller.productNameController.text = details['productName'].toString();
-    if (details.containsKey('productSize')) controller.productSizeController.text = details['productSize'].toString();
-    if (details.containsKey('quality')) controller.qualityController.text = details['quality'].toString();
-    // Add more field mappings as needed
+    controller.customerNameController.text = detailValue(details, 'customerName') ?? quotation.customerName;
+
+    final mapping = <String, TextEditingController>{
+      'productName': controller.productNameController,
+      'productSize': controller.productSizeController,
+      'quality': controller.qualityController,
+      'warpCount': controller.warpCountController,
+      'weftCount': controller.weftCountController,
+      'reeds': controller.reedsController,
+      'picks': controller.picksController,
+      'greyWidth': controller.greyWidthController,
+      'finishWidth': controller.finishWidthController,
+      'pcRatio': controller.pcRatioController,
+      'loom': controller.loomController,
+      'weave': controller.weaveController,
+      'warpRate': controller.warpRateLbsController,
+      'weftRate': controller.weftRateLbsController,
+      'conversionPick': controller.conversionPickController,
+      'warpWeight': controller.warpWeightController,
+      'weftWeight': controller.weftWeightController,
+      'totalWeight': controller.totalWeightController,
+      'warpPrice': controller.warpPriceController,
+      'weftPrice': controller.weftPriceController,
+      'conversionCharges': controller.conversionChargesController,
+      'greyFabricPrice': controller.fabricPriceMeterController,
+      'mendingMt': controller.mendingMTController,
+      'processRate': controller.processRateController,
+      'processCharges': controller.processChargesController,
+      'packingType': controller.packingTypeController,
+      'packingCharges': controller.packingChargesMTController,
+      'wastage': controller.wastagePercentController,
+      'finishFabricCost': controller.finishFabricCostController,
+      'consumption': controller.consumptionController,
+      'consumptionPrice': controller.consumptionPriceController,
+      'stitching': controller.stitchingController,
+      'accessories': controller.accessoriesController,
+      'polyBag': controller.polyBagController,
+      'miscellaneous': controller.miscellaneousController,
+      'containerSize': controller.containerSizeController,
+      'containerCapacity': controller.containerCapacityController,
+      'exchangeRate': controller.rateOfExchangeController,
+      'fobPricePkr': controller.fobPricePKRController,
+      'fobPriceDollar': controller.fobPriceDollarController,
+      'freightDollar': controller.freightInDollarController,
+      'port': controller.rateController,
+      'freightCalculation': controller.freightCalculationController,
+      'cFPriceDollar': controller.cfPriceInDollarController,
+      'commission': controller.commissionController,
+      'profit': controller.profitController,
+      'overhead': controller.overheadController,
+      'fobFinalPrice': controller.fobPriceFinalController,
+      'cFFinalPrice': controller.cfPriceFinalController,
+    };
+
+    final aliasMap = <String, List<String>>{
+      'weave': ['wave'],
+      'warpRate': ['warpRateLbs'],
+      'weftRate': ['weftRateLbs'],
+      'conversionPick': ['coverationPick', 'coversionPick'],
+      'greyFabricPrice': ['grey_fabric_price'],
+      'mendingMt': ['mending', 'mending_mt'],
+      'freightDollar': ['freight_in_dollar', 'freightDollar'],
+      'freightCalculation': ['freightCalculationDollar', 'freight_calculation_dollar'],
+      'cFPriceDollar': ['c_f_price_dollar', 'cfPriceInDollar'],
+      'profit': ['profitPercent'],
+      'overhead': ['overheadPercent'],
+      'cFFinalPrice': ['c_f_final_price'],
+    };
+
+    populateControllers(details, mapping, aliasMap: aliasMap);
+
+    final processTypeValue = detailValue(details, 'processType');
+    if (processTypeValue != null && processTypeValue.isNotEmpty) {
+      controller.processTypeController.text = processTypeValue;
+      controller.selectedProcessType.value = processTypeValue;
+    }
   }
 }
 

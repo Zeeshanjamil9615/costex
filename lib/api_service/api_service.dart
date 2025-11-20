@@ -213,6 +213,60 @@ class ApiService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getUsers({
+    required String companyId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'getUsers',
+        data: FormData.fromMap({'company_id': companyId}),
+      );
+      final parsed = _parseResponse(response);
+      final users = parsed['users'];
+      if (users is List) {
+        return users
+            .whereType<Map>()
+            .map((user) => user.map((key, value) => MapEntry(key.toString(), value)))
+            .toList();
+      }
+      return <Map<String, dynamic>>[];
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to fetch users')
+            : error.message ?? 'Unable to fetch users',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> getUserFabricRecords({
+    required String companyId,
+    required String fabricType,
+    required String username,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'getUserFabricRecords',
+        data: FormData.fromMap({
+          'company_id': companyId,
+          'fabric_type': fabricType,
+          'username': username,
+        }),
+      );
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to fetch user quotations')
+            : error.message ?? 'Unable to fetch user quotations',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
   Future<Map<String, dynamic>> getCounts({
     required String companyId,
   }) async {
@@ -314,6 +368,85 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> saveMultiMadeupsFabricQuote({
+    required Map<String, dynamic> payload,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'saveMultiMadeupsFabricQuote',
+        data: FormData.fromMap(payload),
+      );
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to save export multi madeups fabric quotation')
+            : error.message ?? 'Unable to save export multi madeups fabric quotation',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> saveTowelCostingSheet({
+    required Map<String, dynamic> payload,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'saveTowelCostingSheet',
+        data: FormData.fromMap(payload),
+      );
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to save towel costing sheet')
+            : error.message ?? 'Unable to save towel costing sheet',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchMyQuotations({
+    required String companyId,
+    required String fabricType,
+  }) async {
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    try {
+      final response = await _dio.post(
+        'myQuotations',
+        data: FormData.fromMap({
+          'fabric_records': '1',
+          'fabric_type': fabricType,
+          'company_id': companyId,
+        }),
+      );
+       return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to fetch quotations')
+            : error.message ?? 'Unable to fetch quotations',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
   Map<String, dynamic> _parseResponse(Response<dynamic> response) {
     if (response.statusCode != 200) {
       throw ApiException(
@@ -325,7 +458,7 @@ class ApiService {
     final payload = _normalizePayload(response.data);
     final dynamic status = payload['status'];
 
-    if (_isSuccessStatus(status)) {
+    if (_isSuccessStatus(status) || _looksLikeDataPayload(payload)) {
       return payload;
     }
 
@@ -397,6 +530,19 @@ class ApiService {
         normalized == 'success' ||
         normalized == 'ok' ||
         normalized == 'true';
+  }
+
+  bool _looksLikeDataPayload(Map<String, dynamic> payload) {
+    if (payload.containsKey('records')) {
+      return true;
+    }
+    if (payload.containsKey('data') && payload['data'] is List) {
+      return true;
+    }
+    if (payload.containsKey('users') && payload['users'] is List) {
+      return true;
+    }
+    return false;
   }
 }
 

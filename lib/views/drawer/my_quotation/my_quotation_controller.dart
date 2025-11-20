@@ -1,7 +1,8 @@
 // quotation_model.dart
+import 'package:costex_app/api_service/api_service.dart';
+import 'package:costex_app/services/session_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
 class Quotation {
   final int id;
@@ -25,9 +26,10 @@ class Quotation {
   });
 }
 
-
-
 class QuotationsController extends GetxController {
+  final ApiService _apiService = ApiService();
+  final SessionService _session = SessionService.instance;
+
   // Selected fabric type
   final RxString selectedFabricType = ''.obs;
   
@@ -57,137 +59,8 @@ class QuotationsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadDummyQuotations();
-    
-    // Listen to changes
     ever(selectedFabricType, (_) => filterQuotations());
     ever(searchQuery, (_) => filterQuotations());
-  }
-
-  void loadDummyQuotations() {
-    isLoading.value = true;
-    
-    Future.delayed(const Duration(milliseconds: 500), () {
-      allQuotations.value = [
-        Quotation(
-          id: 1,
-          fabricType: 'Grey Fabric',
-          quotationNo: 'QT-001',
-          dated: '28-10-2025',
-          customerName: 'Aarafat',
-          username: 'john_doe',
-          quality: '30x30/76x56 114',
-          details: {
-            'quality': '30x30/76x56 114',
-            'warpCount': '30',
-            'weftCount': '30',
-            'reeds': '76',
-            'picks': '56',
-            'greyWidth': '114',
-            'pcRatio': '5050',
-            'loom': 'suzler',
-            'weave': 'plain',
-            'warpRate': '300',
-            'weftRate': '300',
-            'coverationPick': '70',
-            'warpWeight': '0.3948',
-            'weftWeight': '0.2909',
-            'totalWeight': '0.6857',
-            'warpPrice': '118.44',
-            'weftPrice': '87.27',
-            'coverationCharges': '3920',
-            'greyFabricPrice': '4125.71',
-            'profit': '0',
-            'fabricPriceFinal': '4125.71',
-          },
-        ),
-        Quotation(
-          id: 2,
-          fabricType: 'Grey Fabric',
-          quotationNo: 'QT-002',
-          dated: '10-08-2021',
-          customerName: 'Gay Blevins',
-          username: 'jane_smith',
-          quality: '40x40/80x60 120',
-          details: {
-            'quality': '40x40/80x60 120',
-            'warpCount': '40',
-            'weftCount': '40',
-            'reeds': '80',
-            'picks': '60',
-            'greyWidth': '120',
-            'pcRatio': '6040',
-            'loom': 'rapier',
-            'weave': 'twill',
-            'warpRate': '320',
-            'weftRate': '320',
-            'coverationPick': '75',
-            'warpWeight': '0.4200',
-            'weftWeight': '0.3150',
-            'totalWeight': '0.7350',
-            'warpPrice': '134.40',
-            'weftPrice': '100.80',
-            'coverationCharges': '4200',
-            'greyFabricPrice': '4435.20',
-            'profit': '0',
-            'fabricPriceFinal': '4435.20',
-          },
-        ),
-        Quotation(
-          id: 3,
-          fabricType: 'Export Processed Fabric',
-          quotationNo: 'QT-003',
-          dated: '15-09-2024',
-          customerName: 'Sarah Johnson',
-          username: 'sarah_j',
-          quality: '50x50/90x70 130',
-          details: {
-            'quality': '50x50/90x70 130',
-            'processType': 'Bleached',
-            'finishedWidth': '58',
-            'gsm': '150',
-            'processRate': '450',
-            'totalPrice': '5200.50',
-          },
-        ),
-        Quotation(
-          id: 4,
-          fabricType: 'Export Madeups Fabric',
-          quotationNo: 'QT-004',
-          dated: '20-10-2025',
-          customerName: 'Ahmed Khan',
-          username: 'ahmed_k',
-          quality: 'Bed Sheet 90x100',
-          details: {
-            'productType': 'Bed Sheet',
-            'size': '90x100',
-            'weight': '250',
-            'stitchingCharges': '150',
-            'packingCharges': '50',
-            'totalPrice': '3500.00',
-          },
-        ),
-        Quotation(
-          id: 5,
-          fabricType: 'Towel Costing Sheet',
-          quotationNo: 'QT-005',
-          dated: '22-10-2025',
-          customerName: 'Maria Garcia',
-          username: 'maria_g',
-          quality: 'Bath Towel 27x54',
-          details: {
-            'towelType': 'Bath Towel',
-            'size': '27x54',
-            'weight': '500',
-            'dyeingCharges': '200',
-            'totalPrice': '1800.00',
-          },
-        ),
-      ];
-      
-      filteredQuotations.value = allQuotations;
-      isLoading.value = false;
-    });
   }
 
   void updateFabricType(String? type) {
@@ -228,7 +101,7 @@ class QuotationsController extends GetxController {
     searchQuery.value = query;
   }
 
-  void showFabricRecords() {
+  Future<void> fetchQuotations() async {
     if (selectedFabricType.value.isEmpty) {
       Get.snackbar(
         'Selection Required',
@@ -241,12 +114,191 @@ class QuotationsController extends GetxController {
       );
       return;
     }
-    filterQuotations();
+
+    final companyId = _session.companyId;
+    if (companyId == null) {
+      Get.snackbar(
+        'Session Expired',
+        'Company information not found. Please login again.',
+        backgroundColor: const Color(0xFFF44336),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final response = await _apiService.fetchMyQuotations(
+        companyId: companyId,
+        fabricType: selectedFabricType.value,
+      );
+
+      final records = response['records'];
+      if (records is List) {
+        final parsed = records
+            .whereType<Map>()
+            .map((record) => _mapRecordToQuotation(
+                  selectedFabricType.value,
+                  record.map((key, value) => MapEntry(key.toString(), value)),
+                  response['table']?.toString(),
+                ))
+            .toList();
+
+        allQuotations.value = parsed;
+        filteredQuotations.value = parsed;
+
+        if (parsed.isEmpty) {
+          Get.snackbar(
+            'No Records',
+            'No quotations found for ${selectedFabricType.value}',
+            backgroundColor: const Color(0xFF17a2b8),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
+          );
+        }
+      } else {
+        allQuotations.clear();
+        filteredQuotations.clear();
+      }
+    } on ApiException catch (error) {
+      Get.snackbar(
+        'Error',
+        error.message,
+        backgroundColor: const Color(0xFFF44336),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to fetch quotations: $e',
+        backgroundColor: const Color(0xFFF44336),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void resetFilter() {
     selectedFabricType.value = '';
     searchQuery.value = '';
     filteredQuotations.value = allQuotations;
+  }
+
+  Quotation _mapRecordToQuotation(
+    String fabricType,
+    Map<String, dynamic> record, [
+    String? tableName,
+  ]) {
+    final idValue = record['id']?.toString() ?? '';
+    final timestamp = record['timestamp']?.toString() ??
+        record['dated']?.toString() ??
+        record['created_at']?.toString() ??
+        '-';
+
+    final Map<String, dynamic> details = {
+      ...record,
+      if (tableName != null) 'table': tableName,
+    };
+    _addCamelCaseAliases(details);
+
+    return Quotation(
+      id: int.tryParse(idValue) ?? 0,
+      fabricType: fabricType,
+      quotationNo: idValue.isNotEmpty ? 'QT-$idValue' : '-',
+      dated: timestamp,
+      customerName: record['customer_name']?.toString() ?? '-',
+      username: record['user_name']?.toString() ?? '',
+      quality: record['quality']?.toString() ?? '',
+      details: details,
+    );
+  }
+
+  void _addCamelCaseAliases(Map<String, dynamic> details) {
+    final entries = Map<String, dynamic>.from(details);
+    for (final entry in entries.entries) {
+      final key = entry.key;
+      final value = entry.value;
+      if (key.contains('_')) {
+        final camelKey = _snakeToCamel(key);
+        _registerAlias(details, camelKey, value);
+        for (final alias in _specialAliases(key, camelKey)) {
+          _registerAlias(details, alias, value);
+        }
+      } else {
+        for (final alias in _specialAliases(key, key)) {
+          _registerAlias(details, alias, value);
+        }
+      }
+    }
+  }
+
+  void _registerAlias(Map<String, dynamic> details, String key, dynamic value) {
+    if (key.isEmpty) return;
+    details.putIfAbsent(key, () => value);
+  }
+
+  String _snakeToCamel(String value) {
+    final buffer = StringBuffer();
+    bool uppercaseNext = false;
+    for (int i = 0; i < value.length; i++) {
+      final char = value[i];
+      if (char == '_') {
+        uppercaseNext = true;
+        continue;
+      }
+      if (uppercaseNext) {
+        buffer.write(char.toUpperCase());
+        uppercaseNext = false;
+      } else {
+        buffer.write(buffer.isEmpty ? char.toLowerCase() : char);
+      }
+    }
+    return buffer.toString();
+  }
+
+  List<String> _specialAliases(String originalKey, String camelKey) {
+    final aliases = <String>[];
+
+    if (camelKey.endsWith('Lbs')) {
+      aliases.add(camelKey.substring(0, camelKey.length - 3));
+    }
+
+    if (camelKey == 'wave') {
+      aliases.add('weave');
+    }
+
+    if (camelKey == 'conversionPick') {
+      aliases.addAll(['coverationPick', 'coversionPick', 'coversionPicks']);
+    }
+
+    if (originalKey.contains('dolar')) {
+      aliases.add(camelKey.replaceFirst('dolar', 'Dollar'));
+    }
+
+    if (originalKey.contains('friehgt')) {
+      aliases.add('freightDollar');
+    }
+
+    if (originalKey.contains('fob_price') && camelKey.contains('fobPrice')) {
+      aliases.add('fobPrice');
+    }
+
+    if (camelKey == 'userName') {
+      aliases.addAll(['username', 'addedBy']);
+    }
+
+    if (camelKey == 'customerName') {
+      aliases.add('clientName');
+    }
+
+    return aliases;
   }
 }
