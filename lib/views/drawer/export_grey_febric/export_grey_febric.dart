@@ -162,7 +162,7 @@ class ExportGreyPage extends StatelessWidget {
                       // Row 5: Container Capacity, FOB Price in PKR, Rate of Exchange, FOB Price in $, Freight in $
                       _buildRow([
                         _buildField('Container Capacity', controller.containerCapacityController),
-                        _buildField('FOB Price in PKR', controller.fobPricePKRController),
+                        _buildCalculatedField('FOB Price in PKR', controller.fobPricePKRController),
                         _buildField('Rate of Exchange', controller.rateOfExchangeController),
                         _buildCalculatedField('FOB Price in \$', controller.fobPriceDollarController),
                         _buildField('Freight in \$', controller.freightInDollarController),
@@ -172,7 +172,7 @@ class ExportGreyPage extends StatelessWidget {
                       // Row 6: Freight Calculation in $, C & F Price in $, Commission, Port
                       _buildRow([
                         _buildCalculatedField('Freight Calculation in \$', controller.freightCalculationController),
-                        _buildField('C & F Price in \$', controller.cfPriceController),
+                        _buildCalculatedField('C & F Price in \$', controller.cfPriceController),
                         _buildField('Commission', controller.commissionController),
                         _buildField('Port', controller.portController, isNumeric: false),
                       ]),

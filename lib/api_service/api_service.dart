@@ -413,19 +413,6 @@ class ApiService {
     required String fabricType,
   }) async {
 
-
-
-
-
-
-
-
-
-
-
-
-
-    
     try {
       final response = await _dio.post(
         'myQuotations',
