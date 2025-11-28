@@ -423,7 +423,7 @@ class ApiService {
         }),
       );
        return _parseResponse(response);
-    } on DioException catch (error) {
+    } on DioException catch (error) {          
       throw ApiException(
         error.response?.data is Map<String, dynamic>
             ? (error.response!.data['message']?.toString() ??
@@ -508,7 +508,7 @@ class ApiService {
     return {'status': null, 'message': 'Unexpected response from server'};
   }
 
-  bool _isSuccessStatus(dynamic status) {
+  bool _isSuccessStatus(dynamic status) {  
     if (status == null) return false;
     if (status is int) return status == 200;
 

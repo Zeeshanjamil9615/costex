@@ -21,7 +21,7 @@ class UserQuotationController extends GetxController {
   final ApiService _apiService = ApiService();
   final SessionService _session = SessionService.instance;
 
-  final RxString selectedFabricType = ''.obs;
+  final RxString selectedFabricType = 'All'.obs;
   final RxString selectedUser = ''.obs;
   final RxList<Quotation> allQuotations = <Quotation>[].obs;
   final RxList<Quotation> filteredQuotations = <Quotation>[].obs;
@@ -32,7 +32,6 @@ class UserQuotationController extends GetxController {
   final RxList<UserOption> userOptions = <UserOption>[].obs;
 
   final List<String> fabricTypes = const [
-    'Choose Type',
     'Grey Fabric',
     'Export Grey Fabric',
     'Export Processed Fabric',

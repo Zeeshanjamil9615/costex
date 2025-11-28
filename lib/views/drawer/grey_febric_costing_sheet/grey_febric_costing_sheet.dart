@@ -375,7 +375,7 @@ class GreyFabricCostingScreen extends StatelessWidget {
 
     final mapping = <String, TextEditingController>{
       'warpCount': controller.warpCountController,
-      'weftCount': controller.weftCountController,
+      'weftCount': controller.weftCountController, 
       'reeds': controller.reedsController,
       'picks': controller.picksController,
       'greyWidth': controller.greyWidthController,

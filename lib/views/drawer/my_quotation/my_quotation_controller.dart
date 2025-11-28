@@ -27,11 +27,13 @@ class Quotation {
 }
 
 class QuotationsController extends GetxController {
+  static const String allFabricType = 'All';
+
   final ApiService _apiService = ApiService();
   final SessionService _session = SessionService.instance;
 
   // Selected fabric type
-  final RxString selectedFabricType = ''.obs;
+  final RxString selectedFabricType = allFabricType.obs;
   
   // All quotations
   final RxList<Quotation> allQuotations = <Quotation>[].obs;
@@ -46,8 +48,8 @@ class QuotationsController extends GetxController {
   final RxBool isLoading = false.obs;
   
   // Available fabric types
-  final List<String> fabricTypes = [
-    'Choose Type',
+  final List<String> fabricTypes = const [
+    allFabricType,
     'Grey Fabric',
     'Export Grey Fabric',
     'Export Processed Fabric',
@@ -63,19 +65,30 @@ class QuotationsController extends GetxController {
     ever(searchQuery, (_) => filterQuotations());
   }
 
-  void updateFabricType(String? type) {
-    if (type != null && type != 'Choose Type') {
-      selectedFabricType.value = type;
-    } else {
-      selectedFabricType.value = '';
-    }
+  @override
+  void onReady() {
+    super.onReady();
+    fetchQuotations();
   }
 
+  void updateFabricType(String? type) {
+    if (type == null || type.isEmpty) {
+      selectedFabricType.value = allFabricType;
+      return;
+    }
+    selectedFabricType.value = type;
+  }
+
+  bool get _isAllSelected => selectedFabricType.value == allFabricType;
+
+  bool get isFilterActive =>
+      !_isAllSelected || searchQuery.value.isNotEmpty;
+
   void filterQuotations() {
-    List<Quotation> filtered = allQuotations;
+    List<Quotation> filtered = List<Quotation>.from(allQuotations);
     
     // Filter by fabric type
-    if (selectedFabricType.value.isNotEmpty) {
+    if (selectedFabricType.value.isNotEmpty && !_isAllSelected) {
       filtered = filtered
           .where((q) => q.fabricType == selectedFabricType.value)
           .toList();
@@ -102,19 +115,6 @@ class QuotationsController extends GetxController {
   }
 
   Future<void> fetchQuotations() async {
-    if (selectedFabricType.value.isEmpty) {
-      Get.snackbar(
-        'Selection Required',
-        'Please select a fabric type first',
-        backgroundColor: const Color(0xFFFF5722),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 8,
-      );
-      return;
-    }
-
     final companyId = _session.companyId;
     if (companyId == null) {
       Get.snackbar(
@@ -147,7 +147,7 @@ class QuotationsController extends GetxController {
             .toList();
 
         allQuotations.value = parsed;
-        filteredQuotations.value = parsed;
+        filterQuotations();
 
         if (parsed.isEmpty) {
           Get.snackbar(
@@ -187,9 +187,8 @@ class QuotationsController extends GetxController {
   }
 
   void resetFilter() {
-    selectedFabricType.value = '';
+    selectedFabricType.value = allFabricType;
     searchQuery.value = '';
-    filteredQuotations.value = allQuotations;
   }
 
   Quotation _mapRecordToQuotation(
@@ -203,6 +202,8 @@ class QuotationsController extends GetxController {
         record['created_at']?.toString() ??
         '-';
 
+    final resolvedFabricType = _inferFabricType(record, fabricType);
+
     final Map<String, dynamic> details = {
       ...record,
       if (tableName != null) 'table': tableName,
@@ -211,7 +212,7 @@ class QuotationsController extends GetxController {
 
     return Quotation(
       id: int.tryParse(idValue) ?? 0,
-      fabricType: fabricType,
+      fabricType: resolvedFabricType,
       quotationNo: idValue.isNotEmpty ? 'QT-$idValue' : '-',
       dated: timestamp,
       customerName: record['customer_name']?.toString() ?? '-',
@@ -300,5 +301,40 @@ class QuotationsController extends GetxController {
     }
 
     return aliases;
+  }
+
+  String _inferFabricType(Map<String, dynamic> record, String requestedType) {
+    final fallback = (requestedType.isEmpty || requestedType == allFabricType)
+        ? 'Grey Fabric'
+        : requestedType;
+
+    final keys = record.keys
+        .map((key) => key.toString().toLowerCase())
+        .toSet();
+
+    bool containsAny(Iterable<String> options) =>
+        options.any((option) => keys.contains(option));
+
+    if (containsAny(['pile', 'towel', 'bathrobe_one', 'bathrobe_two'])) {
+      return 'Towel Costing Sheet';
+    }
+
+    if (containsAny(['warp_counts', 'weft_counts', 'all_product_names', 'all_sizes_1'])) {
+      return 'Export Multi Madeups Fabric';
+    }
+
+    if (containsAny(['product_name', 'product_size', 'top_product_names']) &&
+        !containsAny(['warp_counts', 'all_product_names'])) {
+      return 'Export Madeups Fabric';
+    }
+
+    if (containsAny(['finish_width', 'process_type', 'fob_price_pkr', 'fob_price_dollar'])) {
+      if (containsAny(['process_inch', 'process_charges', 'finish_fabric_cost', 'finish_fabric_price'])) {
+        return 'Export Processed Fabric';
+      }
+      return 'Export Grey Fabric';
+    }
+
+    return fallback;
   }
 }

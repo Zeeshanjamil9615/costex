@@ -114,9 +114,7 @@ class MyQuotationsPage extends StatelessWidget {
                         ),
                       ),
                       Obx(() => DropdownButtonFormField<String>(
-                            value: controller.selectedFabricType.value.isEmpty
-                                ? 'Choose Type'
-                                : controller.selectedFabricType.value,
+                            value: controller.selectedFabricType.value,
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.symmetric(
                                 horizontal: 12,
@@ -205,7 +203,7 @@ class MyQuotationsPage extends StatelessWidget {
                                 color: AppColors.textPrimary,
                               ),
                             ),
-                            Obx(() => controller.selectedFabricType.value.isNotEmpty
+                            Obx(() => controller.isFilterActive
                                 ? TextButton.icon(
                                     onPressed: controller.resetFilter,
                                     icon: const Icon(Icons.clear, size: 16),
@@ -308,7 +306,8 @@ class MyQuotationsPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Select a fabric type to view records',
+                                'Tap "Find Records" or adjust the filters above to search again.',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey[500],
@@ -436,20 +435,22 @@ class MyQuotationsPage extends StatelessWidget {
           // Content
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _buildDetailRow('Quotation No.', quotation.quotationNo),
-                const Divider(height: 24),
-                _buildDetailRow('Date', quotation.dated),
-                const Divider(height: 24),
-                _buildDetailRow('Username', quotation.username),
-                const Divider(height: 24),
-                _buildDetailRow('Customer Name', quotation.customerName),
-                const Divider(height: 24),
-                _buildDetailRow('Type', quotation.fabricType),
-                const Divider(height: 24),
-                _buildDetailRow('Quality', quotation.quality),
-              ],
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDetailRow('Quotation No.', quotation.quotationNo),
+                  const SizedBox(width: 10),
+                  _buildDetailRow('Customer Name', quotation.customerName),
+                  const SizedBox(width: 10),
+                  _buildDetailRow('Type', quotation.fabricType),
+                  const SizedBox(width: 10),
+                  _buildDetailRow('Date', quotation.dated),
+
+
+                ],
+              ),
             ),
           ),
         ],
@@ -458,29 +459,23 @@ class MyQuotationsPage extends StatelessWidget {
   }
 
   Widget _buildDetailRow(String label, String value) {
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        Expanded(
-          flex: 3,
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w500,
-            ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],

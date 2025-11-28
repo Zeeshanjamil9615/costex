@@ -453,52 +453,48 @@ Widget _buildQuotationCard(mq.Quotation quotation, int index) {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              _buildDetailRow('Quotation No.', quotation.quotationNo),
-              const Divider(height: 24),
-              _buildDetailRow('Date', quotation.dated),
-              const Divider(height: 24),
-              _buildDetailRow('Username', quotation.username),
-              const Divider(height: 24),
-              _buildDetailRow('Customer Name', quotation.customerName),
-              const Divider(height: 24),
-              _buildDetailRow('Type', quotation.fabricType),
-              const Divider(height: 24),
-              _buildDetailRow('Quality', quotation.quality),
-            ],
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDetailRow('Quotation No.', quotation.quotationNo),
+                  const SizedBox(width: 10),
+                  _buildDetailRow('Customer Name', quotation.customerName),
+                  const SizedBox(width: 10),
+                  _buildDetailRow('Type', quotation.fabricType),
+                  const SizedBox(width: 10),
+                  _buildDetailRow('Date', quotation.dated),
+
+
+                ],
+              ),
+            ),
           ),
-        ),
       ],
     ),
   );
 }
 
 Widget _buildDetailRow(String label, String value) {
-  return Row(
+  return Column (
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Expanded(
-        flex: 2,
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w600,
-          ),
+      Text(
+        value,
+        style: const TextStyle(
+          fontSize: 14,
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w500,
         ),
       ),
-      Expanded(
-        flex: 3,
-        child: Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w500,
-          ),
+      Text(
+        label,
+        style: const TextStyle(
+          fontSize: 13,
+          color: AppColors.textSecondary,
+          fontWeight: FontWeight.w600,
         ),
       ),
     ],
