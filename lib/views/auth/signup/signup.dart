@@ -11,7 +11,8 @@ class SignupPage extends StatelessWidget {
     final SignupController controller = Get.put(SignupController());
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+           backgroundColor: Colors.white,
+
       body: SafeArea(
         child: Stack(
           children: [
@@ -19,9 +20,7 @@ class SignupPage extends StatelessWidget {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFFF6F7FB), Color(0xFFE3F2FD)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  colors: [Colors.white, Colors.white],
                 ),
               ),
             ),
@@ -34,33 +33,61 @@ class SignupPage extends StatelessWidget {
                     // Big logo and app name
                     Column(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(24),
+                         Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/applogo.png',
+                      height:100,
+                      width: 100,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: AppColors.primary,
                             shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.18),
-                                blurRadius: 36,
-                                spreadRadius: 4,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
                           ),
                           child: const Icon(
                             Icons.business,
-                            size: 54,
+                            size: 28,
                             color: Colors.white,
                           ),
-                        ),
+                        );
+                      },
+                    ),
+                    // Language Selector
+                    // DropdownButton<String>(
+                    //   value: 'EN',
+                    //   underline: const SizedBox(),
+                    //   items: const [
+                    //     DropdownMenuItem(
+                    //       value: 'EN',
+                    //       child: Text(
+                    //         'EN',
+                    //         style: TextStyle(
+                    //           fontSize: 14,
+                    //           color: Colors.black87,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    //   onChanged: (value) {},
+                    //   icon: const Icon(
+                    //     Icons.arrow_drop_down,
+                    //     size: 20,
+                    //     color: Colors.black87,
+                    //   ),
+                    // ),
+                  ],
+                ),
+             
                         const SizedBox(height: 18),
                         const Text(
                           'COSTEX',
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
+                            color: AppColors.darkBackground,
                             letterSpacing: 4,
                           ),
                         ),
@@ -136,6 +163,15 @@ class SignupPage extends StatelessWidget {
                                 controller: controller.companyPhoneController,
                                 keyboardType: TextInputType.phone,
                                 validator: controller.validateCompanyPhone,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Username Field
+                              _buildTextField(
+                                label: 'Username',
+                                hintText: 'Username',
+                                controller: controller.usernameController,
+                                validator: controller.validateUsername,
                               ),
                               const SizedBox(height: 16),
 

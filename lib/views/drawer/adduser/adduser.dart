@@ -95,7 +95,7 @@ class AddUserPage extends StatelessWidget {
                   key: controller.formKey,
                   child: Column(
                     children: [
-                      // Row 1: Full Name, Email, Address
+                      // Row 1: Full Name, Username, Email
                       _buildResponsiveRow([
                         Expanded(
                           child: CustomTextField(
@@ -108,6 +108,16 @@ class AddUserPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
+                          child: CustomTextField(
+                            label: 'Username',
+                            hintText: 'Enter Username',
+                            controller: controller.usernameController,
+                            required: true,
+                            validator: controller.validateUsername,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
                           child: HighlightedTextField(
                             label: 'Email',
                             controller: controller.emailController,
@@ -116,7 +126,12 @@ class AddUserPage extends StatelessWidget {
                             validator: controller.validateEmail,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                      ]),
+
+                      const SizedBox(height: 20),
+
+                      // Row 1.5: Address
+                      _buildResponsiveRow([
                         Expanded(
                           child: CustomTextField(
                             label: 'Address',
@@ -126,6 +141,7 @@ class AddUserPage extends StatelessWidget {
                             validator: controller.validateAddress,
                           ),
                         ),
+                        const Expanded(flex: 2, child: SizedBox()),
                       ]),
 
                       const SizedBox(height: 20),
@@ -166,7 +182,7 @@ class AddUserPage extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // Row 3: Password (single field)
+                      // Row 3: Password and Status
                       _buildResponsiveRow([
                         Expanded(
                           flex: 1,
@@ -178,7 +194,12 @@ class AddUserPage extends StatelessWidget {
                             validator: controller.validatePassword,
                           ),
                         ),
-                        const Expanded(flex: 2, child: SizedBox()),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          flex: 1,
+                          child: _buildStatusDropdown(controller),
+                        ),
+                        const Expanded(flex: 1, child: SizedBox()),
                       ]),
 
                       const SizedBox(height: 32),
@@ -270,6 +291,78 @@ class AddUserPage extends StatelessWidget {
         // Tablet/Desktop: horizontal row
         return Row(children: children);
       },
+    );
+  }
+
+  Widget _buildStatusDropdown(AddUserController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RichText(
+          text: const TextSpan(
+            text: 'Status',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            children: [
+              TextSpan(
+                text: '*',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontSize: 14,
+                ),
+              ),
+              TextSpan(
+                text: ' :',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Obx(() => Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: DropdownButtonFormField<int>(
+                value: controller.status.value,
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+                items: const [
+                  DropdownMenuItem<int>(
+                    value: 0,
+                    child: Text('Deactive'),
+                  ),
+                  DropdownMenuItem<int>(
+                    value: 1,
+                    child: Text('Active'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    controller.status.value = value;
+                  }
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select status';
+                  }
+                  return null;
+                },
+              ),
+            )),
+      ],
     );
   }
 }

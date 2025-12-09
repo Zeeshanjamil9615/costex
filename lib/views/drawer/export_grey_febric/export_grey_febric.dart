@@ -112,77 +112,137 @@ class ExportGreyPage extends StatelessWidget {
                         label: 'Customer Name',
                         hintText: 'Customer Name',
                         controller: controller.customerNameController,
+                        readOnly: viewMode,
                       ),
                       const SizedBox(height: 20),
 
-                      // Row 1: Quality, Warp Count, Weft Count, Reeds, Picks, Grey Width
+                      // Quality (Full Width)
+                      CustomTextField(
+                        label: 'Quality',
+                        hintText: 'Quality',
+                        controller: controller.qualityController,
+                        readOnly: viewMode,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Row 1: Warp Count, Weft Count
                       _buildRow([
-                        _buildField('Quality', controller.qualityController),
                         _buildField('Warp Count', controller.warpCountController),
                         _buildField('Weft Count', controller.weftCountController),
+                      ]),
+                      const SizedBox(height: 20),
+                      _buildRow([
                         _buildField('Reeds', controller.reedsController),
                         _buildField('Picks', controller.picksController),
+                      ]),
+                      const SizedBox(height: 20),
+
+                      // Row 2: Grey Width
+                      _buildRow([
                         _buildField('Grey Width', controller.greyWidthController),
                       ]),
                       const SizedBox(height: 20),
-
-                      // Row 2: P/C Ratio, Loom, Weave, Warp Rate/Lbs, Weft Rate/Lbs, Coversion/Pick
                       _buildRow([
-                        _buildField('P/C Ratio', controller.pcRatioController),
-                        _buildField('Loom', controller.loomController),
-                        _buildField('Weave', controller.weaveController),
-                        _buildField('Warp Rate/Lbs', controller.warpRateController),
-                        _buildField('Weft Rate/Lbs', controller.weftRateController),
-                        _buildField('Coversion/Pick', controller.coversionPickController),
+                        _buildField('P/C Ratio', controller.pcRatioController, isNumeric: false),
+                        _buildField('Loom', controller.loomController, isNumeric: false),
                       ]),
                       const SizedBox(height: 20),
 
-                      // Row 3: Warp Weight, Weft Weight, Total Weight, Warp Price, Weft Price, Coversion Charges
+                      // Row 3: Weave
+                      _buildRow([
+                        _buildField('Weave', controller.weaveController, isNumeric: false),
+                      ]),
+                      const SizedBox(height: 20),
+
+                      // Row 4: Warp Rate/Lbs, Weft Rate/Lbs
+                      _buildRow([
+                        _buildField('Warp Rate/Lbs', controller.warpRateController),
+                        _buildField('Weft Rate/Lbs', controller.weftRateController),
+                      ]),
+                      const SizedBox(height: 20),
+                      _buildRow([
+                        _buildField('Coversion/Picks', controller.coversionPickController),
+                      ]),
+                      const SizedBox(height: 20),
+
+                      // Row 5: Warp Weight, Weft Weight
                       _buildRow([
                         _buildCalculatedField('Warp Weight', controller.warpWeightController),
                         _buildCalculatedField('Weft Weight', controller.weftWeightController),
+                      ]),
+                      const SizedBox(height: 20),
+                      // Total Weight in separate row
+                      _buildRow([
                         _buildCalculatedField('Total Weight', controller.totalWeightController),
+                      ]),
+                      const SizedBox(height: 20),
+
+                      // Row 6: Warp Price, Weft Price, Coversion Charges
+                      _buildRow([
                         _buildCalculatedField('Warp Price', controller.warpPriceController),
                         _buildCalculatedField('Weft Price', controller.weftPriceController),
-                        _buildCalculatedField('Coversion Charges', controller.coversionChargesController),
                       ]),
                       const SizedBox(height: 20),
 
-                      // Row 4: Grey Fabric Price, Mending/MT, Packing Type, Packing Charges/MT, Wastage %, Container Size
+                       _buildRow([
+                                                _buildCalculatedField('Coversion Charges', controller.coversionChargesController),
+
+                      ]),
+                      const SizedBox(height: 20),
+
+
+                      // Row 7: Grey Fabric Price, Profit %, Fabric Price Final (using FOB Price Final as equivalent)
                       _buildRow([
                         _buildCalculatedField('Grey Fabric Price', controller.greyFabricPriceController),
-                        _buildField('Mending/MT', controller.mendingMTController),
-                        _buildField('Packing Type', controller.packingTypeController, isNumeric: false),
-                        _buildField('Packing Charges/MT', controller.packingChargesController),
-                        _buildField('Wastage %', controller.wastageController),
-                        _buildField('Container Size', controller.containerSizeController, isNumeric: false),
+                        _buildField('Profit %', controller.profitPercentController),
+                        
                       ]),
                       const SizedBox(height: 20),
 
-                      // Row 5: Container Capacity, FOB Price in PKR, Rate of Exchange, FOB Price in $, Freight in $
+                       _buildRow([
+                       _buildCalculatedField('FOB Price Final', controller.fobPriceFinalController),
+                      ]),
+
+                      const SizedBox(height: 20),
+
+                      // Additional Export-specific fields
                       _buildRow([
+                        _buildField('Mending/MT', controller.mendingMTController),
+                        _buildField('Packing Type', controller.packingTypeController, isNumeric: false),
+                      ]),
+                      const SizedBox(height: 20),
+                      _buildRow([
+                        _buildField('Packing Charges/MT', controller.packingChargesController),
+                        _buildField('Wastage %', controller.wastageController),
+                      ]),
+                      const SizedBox(height: 20),
+                      _buildRow([
+                        _buildField('Container Size', controller.containerSizeController, isNumeric: false),
                         _buildField('Container Capacity', controller.containerCapacityController),
+                      ]),
+                      const SizedBox(height: 20),
+                      _buildRow([
                         _buildCalculatedField('FOB Price in PKR', controller.fobPricePKRController),
                         _buildField('Rate of Exchange', controller.rateOfExchangeController),
+                      ]),
+                      const SizedBox(height: 20),
+                      _buildRow([
                         _buildCalculatedField('FOB Price in \$', controller.fobPriceDollarController),
                         _buildField('Freight in \$', controller.freightInDollarController),
                       ]),
                       const SizedBox(height: 20),
-
-                      // Row 6: Freight Calculation in $, C & F Price in $, Commission, Port
                       _buildRow([
                         _buildCalculatedField('Freight Calculation in \$', controller.freightCalculationController),
                         _buildCalculatedField('C & F Price in \$', controller.cfPriceController),
+                      ]),
+                      const SizedBox(height: 20),
+                      _buildRow([
                         _buildField('Commission', controller.commissionController),
                         _buildField('Port', controller.portController, isNumeric: false),
                       ]),
                       const SizedBox(height: 20),
-
-                      // Row 7: Profit %, OverHead %, FOB Price Final, C & F Price Final
                       _buildRow([
-                        _buildField('Profit %', controller.profitPercentController),
                         _buildField('OverHead %', controller.overheadPercentController),
-                        _buildCalculatedField('FOB Price Final', controller.fobPriceFinalController),
                         _buildCalculatedField('C & F Price Final', controller.cfPriceFinalController),
                       ]),
                       const SizedBox(height: 32),
@@ -264,42 +324,60 @@ class ExportGreyPage extends StatelessWidget {
   Widget _buildRow(List<Widget> children) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        // On mobile/tablet narrow width, arrange according to widget type:
+        // - Input widgets should be two-per-row
+        // - Calculated fields can be displayed side-by-side when multiple in a row
         final isNarrow = constraints.maxWidth < 1000;
 
         List<Widget> buildStacked() {
           final rows = <Widget>[];
           final inputsBuffer = <Widget>[];
 
-          void flushInputs() {
+          void flushInputsBuffer() {
             if (inputsBuffer.isEmpty) return;
-          for (var i = 0; i < inputsBuffer.length; i += 2) {
-            final first = inputsBuffer[i];
-            final second = (i + 1) < inputsBuffer.length ? inputsBuffer[i + 1] : null;
-            if (second != null) {
-              rows.add(Row(children: [
-                Expanded(child: first),
-                const SizedBox(width: 16),
-                Expanded(child: second),
-              ]));
+            // For 2 items: pair them side-by-side
+            // For 3 items: display all 3 side-by-side
+            // For 1 item: full width
+            if (inputsBuffer.length == 1) {
+              rows.add(Row(children: [Expanded(child: inputsBuffer[0])]));
+            } else if (inputsBuffer.length == 2) {
+              rows.add(Row(
+                children: [
+                  Expanded(child: inputsBuffer[0]),
+                  const SizedBox(width: 16),
+                  Expanded(child: inputsBuffer[1]),
+                ],
+              ));
             } else {
-              rows.add(Row(children: [Expanded(child: first)]));
+              // 3 or more items: display all side-by-side
+              rows.add(Row(
+                children: inputsBuffer
+                    .asMap()
+                    .entries
+                    .map((entry) => Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: entry.key < inputsBuffer.length - 1 ? 16 : 0),
+                            child: entry.value,
+                          ),
+                        ))
+                    .toList(),
+              ));
             }
             rows.add(const SizedBox(height: 16));
-          }
             inputsBuffer.clear();
           }
 
           for (final child in children) {
-            final isReadOnly = child is HighlightedNumericTextField || child is SizedBox && child.key != null;
-            if (isReadOnly) {
-              flushInputs();
-              rows.add(child);
-              rows.add(const SizedBox(height: 16));
+            // Only treat SizedBox.shrink() as a special case (empty space)
+            if (child is SizedBox && child.key != null) {
+              // Skip empty space widgets
+              continue;
             } else {
               inputsBuffer.add(child);
             }
           }
-          flushInputs();
+          // flush remaining inputs
+          flushInputsBuffer();
           if (rows.isNotEmpty) rows.removeLast();
           return rows;
         }
@@ -308,35 +386,51 @@ class ExportGreyPage extends StatelessWidget {
           return Column(children: buildStacked());
         }
 
-        // Wide: use pairing for inputs, read-only spans full width
-        final widgets = <Widget>[];
-        final inputs = <Widget>[];
-
-        void flushWide() {
-          if (inputs.isEmpty) return;
-          if (inputs.length == 1) {
-            widgets.add(Row(children: [Expanded(child: Padding(padding: const EdgeInsets.only(right: 0), child: inputs[0]))]));
-          } else {
-            widgets.add(Row(children: inputs.map((w) => Expanded(child: Padding(padding: const EdgeInsets.only(right: 16), child: w))).toList()));
-          }
-          widgets.add(const SizedBox(height: 16));
-          inputs.clear();
+        // On wide screens: show all widgets side-by-side based on count
+        if (children.isEmpty) return const SizedBox.shrink();
+        
+        // Filter out SizedBox.shrink() widgets
+        final filteredChildren = children.where((child) => !(child is SizedBox && child.key != null)).toList();
+        
+        if (filteredChildren.isEmpty) return const SizedBox.shrink();
+        
+        if (filteredChildren.length == 1) {
+          return Column(
+            children: [
+              Row(children: [Expanded(child: filteredChildren[0])]),
+            ],
+          );
+        } else if (filteredChildren.length == 2) {
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: filteredChildren[0]),
+                  const SizedBox(width: 16),
+                  Expanded(child: filteredChildren[1]),
+                ],
+              ),
+            ],
+          );
+        } else {
+          // 3 or more items: display all side-by-side
+          return Column(
+            children: [
+              Row(
+                children: filteredChildren
+                    .asMap()
+                    .entries
+                    .map((entry) => Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: entry.key < filteredChildren.length - 1 ? 16 : 0),
+                            child: entry.value,
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ],
+          );
         }
-
-        for (final child in children) {
-          final isReadOnly = child is HighlightedNumericTextField || child is SizedBox && child.key != null;
-          if (isReadOnly) {
-            flushWide();
-            widgets.add(child);
-            widgets.add(const SizedBox(height: 16));
-          } else {
-            inputs.add(child);
-            if (inputs.length == 2) flushWide();
-          }
-        }
-        flushWide();
-        if (widgets.isNotEmpty) widgets.removeLast();
-        return Column(children: widgets);
       },
     );
   }

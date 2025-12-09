@@ -24,7 +24,7 @@ class ApiService {
               ),
             );
 
-  static const String _baseUrl = 'https://yarnonline.pk/costex/company/api/';
+  static const String _baseUrl = 'https://costex.pk/company/api/';
 
   final Dio _dio;
 
@@ -32,6 +32,7 @@ class ApiService {
     required String companyName,
     required String address,
     required String phoneNumber,
+    required String username,
     required String email,
     required String password,
     required String confirmPassword,
@@ -43,6 +44,7 @@ class ApiService {
           'company_name': companyName,
           'address': address,
           'phone_no': phoneNumber,
+          'username': username,
           'email_address': email,
           'password': password,
           'confirm_password': confirmPassword,
@@ -69,7 +71,7 @@ class ApiService {
       final response = await _dio.post(
         'registerVerify',
         data: FormData.fromMap({
-          'email_address': email,
+          'email_address': email,    
           'otp': otp,
         }),
       );
@@ -114,12 +116,14 @@ class ApiService {
     required String companyId,
     required String companyName,
     required String fullName,
+    required String username,
     required String email,
     required String address,
     required String departmentName,
     required String designation,
     required String cellNumber,
     required String password,
+    required int status,
   }) async {
     try {
       final response = await _dio.post(
@@ -128,12 +132,14 @@ class ApiService {
           'company_id': companyId,
           'company_name': companyName,
           'full_name': fullName,
+          'username': username,
           'email_address': email,
           'address': address,
           'dept_name': departmentName,
           'designation': designation,
           'password': password,
           'cell_number': cellNumber,
+          'status': status,
         }),
       );
       return _parseResponse(response);
@@ -179,12 +185,14 @@ class ApiService {
   Future<Map<String, dynamic>> updateUser({
     required String userId,
     required String fullName,
+    required String username,
     required String cellNumber,
     required String address,
     required String email,
     required String departmentName,
     required String designation,
     required String password,
+    required int status,
   }) async {
     try {
       final response = await _dio.post(
@@ -192,12 +200,14 @@ class ApiService {
         data: FormData.fromMap({
           'user_id': userId,
           'full_name': fullName,
+          'username': username,
           'cell_number': cellNumber,
           'address': address,
           'email_address': email,
           'department_name': departmentName,
           'designation_no': designation,
           'password': password,
+          'status': status,
         }),
       );
 

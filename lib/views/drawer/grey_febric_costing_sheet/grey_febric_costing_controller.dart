@@ -255,7 +255,8 @@ class GreyFabricCostingController extends GetxController {
     }
   }
 
-  Future<void> generatePDF() async {
+  Future<void> 
+  generatePDF() async {
     if (customerName.value.isEmpty) {
       Get.snackbar(
         'Error',
@@ -267,32 +268,64 @@ class GreyFabricCostingController extends GetxController {
       return;
     }
 
-    // Build rows for PDF including inputs and computed values
-    final rows = <List<String>>[];
-    rows.addAll([
-      ['Customer', customerNameController.text],
-      ['Quality', qualityController.text],
-      ['Warp Count', warpCountController.text],
-      ['Weft Count', weftCountController.text],
-      ['Reeds', reedsController.text],
-      ['Picks', picksController.text],
-      ['Grey Width', greyWidthController.text],
-      ['P/C Ratio', pcRatioController.text],
-      ['Loom', loomController.text],
-      ['Weave', weaveController.text],
-      ['Warp Rate', warpRateController.text],
-      ['Weft Rate', weftRateController.text],
-      ['Conversion/Picks', coversionPicksController.text],
-      ['Profit %', profitPercentController.text],
-      ['Warp Weight', warpWeight.toStringAsFixed(4)],
-      ['Weft Weight', weftWeight.toStringAsFixed(4)],
-      ['Total Weight', totalWeight.toStringAsFixed(4)],
-      ['Warp Price', warpPrice.toStringAsFixed(4)],
-      ['Weft Price', weftPrice.toStringAsFixed(4)],
-      ['Conversion Charges', coversionCharges.toStringAsFixed(4)],
-      ['Grey Fabric Price', greyFabricPrice.toStringAsFixed(4)],
-      ['Final Fabric Price', fabricPriceFinal.toStringAsFixed(4)],
-    ]);
+    // Build table rows matching the on-screen layout
+    final rows = <List<List<String>>>[
+      [
+        ['Customer Name', customerNameController.text],
+      ],
+      [
+        ['Quality', qualityController.text],
+      ],
+      [
+        ['Warp Count', warpCountController.text],
+        ['Weft Count', weftCountController.text],
+      ],
+      [
+        ['Reeds', reedsController.text],
+
+        ['Picks', picksController.text],
+      ],
+      [
+        ['Grey Width', greyWidthController.text],
+
+      ],
+      [
+        ['P/C Ratio', pcRatioController.text],
+        ['Loom', loomController.text],
+
+
+      ],
+      [
+        ['Weave', weaveController.text],
+      ],
+      [
+        ['Warp Rate/Lbs', warpRateController.text],
+
+        ['Weft Rate/Lbs', weftRateController.text],
+      ],
+      [
+        ['Conversion/Picks', coversionPicksController.text],
+
+      ],
+      [
+        ['Warp Weight', warpWeight.toStringAsFixed(4)],
+        ['Weft Weight', weftWeight.toStringAsFixed(4)],
+        ['Total Weight', totalWeight.toStringAsFixed(4)],
+      ],
+      [
+        ['Warp Price', warpPrice.toStringAsFixed(4)],
+        ['Weft Price', weftPrice.toStringAsFixed(4)],
+      ],
+      [
+        ['Conversion Charges', coversionCharges.toStringAsFixed(4)],
+
+      ],
+      [
+        ['Grey Fabric Price', greyFabricPrice.toStringAsFixed(4)],
+        ['Profit %', profitPercentController.text],
+        ['Fabric Price Final', fabricPriceFinal.toStringAsFixed(4)],
+      ],
+    ];
 
     // Use the printing utility to print directly and await completion
     final pages = [ {'title': 'Grey Fabric Costing', 'rows': rows} ];

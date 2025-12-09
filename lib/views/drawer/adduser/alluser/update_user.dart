@@ -100,6 +100,22 @@ class ManageUserPage extends StatelessWidget {
                     const SizedBox(height: 20),
                     
                     CustomTextField(
+                      label: 'Username',
+                      controller: controller.usernameController,
+                      required: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter username';
+                        }
+                        if (value.length < 3) {
+                          return 'Username must be at least 3 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    CustomTextField(
                       label: 'Email',
                       controller: controller.emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -184,6 +200,9 @@ class ManageUserPage extends StatelessWidget {
                         return null;
                       },
                     ),
+                    const SizedBox(height: 20),
+                    
+                    _buildStatusDropdown(controller),
                     const SizedBox(height: 32),
                     
                     // Action Buttons
@@ -230,6 +249,78 @@ class ManageUserPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStatusDropdown(ManageUserController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RichText(
+          text: const TextSpan(
+            text: 'Status',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            children: [
+              TextSpan(
+                text: '*',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontSize: 14,
+                ),
+              ),
+              TextSpan(
+                text: ' :',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Obx(() => Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: DropdownButtonFormField<int>(
+                value: controller.status.value,
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+                items: const [
+                  DropdownMenuItem<int>(
+                    value: 0,
+                    child: Text('Deactive'),
+                  ),
+                  DropdownMenuItem<int>(
+                    value: 1,
+                    child: Text('Active'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    controller.status.value = value;
+                  }
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select status';
+                  }
+                  return null;
+                },
+              ),
+            )),
+      ],
     );
   }
 

@@ -125,31 +125,44 @@ class GreyFabricCostingScreen extends StatelessWidget {
                     _buildRow([
                       _buildField('Warp Count', controller.warpCountController),
                       _buildField('Weft Count', controller.weftCountController),
+                    ]),
+                    const SizedBox(height: 20),
+                      _buildRow([
                       _buildField('Reeds', controller.reedsController),
+                      _buildField('Picks', controller.picksController),
+
                     ]),
                     const SizedBox(height: 20),
 
                     // Row 2: Picks, Grey Width, P/C Ratio
                     _buildRow([
-                      _buildField('Picks', controller.picksController),
                       _buildField('Grey Width', controller.greyWidthController),
+                    ]),
+                    const SizedBox(height: 20),
+                    _buildRow([
                       _buildField('P/C Ratio', controller.pcRatioController, isNumeric: false),
+                      _buildField('Loom', controller.loomController, isNumeric: false),
+
                     ]),
                     const SizedBox(height: 20),
 
                     // Row 3: Loom, Weave, Warp Rate/Lbs
                     _buildRow([
-                      _buildField('Loom', controller.loomController, isNumeric: false),
                       _buildField('Weave', controller.weaveController, isNumeric: false),
-                      _buildField('Warp Rate/Lbs', controller.warpRateController),
                     ]),
                     const SizedBox(height: 20),
 
                     // Row 4: Weft Rate/Lbs, Coversion/Picks
                     _buildRow([
+                      _buildField('Warp Rate/Lbs', controller.warpRateController),
+
                       _buildField('Weft Rate/Lbs', controller.weftRateController),
-                      _buildField('Coversion/Picks', controller.coversionPicksController),
                       const SizedBox.shrink(), // Empty space for alignment
+                    ]),
+                    const SizedBox(height: 20),
+                    _buildRow([
+                      _buildField('Coversion/Picks', controller.coversionPicksController),
+
                     ]),
                     const SizedBox(height: 20),
 
@@ -269,7 +282,6 @@ class GreyFabricCostingScreen extends StatelessWidget {
 
           void flushInputsBuffer() {
             if (inputsBuffer.isEmpty) return;
-            // Pair inputs two-per-row
             for (var i = 0; i < inputsBuffer.length; i += 2) {
               final first = inputsBuffer[i];
               final second = (i + 1) < inputsBuffer.length ? inputsBuffer[i + 1] : null;
@@ -282,6 +294,7 @@ class GreyFabricCostingScreen extends StatelessWidget {
                   ],
                 ));
               } else {
+                // single trailing input becomes full width
                 rows.add(Row(children: [Expanded(child: first)]));
               }
               rows.add(const SizedBox(height: 16));
@@ -290,10 +303,9 @@ class GreyFabricCostingScreen extends StatelessWidget {
           }
 
           for (final child in children) {
-            // Treat our highlighted/read-only widgets as full-row items
-            final isReadOnly = child is _ReadOnlyHighlightedField || child is HighlightedNumericTextField || child is SizedBox && child.key != null;
+            final typeName = child.runtimeType.toString();
+            final isReadOnly = child is CustomTextField || typeName.contains('Highlighted') || typeName.contains('ReadOnly') || (child is SizedBox && child.key != null);
             if (isReadOnly) {
-              // flush any buffered inputs first
               flushInputsBuffer();
               rows.add(child);
               rows.add(const SizedBox(height: 16));
@@ -301,7 +313,7 @@ class GreyFabricCostingScreen extends StatelessWidget {
               inputsBuffer.add(child);
             }
           }
-          // flush remaining inputs
+
           flushInputsBuffer();
           if (rows.isNotEmpty) rows.removeLast();
           return rows;
@@ -331,7 +343,8 @@ class GreyFabricCostingScreen extends StatelessWidget {
         }
 
         for (final child in children) {
-          final isReadOnly = child is _ReadOnlyHighlightedField || child is HighlightedNumericTextField || child is SizedBox && child.key != null;
+          final typeName = child.runtimeType.toString();
+          final isReadOnly = child is CustomTextField || typeName.contains('Highlighted') || typeName.contains('ReadOnly') || (child is SizedBox && child.key != null);
           if (isReadOnly) {
             flushWideInputs();
             widgets.add(child);

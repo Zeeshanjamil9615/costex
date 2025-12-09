@@ -12,6 +12,7 @@ class SignupController extends GetxController {
   final companyNameController = TextEditingController();
   final companyAddressController = TextEditingController();
   final companyPhoneController = TextEditingController();
+  final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
@@ -29,6 +30,7 @@ class SignupController extends GetxController {
     companyNameController.dispose();
     companyAddressController.dispose();
     companyPhoneController.dispose();
+    usernameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
@@ -54,6 +56,7 @@ class SignupController extends GetxController {
           companyName: companyNameController.text.trim(),
           address: companyAddressController.text.trim(),
           phoneNumber: companyPhoneController.text.trim(),
+          username: usernameController.text.trim(),
           email: emailController.text.trim(),
           password: passwordController.text,
           confirmPassword: confirmPasswordController.text,
@@ -124,6 +127,16 @@ class SignupController extends GetxController {
     final phoneRegex = RegExp(r'^[\d\s\-\+\(\)]+$');
     if (!phoneRegex.hasMatch(value)) {
       return 'Please enter a valid phone number';
+    }
+    return null;
+  }
+
+  String? validateUsername(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Username is required';
+    }
+    if (value.length < 3) {
+      return 'Username must be at least 3 characters';
     }
     return null;
   }

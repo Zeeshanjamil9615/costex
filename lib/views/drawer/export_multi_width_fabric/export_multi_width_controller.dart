@@ -957,6 +957,76 @@ class MultiMadeupsController extends GetxController
       default: return 0.0;
     }
   }
+
+  TextEditingController _getQualityController(int product) {
+    switch (product) {
+      case 1: return quality1Controller;
+      case 2: return quality2Controller;
+      case 3: return quality3Controller;
+      case 4: return quality4Controller;
+      default: return quality1Controller;
+    }
+  }
+
+  TextEditingController _getLoomController(int product) {
+    switch (product) {
+      case 1: return loom1Controller;
+      case 2: return loom2Controller;
+      case 3: return loom3Controller;
+      case 4: return loom4Controller;
+      default: return loom1Controller;
+    }
+  }
+
+  TextEditingController _getWeaveController(int product) {
+    switch (product) {
+      case 1: return weave1Controller;
+      case 2: return weave2Controller;
+      case 3: return weave3Controller;
+      case 4: return weave4Controller;
+      default: return weave1Controller;
+    }
+  }
+
+  TextEditingController _getProcessingInchController(int product) {
+    switch (product) {
+      case 1: return processinginch1Controller;
+      case 2: return processinginch2Controller;
+      case 3: return processinginch3Controller;
+      case 4: return processinginch4Controller;
+      default: return processinginch1Controller;
+    }
+  }
+
+  TextEditingController _getContainerSizeController(int product) {
+    switch (product) {
+      case 1:
+        return containerSize1Controller;
+      case 2:
+        return containerSize2Controller;
+      case 3:
+        return containerSize3Controller;
+      case 4:
+        return containerSize4Controller;
+      default:
+        return containerSize1Controller;
+    }
+  }
+
+  TextEditingController _getGeneralProductNameController(int product) {
+    switch (product) {
+      case 1:
+        return generalProductName1Controller;
+      case 2:
+        return generalProductName2Controller;
+      case 3:
+        return generalProductName3Controller;
+      case 4:
+        return generalProductName4Controller;
+      default:
+        return generalProductName1Controller;
+    }
+  }
   
   Map<String, double> _getBasicValues(int product) {
     final controllers = _getBasicControllers(product);
@@ -1352,95 +1422,97 @@ class MultiMadeupsController extends GetxController
   Future<void> generatePDF() async {
     try {
       isLoading.value = true;
-      // Build comprehensive page containing all form fields
-      final rows = <List<String>>[];
+      // Build rows in a single-column style so each PDF row matches the sheet row.
+      final rows = <List<List<String>>>[];
 
-      rows.addAll([
-        ['Customer', customerNameController.text],
-        // Basic details per width
-        ['Warp 1', warp1Controller.text],
-        ['Weft 1', weft1Controller.text],
-        ['Reed 1', reed1Controller.text],
-        ['Pick 1', pick1Controller.text],
-        ['Grey Width 1', greyWidth1Controller.text],
-        ['Finish Width 1', finishWidth1Controller.text],
+      void addRow(String label, String value) {
+        rows.add([
+          [label, value],
+        ]);
+      }
 
-        ['Warp 2', warp2Controller.text],
-        ['Weft 2', weft2Controller.text],
-        ['Reed 2', reed2Controller.text],
-        ['Pick 2', pick2Controller.text],
-        ['Grey Width 2', greyWidth2Controller.text],
-        ['Finish Width 2', finishWidth2Controller.text],
+      addRow('Customer Name', customerNameController.text);
 
-        ['Warp 3', warp3Controller.text],
-        ['Weft 3', weft3Controller.text],
-        ['Reed 3', reed3Controller.text],
-        ['Pick 3', pick3Controller.text],
-        ['Grey Width 3', greyWidth3Controller.text],
-        ['Finish Width 3', finishWidth3Controller.text],
+      // Basic details per product (each field its own row, like the cards)
+      for (int i = 1; i <= 4; i++) {
+        addRow('Product $i - Warp', _getBasicControllers(i)[0].text);
+        addRow('Product $i - Weft', _getBasicControllers(i)[1].text);
+        addRow('Product $i - Reed', _getBasicControllers(i)[2].text);
+        addRow('Product $i - Pick', _getBasicControllers(i)[3].text);
+        addRow('Product $i - Grey Width', _getBasicControllers(i)[4].text);
+        addRow('Product $i - Finish Width', _getBasicControllers(i)[5].text);
+      }
 
-        ['Warp 4', warp4Controller.text],
-        ['Weft 4', weft4Controller.text],
-        ['Reed 4', reed4Controller.text],
-        ['Pick 4', pick4Controller.text],
-        ['Grey Width 4', greyWidth4Controller.text],
-        ['Finish Width 4', finishWidth4Controller.text],
-      ]);
-
-      // Consumption & products (flattened for PDF)
+      // Consumption per product (stacked like the ExpansionTile content)
       for (int p = 1; p <= 4; p++) {
-        rows.add(['', '']);
-        rows.add(['Product Group', 'Product $p']);
+        addRow('Product Group', 'Product $p');
+        addRow('Product Name', _getGeneralProductNameController(p).text);
         for (int r = 1; r <= 4; r++) {
           final ctrls = _getConsumptionRowControllers(p, r);
-          rows.add(['Product Name', ctrls[0].text]);
-          rows.add(['Size', ctrls[1].text]);
-          rows.add(['Cut Size', ctrls[3].text]);
-          rows.add(['Grey Width', ctrls[4].text]);
-          rows.add(['Finish Width', ctrls[5].text]);
-          rows.add(['PCS', ctrls[6].text]);
-          rows.add(['Consumption', ctrls[7].text]);
-          rows.add(['Consumption Price', ctrls[8].text]);
+          addRow('Item $p.$r - Product Name', ctrls[0].text);
+          addRow('Item $p.$r - Size 1', ctrls[1].text);
+          addRow('Item $p.$r - Size 2', ctrls[2].text);
+          addRow('Item $p.$r - Cut Size', ctrls[3].text);
+          addRow('Item $p.$r - Grey Width', ctrls[4].text);
+          addRow('Item $p.$r - Finish Width', ctrls[5].text);
+          addRow('Item $p.$r - PCS', ctrls[6].text);
+          addRow('Item $p.$r - Consumption', ctrls[7].text);
+          addRow('Item $p.$r - Consumption Price', ctrls[8].text);
         }
-        rows.add(['Total', _getTotalController(p).text]);
+        addRow('Product $p Total', _getTotalController(p).text);
+        addRow('Product $p Consumption Price', _getConsumptionPriceController(p).text);
       }
 
-      // Fabric details per product
+      // Fabric details per product (each card field on its own row)
       for (int i = 1; i <= 4; i++) {
         final fabric = _getFabricCalculatedControllers(i);
-        rows.add(['', '']);
-        rows.add(['Fabric Details', 'Product $i']);
-        rows.add(['Warp Weight', fabric[0].text]);
-        rows.add(['Weft Weight', fabric[1].text]);
-        rows.add(['Total Weight', fabric[2].text]);
-        rows.add(['Warp Price', fabric[3].text]);
-        rows.add(['Weft Price', fabric[4].text]);
-        rows.add(['Conversion', fabric[5].text]);
-        rows.add(['Grey Fabric Price', fabric[6].text]);
-        rows.add(['Processing Charges', fabric[7].text]);
-        rows.add(['Finish Fabric Cost', fabric[8].text]);
+        addRow('Fabric - Product $i - Quality', _getQualityController(i).text);
+        addRow('Fabric - Product $i - Loom', _getLoomController(i).text);
+        addRow('Fabric - Product $i - Weave', _getWeaveController(i).text);
+        addRow('Fabric - Product $i - Warp Rate/Lbs', _getFabricValues(i)['warpRate']!.toString());
+        addRow('Fabric - Product $i - Weft Rate/Lbs', _getFabricValues(i)['weftRate']!.toString());
+        addRow('Fabric - Product $i - Conversion/Pick', _getFabricValues(i)['conversionPick']!.toString());
+        addRow('Fabric - Product $i - Warp Weight', fabric[0].text);
+        addRow('Fabric - Product $i - Weft Weight', fabric[1].text);
+        addRow('Fabric - Product $i - Total Weight', fabric[2].text);
+        addRow('Fabric - Product $i - Warp Price', fabric[3].text);
+        addRow('Fabric - Product $i - Weft Price', fabric[4].text);
+        addRow('Fabric - Product $i - Conversion', fabric[5].text);
+        addRow('Fabric - Product $i - Grey Fabric Price', fabric[6].text);
+        addRow('Fabric - Product $i - Processing/inch', _getProcessingInchController(i).text);
+        addRow('Fabric - Product $i - Processing Charges', fabric[7].text);
+        addRow('Fabric - Product $i - Mending/MT', _getMendingMT(i).toString());
+        addRow('Fabric - Product $i - Wastage %', _getWastage(i).toString());
+        addRow('Fabric - Product $i - Finish Fabric Cost', fabric[8].text);
       }
 
-      // Freight / export details per product
+      // Freight / export details per product (single-field rows)
       for (int i = 1; i <= 4; i++) {
         final freight = _getFreightCalculatedControllers(i);
-        rows.add(['', '']);
-        rows.add(['Freight Details', 'Product $i']);
-        rows.add(['Consumption Price', _getConsumptionPriceController(i).text]);
-        rows.add(['Stitching', _getFreightControllers(i)[0].text]);
-        rows.add(['Accessories', _getFreightControllers(i)[1].text]);
-        rows.add(['Poly Bag', _getFreightControllers(i)[2].text]);
-        rows.add(['Miscellaneous', _getFreightControllers(i)[3].text]);
-        rows.add(['Packing Charges', _getFreightControllers(i)[4].text]);
-        rows.add(['Container Capacity', _getFreightControllers(i)[5].text]);
-        rows.add(['Rate of Exchange', _getFreightControllers(i)[6].text]);
-        rows.add(['FOB Price PKR', freight[0].text]);
-  rows.add(['FOB Price \$', freight[1].text]);
-        rows.add(['Freight Calculation', freight[2].text]);
-  rows.add(['C&F Price \$', freight[3].text]);
-        rows.add(['FOB Final', freight[4].text]);
-        rows.add(['C&F Final', freight[5].text]);
+        final freightInputs = _getFreightControllers(i);
+        addRow('Freight - Product $i - Consumption Price', _getConsumptionPriceController(i).text);
+        addRow('Freight - Product $i - Stitching', freightInputs[0].text);
+        addRow('Freight - Product $i - Accessories', freightInputs[1].text);
+        addRow('Freight - Product $i - Poly Bag', freightInputs[2].text);
+        addRow('Freight - Product $i - Miscellaneous', freightInputs[3].text);
+        addRow('Freight - Product $i - Packing charges', freightInputs[4].text);
+        addRow('Freight - Product $i - Container Size', _getContainerSizeController(i).text);
+        addRow('Freight - Product $i - Container Capacity', freightInputs[5].text);
+        addRow('Freight - Product $i - Rate of Exchange', freightInputs[6].text);
+        addRow('Freight - Product $i - Freight in \$', freightInputs[7].text);
+        addRow('Freight - Product $i - FOB Price in PKR', freight[0].text);
+        addRow('Freight - Product $i - FOB Price in \$', freight[1].text);
+        addRow('Freight - Product $i - Freight Calculation in \$', freight[2].text);
+        addRow('Freight - Product $i - C & F Price in \$', freight[3].text);
+        addRow('Freight - Product $i - Profit %', freightInputs[8].text);
+        addRow('Freight - Product $i - Commission %', freightInputs[9].text);
+        addRow('Freight - Product $i - Overhead %', freightInputs[10].text);
+        addRow('Freight - Product $i - FOB Price Final', freight[4].text);
+        addRow('Freight - Product $i - C & F Price Final', freight[5].text);
       }
+
+      addRow('FOB Total DuvetSet', fobTotalDuvetSet1Controller.text);
+      addRow('C&F Total DuvetSet', cfTotalDuvetSet1Controller.text);
 
       final pages = [
         {'title': 'Export Multi-Width Fabric', 'rows': rows}

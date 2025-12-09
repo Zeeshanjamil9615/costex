@@ -432,51 +432,90 @@ class ExportGreyController extends GetxController {
       try {
         isLoading.value = true;
 
-        final rows = <List<String>>[];
-        rows.addAll([
-          ['Customer', customerNameController.text],
-          ['Quality', qualityController.text],
-          ['Warp Count', warpCountController.text],
-          ['Weft Count', weftCountController.text],
-          ['Reeds', reedsController.text],
-          ['Picks', picksController.text],
-          ['Grey Width', greyWidthController.text],
-          ['P/C Ratio', pcRatioController.text],
-          ['Loom', loomController.text],
-          ['Weave', weaveController.text],
-          ['Warp Rate', warpRateController.text],
-          ['Weft Rate', weftRateController.text],
-          ['Conversion/Pick', coversionPickController.text],
-
-          ['Warp Weight', warpWeightController.text],
-          ['Weft Weight', weftWeightController.text],
-          ['Total Weight', totalWeightController.text],
-          ['Warp Price', warpPriceController.text],
-          ['Weft Price', weftPriceController.text],
-          ['Conversion Charges', coversionChargesController.text],
-
-          ['Grey Fabric Price', greyFabricPriceController.text],
-          ['Mending/MT', mendingMTController.text],
-          ['Packing Type', packingTypeController.text],
-          ['Packing Charges', packingChargesController.text],
-          ['Wastage %', wastageController.text],
-          ['Container Size', containerSizeController.text],
-
-          ['Container Capacity', containerCapacityController.text],
-          ['FOB Price PKR', fobPricePKRController.text],
-          ['Rate of Exchange', rateOfExchangeController.text],
-          ['FOB Price \$', fobPriceDollarController.text],
-          ['Freight in \$', freightInDollarController.text],
-          ['Freight Calculation', freightCalculationController.text],
-
-          ['C&F Price', cfPriceController.text],
-          ['Commission', commissionController.text],
-          ['Port', portController.text],
-          ['Profit %', profitPercentController.text],
-          ['Overhead %', overheadPercentController.text],
-          ['FOB Final', fobPriceFinalController.text],
-          ['C&F Final', cfPriceFinalController.text],
-        ]);
+        // Build table rows matching the on-screen layout (matching grey_fabric structure for common fields)
+        final rows = <List<List<String>>>[
+          [
+            ['Customer Name', customerNameController.text],
+          ],
+          [
+            ['Quality', qualityController.text],
+          ],
+          [
+            ['Warp Count', warpCountController.text],
+            ['Weft Count', weftCountController.text],
+          ],
+          [
+            ['Reeds', reedsController.text],
+            ['Picks', picksController.text],
+          ],
+          [
+            ['Grey Width', greyWidthController.text],
+          ],
+          [
+            ['P/C Ratio', pcRatioController.text],
+            ['Loom', loomController.text],
+          ],
+          [
+            ['Weave', weaveController.text],
+          ],
+          [
+            ['Warp Rate/Lbs', warpRateController.text],
+            ['Weft Rate/Lbs', weftRateController.text],
+          ],
+          [
+            ['Conversion/Picks', coversionPickController.text],
+          ],
+          [
+            ['Warp Weight', warpWeightController.text],
+            ['Weft Weight', weftWeightController.text],
+          ],
+          [
+            ['Total Weight', totalWeightController.text],
+          ],
+          [
+            ['Warp Price', warpPriceController.text],
+            ['Weft Price', weftPriceController.text],
+            ['Conversion Charges', coversionChargesController.text],
+          ],
+          [
+            ['Grey Fabric Price', greyFabricPriceController.text],
+            ['Profit %', profitPercentController.text],
+            ['FOB Price Final', fobPriceFinalController.text],
+          ],
+          // Additional Export-specific fields
+          [
+            ['Mending/MT', mendingMTController.text],
+            ['Packing Type', packingTypeController.text],
+          ],
+          [
+            ['Packing Charges/MT', packingChargesController.text],
+            ['Wastage %', wastageController.text],
+          ],
+          [
+            ['Container Size', containerSizeController.text],
+            ['Container Capacity', containerCapacityController.text],
+          ],
+          [
+            ['FOB Price in PKR', fobPricePKRController.text],
+            ['Rate of Exchange', rateOfExchangeController.text],
+          ],
+          [
+            ['FOB Price in \$', fobPriceDollarController.text],
+            ['Freight in \$', freightInDollarController.text],
+          ],
+          [
+            ['Freight Calculation in \$', freightCalculationController.text],
+            ['C & F Price in \$', cfPriceController.text],
+          ],
+          [
+            ['Commission', commissionController.text],
+            ['Port', portController.text],
+          ],
+          [
+            ['OverHead %', overheadPercentController.text],
+            ['C & F Price Final', cfPriceFinalController.text],
+          ],
+        ];
 
         final pages = [ {'title': 'Export Grey Fabric', 'rows': rows} ];
         try {

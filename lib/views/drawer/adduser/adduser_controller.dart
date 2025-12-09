@@ -9,12 +9,16 @@ class AddUserController extends GetxController {
   final SessionService _session = SessionService.instance;
   // Text Controllers
   final fullNameController = TextEditingController();
+  final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final addressController = TextEditingController();
   final departmentController = TextEditingController();
   final designationController = TextEditingController();
   final cellNumberController = TextEditingController();
   final passwordController = TextEditingController();
+
+  // Status (0 = Deactive, 1 = Active)
+  final status = 0.obs;
 
   // Form Key
   final formKey = GlobalKey<FormState>();
@@ -26,6 +30,7 @@ class AddUserController extends GetxController {
   void onClose() {
     // Dispose controllers
     fullNameController.dispose();
+    usernameController.dispose();
     emailController.dispose();
     addressController.dispose();
     departmentController.dispose();
@@ -52,12 +57,14 @@ class AddUserController extends GetxController {
           companyId: companyId,
           companyName: companyName,
           fullName: fullNameController.text.trim(),
+          username: usernameController.text.trim(),
           email: emailController.text.trim(),
           address: addressController.text.trim(),
           departmentName: departmentController.text.trim(),
           designation: designationController.text.trim(),
           cellNumber: cellNumberController.text.trim(),
           password: passwordController.text.trim(),
+          status: status.value,
         );
 
         Get.snackbar(
@@ -89,12 +96,14 @@ class AddUserController extends GetxController {
   // Clear form
   void clearForm() {
     fullNameController.clear();
+    usernameController.clear();
     emailController.clear();
     addressController.clear();
     departmentController.clear();
     designationController.clear();
     cellNumberController.clear();
     passwordController.clear();
+    status.value = 0; // Reset to default (Deactive)
   }
 
   void _notifyUsersPage() {
@@ -110,6 +119,16 @@ class AddUserController extends GetxController {
     }
     if (value.length < 3) {
       return 'Full name must be at least 3 characters';
+    }
+    return null;
+  }
+
+  String? validateUsername(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Username is required';
+    }
+    if (value.length < 3) {
+      return 'Username must be at least 3 characters';
     }
     return null;
   }

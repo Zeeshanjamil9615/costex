@@ -421,80 +421,122 @@ class ExportMadeupsController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Build full page data from all form fields (structured as rows)
+      // Build full page data from all form fields (structured rows to mirror the sheet)
+      // Build table rows matching the on-screen layout (matching grey_fabric structure for common fields)
+      final rows = <List<List<String>>>[
+        [
+          ['Customer Name', customerNameController.text],
+        ],
+         [
+          ['Product Name', productNameController.text],
+          ['Product Size', productSizeController.text],
+        ],
+        [
+          ['Quality', qualityController.text],
+        ],
+        [
+          ['Warp Count', warpCountController.text],
+          ['Weft Count', weftCountController.text],
+        ],
+        [
+          ['Reeds', reedsController.text],
+          ['Picks', picksController.text],
+        ],
+        [
+          ['Grey Width', greyWidthController.text],
+        ],
+        [
+          ['P/C Ratio', pcRatioController.text],
+          ['Loom', loomController.text],
+        ],
+        [
+          ['Weave', weaveController.text],
+        ],
+        [
+          ['Warp Rate/Lbs', warpRateLbsController.text],
+          ['Weft Rate/Lbs', weftRateLbsController.text],
+        ],
+        [
+          ['Conversion/Picks', conversionPickController.text],
+        ],
+        [
+          ['Warp Weight', warpWeightController.text],
+          ['Weft Weight', weftWeightController.text],
+        ],
+        [
+          ['Total Weight', totalWeightController.text],
+        ],
+        [
+          ['Warp Price', warpPriceController.text],
+          ['Weft Price', weftPriceController.text],
+          ['Conversion Charges', conversionChargesController.text],
+        ],
+        [
+          ['Fabric Price/Meter', fabricPriceMeterController.text],
+          ['Profit %', profitController.text],
+          ['FOB Price Final', fobPriceFinalController.text],
+        ],
+        // Additional Madeups-specific fields
+       
+        [
+          ['Finish Width', finishWidthController.text],
+        ],
+        [
+          ['Mending/MT', mendingMTController.text],
+          ['Process Type', processTypeController.text],
+        ],
+        [
+          ['Process/Inch', processRateController.text],
+          ['Process Charges', processChargesController.text],
+        ],
+        [
+          ['Packing Type', packingTypeController.text],
+          ['Packing Charges/MT', packingChargesMTController.text],
+        ],
+        [
+          ['Wastage %', wastagePercentController.text],
+          ['Finish Fabric Cost', finishFabricCostController.text],
+        ],
+        [
+          ['Consumption', consumptionController.text],
+          ['Consumption Price', consumptionPriceController.text],
+        ],
+        [
+          ['Stitching', stitchingController.text],
+          ['Accessories', accessoriesController.text],
+        ],
+        [
+          ['Poly Bag', polyBagController.text],
+          ['Miscellaneous', miscellaneousController.text],
+        ],
+        [
+          ['Container Size', containerSizeController.text],
+          ['Container Capacity', containerCapacityController.text],
+        ],
+        [
+          ['Rate of Exchange', rateOfExchangeController.text],
+          ['FOB Price in PKR', fobPricePKRController.text],
+        ],
+        [
+          ['FOB Price in \$', fobPriceDollarController.text],
+          ['Freight in \$', freightInDollarController.text],
+        ],
+        [
+          ['Port', rateController.text],
+          ['Freight Calculation \$', freightCalculationController.text],
+        ],
+        [
+          ['C & F Price in \$', cfPriceInDollarController.text],
+          ['Commission %', commissionController.text],
+        ],
+        [
+          ['Overhead %', overheadController.text],
+          ['C & F Price Final', cfPriceFinalController.text],
+        ],
+      ];
+
       final pages = [
-        {
-          'title': 'Export Madeups Fabric',
-          'rows': [
-            ['Company', customerNameController.text],
-            ['Product Name', productNameController.text],
-            ['Product Size', productSizeController.text],
-
-            // Basic Information - Row 1
-            ['Quality', qualityController.text],
-            ['Warp Count', warpCountController.text],
-            ['Weft Count', weftCountController.text],
-            ['Reeds', reedsController.text],
-            ['Picks', picksController.text],
-            ['Grey Width', greyWidthController.text],
-
-            // Basic Information - Row 2
-            ['Finish Width', finishWidthController.text],
-            ['P/C Ratio', pcRatioController.text],
-            ['Loom', loomController.text],
-            ['Weave', weaveController.text],
-            ['Warp Rate/Lbs', warpRateLbsController.text],
-            ['Weft Rate/Lbs', weftRateLbsController.text],
-
-            // Basic Information - Row 3
-            ['Conversion/Pick', conversionPickController.text],
-            ['Warp Weight', warpWeightController.text],
-            ['Weft Weight', weftWeightController.text],
-            ['Total Weight', totalWeightController.text],
-            ['Warp Price', warpPriceController.text],
-            ['Weft Price', weftPriceController.text],
-
-            // Basic Information - Row 4
-            ['Conversion Charges', conversionChargesController.text],
-            ['Grey Fabric Price', fabricPriceMeterController.text],
-            ['Mending/MT', mendingMTController.text],
-            ['Process Type', processTypeController.text],
-            ['Process Rate (/Inch)', processRateController.text],
-            ['Process Charges', processChargesController.text],
-
-            // Pricing Details - Row 5
-            ['Packing Type', packingTypeController.text],
-            ['Packing Charges/MT', packingChargesMTController.text],
-            ['Wastage %', wastagePercentController.text],
-            ['Finish Fabric Cost', finishFabricCostController.text],
-            ['Consumption', consumptionController.text],
-            ['Consumption Price', consumptionPriceController.text],
-
-            // Pricing Details - Row 6
-            ['Stitching', stitchingController.text],
-            ['Accessories', accessoriesController.text],
-            ['Poly Bags', polyBagController.text],
-            ['Miscellaneous', miscellaneousController.text],
-            ['Container Size', containerSizeController.text],
-            ['Container Capacity', containerCapacityController.text],
-
-            // Export Pricing - Row 7
-            ['Rate of Exchange', rateOfExchangeController.text],
-            ['FOB Price PKR', fobPricePKRController.text],
-            ['FOB Price \$', fobPriceDollarController.text],
-            ['Freight in \$', freightInDollarController.text],
-            ['Freight Calculation', freightCalculationController.text],
-            ['Rate', rateController.text],
-
-            // Final Calculation - Row 8
-            ['C&F Price \$', cfPriceInDollarController.text],
-            ['Commission %', commissionController.text],
-            ['Overhead %', overheadController.text],
-            ['Profit %', profitController.text],
-            ['C&F Final Price', cfPriceFinalController.text],
-            ['FOB Final Price', fobPriceFinalController.text],
-          ]
-        }
+        {'title': 'Export Madeups Fabric', 'rows': rows}
       ];
 
       // Use printing utility to directly open print dialog (no preview) and await result

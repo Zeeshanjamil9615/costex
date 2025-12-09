@@ -6,16 +6,37 @@ import 'package:printing/printing.dart';
 import 'dart:io';
 import 'package:flutter/services.dart';
 
-/// Build a simple multi-page PDF. Each page is a title + list of key/value rows.
+/// Build a simple multi-page PDF.
+/// Rows can be provided in two formats:
+/// 1) Legacy: `[label, value]` (list of length 2)
+/// 2) Table aware: `[[label, value], [label2, value2], ...]` per row.
+///    The number of inner items controls how many columns appear for that row.
+///    This lets the PDF mirror the on-screen row grouping (1 item = full width,
+///    2 items = two columns, etc.).
 Future<Uint8List> buildMultiPagePdf(List<Map<String, dynamic>> pages, {String? header}) async {
   final pdf = pw.Document();
 
   for (final page in pages) {
     // Ensure rows are a list of two-string lists
     final rawRows = (page['rows'] as List?) ?? [];
-    final rows = rawRows.map<List<String>>((r) {
-      if (r is List) return r.map((c) => c?.toString() ?? '').toList();
-      return [r.toString(), ''];
+    final rows = rawRows.map<List<List<String>>>((r) {
+      // Table-aware: a row that is already a list of cells
+      if (r is List && r.isNotEmpty && r.first is List) {
+        final List rowList = r;
+        return rowList
+            .map<List<String>>((cell) => (cell as List).map((c) => c?.toString() ?? '').toList())
+            .toList();
+      }
+      // Legacy: a single cell row (label/value)
+      if (r is List) {
+        return [
+          r.map((c) => c?.toString() ?? '').toList(),
+        ];
+      }
+      // Fallback: single text cell
+      return [
+        [r.toString(), ''],
+      ];
     }).toList();
 
     pdf.addPage(
@@ -24,24 +45,45 @@ Future<Uint8List> buildMultiPagePdf(List<Map<String, dynamic>> pages, {String? h
         margin: const pw.EdgeInsets.all(16),
         build: (context) {
           return [
-            if (header != null) pw.Text(header, style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 8),
+            // if (header != null) pw.Text(header, style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            // pw.SizedBox(height: 8),
             if (page.containsKey('title')) pw.Text(page['title'] ?? '', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 12),
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: rows.map((r) {
-                final left = r.isNotEmpty ? r[0] : '';
-                final right = r.length > 1 ? r[1] : '';
+              children: rows.map((cells) {
                 return pw.Padding(
                   padding: const pw.EdgeInsets.symmetric(vertical: 6),
                   child: pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Expanded(flex: 3, child: pw.Text(left, style: pw.TextStyle(fontSize: 11, color: PdfColors.black))),
-                      pw.SizedBox(width: 8),
-                      pw.Expanded(flex: 4, child: pw.Text(right, style: pw.TextStyle(fontSize: 11, color: PdfColors.black))),
-                    ],
+                    children: cells.map((cell) {
+                      final label = cell.isNotEmpty ? cell[0] : '';
+                      final value = cell.length > 1 ? cell[1] : '';
+                      return pw.Expanded(
+                        child: pw.Container(
+                          padding: const pw.EdgeInsets.all(6),
+                          decoration: pw.BoxDecoration(
+                            border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
+                            borderRadius: pw.BorderRadius.circular(3),
+                          ),
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              if (label.isNotEmpty)
+                                pw.Text(
+                                  label,
+                                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.grey800),
+                                ),
+                              if (label.isNotEmpty) pw.SizedBox(height: 2),
+                              pw.Text(
+                                value,
+                                style: pw.TextStyle(fontSize: 10, color: PdfColors.black),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 );
               }).toList(),

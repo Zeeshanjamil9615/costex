@@ -10,12 +10,16 @@ class ManageUserController extends GetxController {
   final ApiService _apiService = ApiService();
 
   late TextEditingController fullNameController;
+  late TextEditingController usernameController;
   late TextEditingController emailController;
   late TextEditingController addressController;
   late TextEditingController departmentController;
   late TextEditingController designationController;
   late TextEditingController cellNumberController;
   late TextEditingController passwordController;
+
+  // Status (0 = Deactive, 1 = Active)
+  final status = 0.obs;
 
   final RxBool isLoading = false.obs;
   final formKey = GlobalKey<FormState>();
@@ -25,17 +29,22 @@ class ManageUserController extends GetxController {
   void initializeControllers(User user) {
     _user = user;
     fullNameController = TextEditingController(text: user.userName);
+    // Initialize username - if API doesn't provide it, leave empty
+    usernameController = TextEditingController();
     emailController = TextEditingController(text: user.email);
     addressController = TextEditingController(text: user.address);
     departmentController = TextEditingController(text: user.department);
     designationController = TextEditingController(text: user.designation);
     cellNumberController = TextEditingController(text: user.cellNo);
     passwordController = TextEditingController();
+    // Initialize status from user (convert string to int, default to 0)
+    status.value = int.tryParse(user.status) ?? 0;
   }
 
   @override
   void onClose() {
     fullNameController.dispose();
+    usernameController.dispose();
     emailController.dispose();
     addressController.dispose();
     departmentController.dispose();
@@ -56,12 +65,14 @@ class ManageUserController extends GetxController {
       final response = await _apiService.updateUser(
         userId: _user.id.toString(),
         fullName: fullNameController.text.trim(),
+        username: usernameController.text.trim(),
         cellNumber: cellNumberController.text.trim(),
         address: addressController.text.trim(),
         email: emailController.text.trim(),
         departmentName: departmentController.text.trim(),
         designation: designationController.text.trim(),
         password: passwordController.text.trim(),
+        status: status.value,
       );
 
       Get.snackbar(

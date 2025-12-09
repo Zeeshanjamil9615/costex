@@ -46,11 +46,15 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       setState(() => _isLoading = false);
 
       Get.snackbar(
+        
         'Success',
         response['message']?.toString() ?? 'OTP verified successfully.',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: const Color(0xFF4CAF50),
         colorText: Colors.white,
+        duration: const Duration(seconds: 40),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
       );
 
       await SessionService.instance.clearSession();
