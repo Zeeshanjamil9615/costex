@@ -1233,9 +1233,10 @@ class MultiMadeupsController extends GetxController
       Get.snackbar(
         'Validation',
         'Please enter customer name before saving.',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFFFC107),
         colorText: Colors.black,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
       return;
     }
@@ -1246,9 +1247,10 @@ class MultiMadeupsController extends GetxController
       Get.snackbar(
         'Error',
         'Company information not found. Please login again.',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
       return;
     }
@@ -1399,25 +1401,28 @@ class MultiMadeupsController extends GetxController
       Get.snackbar(
         'Success',
         response['message']?.toString() ?? 'Quotation saved successfully',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4CAF50),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     } on ApiException catch (error) {
       Get.snackbar(
         'Error',
         error.message,
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     } catch (e) {
       Get.snackbar(
         'Error',
         'Failed to save: $e',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     } finally {
       isLoading.value = false;
@@ -1562,9 +1567,9 @@ class MultiMadeupsController extends GetxController
 
       try {
         await printPagesDirect(pages, header: 'Export Multi-Width Fabric');
-        Get.snackbar('Success', 'PDF generated successfully', backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: EdgeInsets.symmetric(vertical: 200));
+        Get.snackbar('Success', 'PDF generated successfully', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: const EdgeInsets.all(16));
       } catch (e) {
-        Get.snackbar('Error', 'Failed to generate PDF: $e', backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: EdgeInsets.symmetric(vertical: 200));
+        Get.snackbar('Error', 'Failed to generate PDF: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: const EdgeInsets.all(16));
       }
     } finally {
       isLoading.value = false;

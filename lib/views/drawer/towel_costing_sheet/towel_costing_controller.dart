@@ -748,9 +748,10 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
       Get.snackbar(
         'Validation',
         'Please enter client name before saving.',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFFFC107),
         colorText: Colors.black87,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
       return;
     }
@@ -761,9 +762,10 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
       Get.snackbar(
         'Session Expired',
         'Company information missing. Please login again.',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
       return;
     }
@@ -779,25 +781,28 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
       Get.snackbar(
         'Success',
         response['message']?.toString() ?? 'Towel Costing Sheet saved Successfully',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4CAF50),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     } on ApiException catch (error) {
       Get.snackbar(
         'Error',
         error.message,
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     } catch (e) {
       Get.snackbar(
         'Error',
         'Failed to save: $e',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     } finally {
       isLoading.value = false;
@@ -1288,9 +1293,9 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
       final pages = [ {'title': 'Towel Costing Sheet', 'rows': rows} ];
       try {
         await printPagesDirect(pages, header: 'Towel Costing Sheet');
-        Get.snackbar('Success', 'PDF generated successfully', backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: EdgeInsets.symmetric(vertical: 200));
+        Get.snackbar('Success', 'PDF generated successfully', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: const EdgeInsets.all(16));
       } catch (e) {
-        Get.snackbar('Error', 'Failed to generate PDF: $e', backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: EdgeInsets.symmetric(vertical: 200));
+        Get.snackbar('Error', 'Failed to generate PDF: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: const EdgeInsets.all(16));
       }
     } finally {
       isLoading.value = false;

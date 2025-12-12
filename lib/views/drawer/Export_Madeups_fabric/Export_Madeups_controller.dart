@@ -321,10 +321,11 @@ class ExportMadeupsController extends GetxController {
         Get.snackbar(
           'Error',
           'Company information not found. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: EdgeInsets.symmetric(vertical: 200),
+          margin: const EdgeInsets.all(16),
         );
         return;
       }
@@ -384,28 +385,31 @@ class ExportMadeupsController extends GetxController {
       Get.snackbar(
         'Success',
         response['message']?.toString() ?? 'Quotation saved successfully',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4CAF50),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     } on ApiException catch (e) {
       Get.snackbar(
         'Error',
         e.message,
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     } catch (e) {
       Get.snackbar(
         'Error',
         'Failed to save quotation: $e',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     } finally {
       isLoading.value = false;
@@ -541,29 +545,32 @@ class ExportMadeupsController extends GetxController {
         Get.snackbar(
           'Success',
           'PDF generated successfully',
+          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4CAF50),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: EdgeInsets.symmetric(vertical: 200),
+          margin: const EdgeInsets.all(16),
         );
       } catch (e) {
         Get.snackbar(
           'Error',
           'Failed to generate PDF: $e',
+          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: EdgeInsets.symmetric(vertical: 200),
+          margin: const EdgeInsets.all(16),
         );
       }
     } catch (e) {
       Get.snackbar(
         'Error',
         'Failed to generate PDF: $e',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     } finally {
       isLoading.value = false;

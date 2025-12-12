@@ -542,7 +542,7 @@ class MyQuotationsPage extends StatelessWidget {
         Get.snackbar(
           'Error',
           'Unknown fabric type: ${quotation.fabricType}',
-          margin: EdgeInsets.symmetric(vertical: 200),
+          snackPosition: SnackPosition.BOTTOM,
         );
     }
   }

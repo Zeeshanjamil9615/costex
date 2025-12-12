@@ -79,7 +79,7 @@ class AddUserController extends GetxController {
           Get.snackbar(
             'OTP Sent',
             response['message']?.toString() ?? 'OTP sent to your email. Please verify.',
-            margin: EdgeInsets.symmetric(vertical: 200),
+            snackPosition: SnackPosition.BOTTOM,
             backgroundColor: const Color(0xFF4CAF50),
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
@@ -92,7 +92,7 @@ class AddUserController extends GetxController {
           Get.snackbar(
             'Success',
             response['message']?.toString() ?? 'User added successfully',
-            margin: EdgeInsets.symmetric(vertical: 200),
+            snackPosition: SnackPosition.BOTTOM,
             backgroundColor: const Color(0xFF4CAF50),
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
@@ -105,7 +105,7 @@ class AddUserController extends GetxController {
         Get.snackbar(
           'Error',
           e.message,
-          margin: EdgeInsets.symmetric(vertical: 200),
+          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
@@ -114,7 +114,7 @@ class AddUserController extends GetxController {
         Get.snackbar(
           'Error',
           e.toString(),
-          margin: EdgeInsets.symmetric(vertical: 200),
+          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),

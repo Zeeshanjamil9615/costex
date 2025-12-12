@@ -47,7 +47,7 @@ class _AddUserOtpVerificationPageState extends State<AddUserOtpVerificationPage>
       Get.snackbar(
         'Success',
         response['message']?.toString() ?? 'User registered successfully!',
-        margin: EdgeInsets.symmetric(vertical: 200),
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4CAF50),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
@@ -65,7 +65,7 @@ class _AddUserOtpVerificationPageState extends State<AddUserOtpVerificationPage>
       Get.snackbar(
         'Error',
         error.message,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
@@ -75,7 +75,7 @@ class _AddUserOtpVerificationPageState extends State<AddUserOtpVerificationPage>
       Get.snackbar(
         'Error',
         'OTP verification failed: $error',
-        margin: EdgeInsets.symmetric(vertical: 200),
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),

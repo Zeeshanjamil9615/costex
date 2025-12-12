@@ -324,10 +324,11 @@ class ExportGreyController extends GetxController {
           Get.snackbar(
             'Error',
             'Company information missing. Please login again.',
+            snackPosition: SnackPosition.BOTTOM,
             backgroundColor: const Color(0xFFF44336),
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
-            margin: EdgeInsets.symmetric(vertical: 200),
+            margin: const EdgeInsets.all(16),
           );
           return;
         }
@@ -383,28 +384,31 @@ class ExportGreyController extends GetxController {
           'Success',
           response['message']?.toString() ??
               'Export grey fabric quotation saved successfully',
+          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4CAF50),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: EdgeInsets.symmetric(vertical: 200),
+          margin: const EdgeInsets.all(16),
         );
       } on ApiException catch (error) {
         Get.snackbar(
           'Error',
           error.message,
+          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: EdgeInsets.symmetric(vertical: 200),
+          margin: const EdgeInsets.all(16),
         );
       } catch (e) {
         Get.snackbar(
           'Error',
           'Failed to save quotation: $e',
+          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: EdgeInsets.symmetric(vertical: 200),
+          margin: const EdgeInsets.all(16),
         );
       } finally {
         isLoading.value = false;
@@ -413,10 +417,11 @@ class ExportGreyController extends GetxController {
       Get.snackbar(
         'Validation Error',
         'Please fill all required fields correctly',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFFFC107),
         colorText: Colors.black87,
         duration: const Duration(seconds: 3),
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     }
   }
@@ -518,29 +523,32 @@ class ExportGreyController extends GetxController {
           Get.snackbar(
             'Success',
             'PDF generated successfully',
+            snackPosition: SnackPosition.BOTTOM,
             backgroundColor: const Color(0xFF4CAF50),
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
-            margin: EdgeInsets.symmetric(vertical: 200),
+            margin: const EdgeInsets.all(16),
           );
         } catch (e) {
           Get.snackbar(
             'Error',
             'Failed to generate PDF: $e',
+            snackPosition: SnackPosition.BOTTOM,
             backgroundColor: const Color(0xFFF44336),
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
-            margin: EdgeInsets.symmetric(vertical: 200),
+            margin: const EdgeInsets.all(16),
           );
         }
       } catch (e) {
         Get.snackbar(
           'Error',
           'Failed to generate PDF: $e',
+          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: EdgeInsets.symmetric(vertical: 200),
+          margin: const EdgeInsets.all(16),
         );
       } finally {
         isLoading.value = false;
@@ -549,10 +557,11 @@ class ExportGreyController extends GetxController {
       Get.snackbar(
         'Validation Error',
         'Please fill all required fields correctly',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFFFC107),
         colorText: Colors.black87,
         duration: const Duration(seconds: 3),
-        margin: EdgeInsets.symmetric(vertical: 200),
+        margin: const EdgeInsets.all(16),
       );
     }
   }

@@ -122,7 +122,8 @@ class QuotationsController extends GetxController {
         'Company information not found. Please login again.',
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
       );
       return;
     }
@@ -154,7 +155,8 @@ class QuotationsController extends GetxController {
             'No quotations found for ${selectedFabricType.value}',
             backgroundColor: const Color(0xFF17a2b8),
             colorText: Colors.white,
-            margin: EdgeInsets.symmetric(vertical: 200),
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
           );
         }
       } else {
@@ -167,7 +169,8 @@ class QuotationsController extends GetxController {
         error.message,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
       );
     } catch (e) {
       Get.snackbar(
@@ -175,7 +178,8 @@ class QuotationsController extends GetxController {
         'Failed to fetch quotations: $e',
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
       );
     } finally {
       isLoading.value = false;
