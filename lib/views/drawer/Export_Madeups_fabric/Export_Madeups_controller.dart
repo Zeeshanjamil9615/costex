@@ -321,11 +321,10 @@ class ExportMadeupsController extends GetxController {
         Get.snackbar(
           'Error',
           'Company information not found. Please login again.',
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.symmetric(vertical: 200),
         );
         return;
       }
@@ -385,31 +384,28 @@ class ExportMadeupsController extends GetxController {
       Get.snackbar(
         'Success',
         response['message']?.toString() ?? 'Quotation saved successfully',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4CAF50),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } on ApiException catch (e) {
       Get.snackbar(
         'Error',
         e.message,
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } catch (e) {
       Get.snackbar(
         'Error',
         'Failed to save quotation: $e',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } finally {
       isLoading.value = false;
@@ -431,7 +427,7 @@ class ExportMadeupsController extends GetxController {
           ['Product Name', productNameController.text],
           ['Product Size', productSizeController.text],
         ],
-        [
+        [ 
           ['Quality', qualityController.text],
         ],
         [
@@ -536,41 +532,38 @@ class ExportMadeupsController extends GetxController {
       ];
 
       final pages = [
-        {'title': 'Export Madeups Fabric', 'rows': rows}
+        {'title': 'Export Madeups Fabric Sheet', 'rows': rows}
       ];
 
       // Use printing utility to directly open print dialog (no preview) and await result
       try {
-        await printPagesDirect(pages, header: 'Export Madeups Fabric');
+        await printPagesDirect(pages, header: 'Export Madeups Fabric Sheet');
         Get.snackbar(
           'Success',
           'PDF generated successfully',
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4CAF50),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.symmetric(vertical: 200),
         );
       } catch (e) {
         Get.snackbar(
           'Error',
           'Failed to generate PDF: $e',
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.symmetric(vertical: 200),
         );
       }
     } catch (e) {
       Get.snackbar(
         'Error',
         'Failed to generate PDF: $e',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } finally {
       isLoading.value = false;

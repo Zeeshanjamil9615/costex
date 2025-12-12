@@ -227,9 +227,7 @@ class MultiMadeupsPage extends StatelessWidget {
 
   Widget _buildProductCard(String title, MultiMadeupsController controller, int productNum) {
     final List<TextEditingController> ctrls = _getBasicControllers(controller, productNum);
-    final labelList = [
-      'Warp', 'Weft', 'Reed', 'Pick', 'Grey Width', 'Finish Width'
-    ];
+    // ctrls order: [warp, weft, reed, pick, greyWidth, finishWidth]
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -255,15 +253,67 @@ class MultiMadeupsPage extends StatelessWidget {
           children: [
             Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.primary)),
             const SizedBox(height: 8),
-            for (int i = 0; i < ctrls.length; i++) ...[
-              CustomTextField(
-                label: labelList[i],
-                hintText: labelList[i],
-                controller: ctrls[i],
-                readOnly: viewMode,
-              ),
-              if (i < ctrls.length - 1) const SizedBox(height: 10),
-            ],
+            // Row 1: Warp and Weft side by side
+            Row(
+              children: [
+                Expanded(
+                  child: CustomTextField(
+                    label: 'Warp',
+                    hintText: 'Warp',
+                    controller: ctrls[0],
+                    readOnly: viewMode,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: CustomTextField(
+                    label: 'Weft',
+                    hintText: 'Weft',
+                    controller: ctrls[1],
+                    readOnly: viewMode,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            // Row 2: Reed and Pick side by side
+            Row(
+              children: [
+                Expanded(
+                  child: CustomTextField(
+                    label: 'Reed',
+                    hintText: 'Reed',
+                    controller: ctrls[2],
+                    readOnly: viewMode,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: CustomTextField(
+                    label: 'Pick',
+                    hintText: 'Pick',
+                    controller: ctrls[3],
+                    readOnly: viewMode,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            // Row 3: Grey Width (separate row)
+            CustomTextField(
+              label: 'Grey Width',
+              hintText: 'Grey Width',
+              controller: ctrls[4],
+              readOnly: viewMode,
+            ),
+            const SizedBox(height: 10),
+            // Row 4: Finish Width (separate row)
+            CustomTextField(
+              label: 'Finish Width',
+              hintText: 'Finish Width',
+              controller: ctrls[5],
+              readOnly: viewMode,
+            ),
           ],
         ),
       ),

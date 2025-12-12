@@ -345,10 +345,9 @@ class UserQuotationController extends GetxController {
     Get.snackbar(
       title,
       message,
-      snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFFF44336),
       colorText: Colors.white,
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.symmetric(vertical: 200),
     );
   }
 
@@ -356,10 +355,9 @@ class UserQuotationController extends GetxController {
     Get.snackbar(
       title,
       message,
-      snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFFFF5722),
       colorText: Colors.white,
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.symmetric(vertical: 200),
     );
   }
 
@@ -367,10 +365,9 @@ class UserQuotationController extends GetxController {
     Get.snackbar(
       title,
       message,
-      snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFF17a2b8),
       colorText: Colors.white,
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.symmetric(vertical: 200),
     );
   }
 }

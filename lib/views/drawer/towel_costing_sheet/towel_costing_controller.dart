@@ -748,10 +748,9 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
       Get.snackbar(
         'Validation',
         'Please enter client name before saving.',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFFFC107),
         colorText: Colors.black87,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
       return;
     }
@@ -762,10 +761,9 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
       Get.snackbar(
         'Session Expired',
         'Company information missing. Please login again.',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
       return;
     }
@@ -781,28 +779,25 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
       Get.snackbar(
         'Success',
         response['message']?.toString() ?? 'Towel Costing Sheet saved Successfully',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4CAF50),
         colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } on ApiException catch (error) {
       Get.snackbar(
         'Error',
         error.message,
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } catch (e) {
       Get.snackbar(
         'Error',
         'Failed to save: $e',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } finally {
       isLoading.value = false;
@@ -939,169 +934,363 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
   Future<void> generatePDF() async {
     try {
       isLoading.value = true;
-      // Build rows with main sections and fields (table-style to mirror the sheet)
+      // Build rows matching the image layout - table structure with multiple columns
       final rows = <List<List<String>>>[];
 
-      void addRow(String label, String value) {
-        rows.add([
-          [label, value],
-        ]);
-      }
-
-      // Header
+      // Header row: Date and Client
       rows.add([
         ['Date', dateController.text],
-        ['Client', clientNameController.text],
+            ]);
+      rows.add([
+        ['Client Name', clientNameController.text],
       ]);
 
-      // Costing blocks (pile/weft/ground/fancy) – one field per row to match cards
-      addRow('Pile Count', pileCountController.text);
-      addRow('Pile Rate', pileRateController.text);
-      addRow('Pile %AGE', pileAgeController.text);
-      addRow('Pile Amount', pileAmountController.text);
+      // Product Specification Section - 6 columns table   
+      // Headers row
+      rows.add([
+        ['FILE', ''],
+        ['WEFT', ''],
+        ['GROUND', ''],
+        ['FANCY', ''],
+        ['Brand Name', ''],
+        ['GST%', ''],
+      ]);
+      
+      // COUNT row
+      rows.add([ 
+        ['COUNT', pileCountController.text],
+        ['', weftCountController.text],
+        ['', groundCountController.text],
+        ['', fancyCountController.text],
+        ['', gstPercentController.text],
+        ['', ''],
+      ]);
+      
+      // RATE row
+      rows.add([
+        ['RATE', pileRateController.text],
+        ['', weftRateController.text],
+        ['', groundRateController.text],
+        ['', fancyRateController.text],
+        ['', ''],
+        ['', ''],
+      ]);
+      
+      // %AGE row
+      rows.add([
+        ['%AGE', pileAgeController.text],
+        ['', weftAgeController.text],
+        ['', groundAgeController.text],
+        ['', fancyAgeController.text],
+        ['', ''],
+        ['', ''],
+      ]);
+      
+      // AMOUNT row
+      rows.add([
+        ['AMOUNT', pileAmountController.text],
+        ['', weftAmountController.text],
+        ['', groundAmountController.text],
+        ['', fancyAmountController.text],
+        ['', totalAmountController.text],
+        ['', ''],
+      ]);
+      
+      // Brand Names row
+      rows.add([
+        ['', pileNameController.text],
+        ['', weftNameController.text],
+        ['', groundNameController.text],
+        ['', fancyNameController.text],
+        ['', ''],
+        ['', ''],
+      ]);
 
-      addRow('Weft Count', weftCountController.text);
-      addRow('Weft Rate', weftRateController.text);
-      addRow('Weft %AGE', weftAgeController.text);
-      addRow('Weft Amount', weftAmountController.text);
+      // GREY FABRIC COST / SHARING COST / PROCESSING COST Section - 3 columns side by side
+      // Row 1: Yarn, Valour Charges, Processing
+      rows.add([
+        ['Yarn:', yarnController.text],
+        ['Valour Charges:', valourChargesController.text],
+        ['Processing:', processingController.text],
+      ]);
+      
+      // Row 2: Wastage% (all three)
+      rows.add([
+        ['Wastage%:', waistage4Controller.text],
+        ['Wastage%:', waistageShareController.text],
+        ['Wastage%:', waistageProcessController.text],
+      ]);
+      
+      // Row 3: Yarn Total, Total Cost (Share), Total Cost (Process)
+      rows.add([
+        ['Yarn Total:', yarnTotalController.text],
+        ['Total Cost:', totalCostShareController.text],
+        ['Total Cost:', totalCostProcessController.text],
+      ]);
+      
+      // Row 4: Weaving Charges, Wastage Cost (Share), Wastage Cost (Process)
+      rows.add([
+        ['Weaving Charges:', wavingChargesController.text],
+        ['Wastage Cost:', waistageCostController.text],
+        ['Wastage Cost:', waistageCostProcessController.text],
+      ]);
+      
+      // Row 5: Grey Fabric In Pound, Valour Fabric, Dyed Fabric
+      rows.add([
+        ['Grey Fabric In Pound:', greyFabricInPoundController.text],
+        ['Valour Fabric:', valourFabricController.text],
+        ['Dyed Fabric:', dyedFabricController.text],
+      ]);
+      
+      // Row 6: Grey Fabric In Kg (single column)
+      rows.add([
+        ['Grey Fabric In Kg:', greyFabricInKgController.text],
+      ]);
+      
+      // Row 7: Viscous/sizing (single column)
+      rows.add([
+        ['Viscous/sizing:', viscousSizingController.text],
+      ]);
+      
+      // Row 8: Yarn Freight (single column)
+      rows.add([
+        ['Yarn Freight:', yarnFreightController.text],
+      ]);
+      
+      // Row 9: Grey Total (single column)
+      rows.add([
+        ['Grey Total:', greyTotalController.text],
+      ]);
 
-      addRow('Ground Count', groundCountController.text);
-      addRow('Ground Rate', groundRateController.text);
-      addRow('Ground %AGE', groundAgeController.text);
-      addRow('Ground Amount', groundAmountController.text);
+      // Stitching Cost Section - 3 columns (Towel, Bathrobe 1, Bathrobe 2)
+      // Row 1: Stitching, Length (B1), Length (B2)
+      rows.add([
+        ['Stitching:', stitchingTowelController.text],
+        ['Length:', lengthBathrobe1Controller.text],
+        ['Length:', lengthBathrobe2Controller.text],
+      ]);
+      
+      // Row 2: R%, Sleeve (B1), Length Margin (B2)
+      rows.add([
+        ['R%:', bPercentTowelController.text],
+        ['Sleeve:', sleeveBathrobe1Controller.text],
+        ['Length Margin:', lengthMarginBathrobe2Controller.text],
+      ]);
+      
+      // Row 3: Total Cost (Towel), Length Margin (B1), Fabric Use (B2)
+      rows.add([
+        ['Total Cost:', totalCostTowelController.text],
+        ['Length Margin:', lengthMarginBathrobe1Controller.text],
+        ['Fabric Use:', fabricUseBathrobe2Controller.text],
+      ]);
+      
+      // Row 4: Wastage Cost (Towel), Sleeve Margin (B1), Cutting Waste (B2)
+      rows.add([
+        ['Wastage Cost:', waistageCostTowelController.text],
+        ['Sleeve Margin:', sleeveMarginBathrobe1Controller.text],
+        ['Cutting Waste:', cuttingWasteBathrobe2Controller.text],
+      ]);
+      
+      // Row 5: Towel Rate, Pockets (B1), Fabric Consumption (B2)
+      rows.add([
+        ['Towel Rate:', towelRateController.text],
+        ['Pockets:', pocketsBathrobe1Controller.text],
+        ['Fabric Consumption:', fabricCounsumptionBathrobe2Controller.text],
+      ]);
+      
+      // Row 6: (empty for Towel), Cutting Waste (B1), GSM (B2)
+      rows.add([
+        ['', ''],
+        ['Cutting Waste:', cuttingWasteBathrobe1Controller.text],
+        ['GSM:', gsmBathrobe2Controller.text],
+      ]);
+      
+      // Row 7: (empty for Towel), Fabric Consumption (B1), W/M (B2)
+      rows.add([
+        ['', ''],
+        ['Fabric Consumption:', fabricCounsumptionBathrobe1Controller.text],
+        ['W/M:', wtMtrBathrobe2Controller.text],
+      ]);
+      
+      // Row 8: (empty for Towel), W/M (B1), W/P (B2)
+      rows.add([
+        ['', ''],
+        ['W/M:', wtMtrBathrobe1Controller.text],
+        ['W/P:', wtPcBathrobe2Controller.text],
+      ]);
+      
+      // Row 9: (empty for Towel), W/P (B1), Fabric Cost (B2)
+      rows.add([
+        ['', ''],
+        ['W/P:', wtPcBathrobe1Controller.text],
+        ['Fabric Cost:', fabricCostBathrobe2Controller.text],
+      ]);
+      
+      // Row 10: (empty for Towel), Fabric Cost (B1), Labour (B2)
+      rows.add([
+        ['', ''],
+        ['Fabric Cost:', fabricCostBathrobe1Controller.text],
+        ['Labour:', labourBathrobe2Controller.text],
+      ]);
+      
+      // Row 11: (empty for Towel), Labour (B1), R% (B2)
+      rows.add([
+        ['', ''],
+        ['Labour:', labourBathrobe1Controller.text],
+        ['R%:', bPercentBathrobe2Controller.text],
+      ]);
+      
+      // Row 12: (empty for Towel), R% (B1), Total Cost (B2)
+      rows.add([
+        ['', ''],
+        ['R%:', bPercentBathrobe1Controller.text],
+        ['Total Cost:', totalCostBathrobe2Controller.text],
+      ]);
+      
+      // Row 13: (empty for Towel), Total Cost (B1), R Cost (B2)
+      rows.add([
+        ['', ''],
+        ['Total Cost:', totalCostBathrobe1Controller.text],
+        ['R Cost:', bCostBathrobe2Controller.text],
+      ]);
+      
+      // Row 14: (empty for Towel), R Cost (B1), Bathrobe Rate (B2)
+      rows.add([
+        ['', ''],
+        ['R Cost:', bCostBathrobe1Controller.text],
+        ['Bathrobe Rate:', bathrobeRateBathrobe2Controller.text],
+      ]);
+      
+      // Row 15: (empty for Towel), Bathrobe Rate (B1)
+      rows.add([
+        ['', ''],
+        ['Bathrobe Rate:', bathrobeRateBathrobe1Controller.text],
+      ]);
 
-      addRow('Fancy Count', fancyCountController.text);
-      addRow('Fancy Rate', fancyRateController.text);
-      addRow('Fancy %AGE', fancyAgeController.text);
-      addRow('Fancy Amount', fancyAmountController.text);
+      // Ex Factory Rates Section - 3 columns (Towel, Bathrobe 1, Bathrobe 2)
+      // Row 1: Profit % (all three)
+      rows.add([
+        ['Profit %:', profitPercentTowelController.text],
+        ['Profit %:', profitPercentBathrobe1Controller.text],
+        ['Profit %:', profitPercentBathrobe2Controller.text],
+      ]);
+      
+      // Row 2: (empty row)
+      rows.add([
+        ['', ''],
+        ['', ''],
+        ['', ''],
+      ]);
+      
+      // Row 3: Ex Factory (all three)
+      rows.add([
+        ['Ex Factory:', exFactoryTowelController.text],
+        ['Ex Factory:', exFactoryBathrobe1Controller.text],
+        ['Ex Factory:', exFactoryBathrobe2Controller.text],
+      ]);
 
-      // Fabric tab key fields
-      addRow('Yarn', yarnController.text);
-      addRow('Waistage 4%', waistage4Controller.text);
-      addRow('Yarn Total', yarnTotalController.text);
-      addRow('Waving Charges', wavingChargesController.text);
-      addRow('Grey Fabric In Pound', greyFabricInPoundController.text);
-      addRow('Grey Fabric In kg', greyFabricInKgController.text);
-      addRow('Viscous/sizing', viscousSizingController.text);
-      addRow('Yarn Freight', yarnFreightController.text);
-      addRow('Grey Total', greyTotalController.text);
-
-      // Sharing cost
-      addRow('Valour Charges', valourChargesController.text);
-      addRow('Waistage%', waistageShareController.text);
-      addRow('Total Cost', totalCostShareController.text);
-      addRow('Waistage Cost', waistageCostController.text);
-      addRow('Valour Fabric', valourFabricController.text);
-
-      // Processing cost
-      addRow('Processing', processingController.text);
-      addRow('Waistage%', waistageProcessController.text);
-      addRow('Total Cost', totalCostProcessController.text);
-      addRow('Waistage Cost', waistageCostProcessController.text);
-      addRow('Dyed Fabric', dyedFabricController.text);
-
-      // Stitching – Towel
-      addRow('Towel Stitching', stitchingTowelController.text);
-      addRow('Towel B %', bPercentTowelController.text);
-      addRow('Towel Total Cost', totalCostTowelController.text);
-      addRow('Towel Waistage Cost', waistageCostTowelController.text);
-      addRow('Towel Rate', towelRateController.text);
-
-      // Stitching – Bathrobe 1
-      addRow('Bathrobe1 Length', lengthBathrobe1Controller.text);
-      addRow('Bathrobe1 Sleeve', sleeveBathrobe1Controller.text);
-      addRow('Bathrobe1 Length Margin', lengthMarginBathrobe1Controller.text);
-      addRow('Bathrobe1 Sleeve Margin', sleeveMarginBathrobe1Controller.text);
-      addRow('Bathrobe1 Pockets', pocketsBathrobe1Controller.text);
-      addRow('Bathrobe1 Cutting Waste', cuttingWasteBathrobe1Controller.text);
-      addRow('Bathrobe1 Fabric Consumption', fabricCounsumptionBathrobe1Controller.text);
-      addRow('Bathrobe1 GSM', gsmBathrobe1Controller.text);
-      addRow('Bathrobe1 Wt/Mtr', wtMtrBathrobe1Controller.text);
-      addRow('Bathrobe1 Wt/Pc', wtPcBathrobe1Controller.text);
-      addRow('Bathrobe1 Fabric Cost', fabricCostBathrobe1Controller.text);
-      addRow('Bathrobe1 Labour', labourBathrobe1Controller.text);
-      addRow('Bathrobe1 B %', bPercentBathrobe1Controller.text);
-      addRow('Bathrobe1 Total Cost', totalCostBathrobe1Controller.text);
-      addRow('Bathrobe1 B Cost', bCostBathrobe1Controller.text);
-      addRow('Bathrobe1 Rate', bathrobeRateBathrobe1Controller.text);
-
-      // Stitching – Bathrobe 2
-      addRow('Bathrobe2 Length', lengthBathrobe2Controller.text);
-      addRow('Bathrobe2 Length Margin', lengthMarginBathrobe2Controller.text);
-      addRow('Bathrobe2 Fabric Use', fabricUseBathrobe2Controller.text);
-      addRow('Bathrobe2 Cutting Waste', cuttingWasteBathrobe2Controller.text);
-      addRow('Bathrobe2 Fabric Consumption', fabricCounsumptionBathrobe2Controller.text);
-      addRow('Bathrobe2 GSM', gsmBathrobe2Controller.text);
-      addRow('Bathrobe2 Wt/Mtr', wtMtrBathrobe2Controller.text);
-      addRow('Bathrobe2 Wt/Pc', wtPcBathrobe2Controller.text);
-      addRow('Bathrobe2 Fabric Cost', fabricCostBathrobe2Controller.text);
-      addRow('Bathrobe2 Labour', labourBathrobe2Controller.text);
-      addRow('Bathrobe2 B %', bPercentBathrobe2Controller.text);
-      addRow('Bathrobe2 Total Cost', totalCostBathrobe2Controller.text);
-      addRow('Bathrobe2 B Cost', bCostBathrobe2Controller.text);
-      addRow('Bathrobe2 Rate', bathrobeRateBathrobe2Controller.text);
-
-      // Ex Factory
-      addRow('Towel Profit %', profitPercentTowelController.text);
-      addRow('Towel Profit Amount', profitAmountTowelController.text);
-      addRow('Towel Ex Factory', exFactoryTowelController.text);
-
-      addRow('Bathrobe1 Profit %', profitPercentBathrobe1Controller.text);
-      addRow('Bathrobe1 Profit Amount', profitAmountBathrobe1Controller.text);
-      addRow('Bathrobe1 Ex Factory', exFactoryBathrobe1Controller.text);
-
-      addRow('Bathrobe2 Profit %', profitPercentBathrobe2Controller.text);
-      addRow('Bathrobe2 Profit Amount', profitAmountBathrobe2Controller.text);
-      addRow('Bathrobe2 Ex Factory', exFactoryBathrobe2Controller.text);
-
-      // Export – Freight/Kg
-      addRow('Freight/Kg', freightKgController.text);
-      addRow('Sub Total (Kg)', subTotalKgController.text);
-      addRow('Bank Charges % (Kg)', bankChargesPercentKgController.text);
-      addRow('Bank % Total (Kg)', bankPercentTotalKgController.text);
-      addRow('17 GST % (Kg)', gst17PercentKgController.text);
-      addRow('17 GST Total (Kg)', gst17TotalKgController.text);
-      addRow('Overhead % (Kg)', overheadChargesPercentKgController.text);
-      addRow('Overhead Total (Kg)', overheadTotalKgController.text);
-      addRow('Profit % (Kg)', profitPercentKgController.text);
-      addRow('Profit % Total (Kg)', profitPercentTotalKgController.text);
-      addRow('Commission % (Kg)', commissionPercentKgController.text);
-      addRow('Commission % Total (Kg)', commissionPercentTotalKgController.text);
-      addRow('Total (Kg)', totalKgController.text);
-      addRow('USD Rate (Kg)', usdRateKgController.text);
-      addRow('\$ (Kg)', dollarKgController.text);
-
-      // Export – Freight/Pc
-      addRow('Freight/Pc', freightPcController.text);
-      addRow('Sub Total (Pc)', subTotalPcController.text);
-      addRow('Profit % (Pc)', profitPercentPcController.text);
-      addRow('Profit Amount (Pc)', profitAmountPcController.text);
-      addRow('Total (Pc)', totalPcController.text);
-      addRow('USD Rate (Pc)', usdRatePcController.text);
-      addRow('\$ (Pc)', dollarPcController.text);
-
-      // Export – Freight/Pc2
-      addRow('Freight/Pc2', freightPc2Controller.text);
-      addRow('Sub Total (Pc2)', subTotalPc2Controller.text);
-      addRow('Bank Charges (Pc2)', bankChargesPc2Controller.text);
-      addRow('GST % (Pc2)', gstPercentPc2Controller.text);
-      addRow('Profit % (Pc2)', profitPercentPc2Controller.text);
-      addRow('Commission (Pc2)', commissionPc2Controller.text);
-      addRow('Profit Amount (Pc2)', intermediateTotal2Controller.text);
-      addRow('Total (Pc2)', totalPc2Controller.text);
-      addRow('USD Rate (Pc2)', usdRatePc2Controller.text);
-      addRow('\$ (Pc2)', dollarPc2Controller.text);
-
-      // GST totals
-      addRow('GST %', gstPercentController.text);
-      addRow('Total Amount', totalAmountController.text);
+      // Export Section - 3 columns (Freight/Kg, Freight/Pc, Freight/Pc2) aligned side by side
+      // Row 1: Freight/Kg (all three)
+      rows.add([
+        ['Freight/Kg:', freightKgController.text],
+        ['Freight/Kg:', freightPcController.text],
+        ['Freight/Kg:', freightPc2Controller.text],
+      ]);
+      
+      // Row 2: Sub Total (all three)
+      rows.add([
+        ['Sub Total:', subTotalKgController.text],
+        ['Sub Total:', subTotalPcController.text],
+        ['Sub Total:', subTotalPc2Controller.text],
+      ]);
+      
+      // Row 3: Bank Charges % (Kg), Profit % (Pc), Bank Charges (Pc2)
+      rows.add([
+        ['Bank Charges %:', bankChargesPercentKgController.text],
+        ['Profit %:', profitPercentPcController.text],
+        ['Bank Charges:', bankChargesPc2Controller.text],
+      ]);
+      
+      // Row 4: Bank % Total (Kg), Profit Amount (Pc), GST % (Pc2)
+      rows.add([
+        ['Bank % Total:', bankPercentTotalKgController.text],
+        ['Profit Amount:', profitAmountPcController.text],
+        ['GST %:', gstPercentPc2Controller.text],
+      ]);
+      
+      // Row 5: 17 GST % (Kg), Total (Pc), Profit % (Pc2)
+      rows.add([
+        ['17 GST %:', gst17PercentKgController.text],
+        ['Total:', totalPcController.text],
+        ['Profit %:', profitPercentPc2Controller.text],
+      ]);
+      
+      // Row 6: 17 GST Total (Kg), USD RATE (Pc), Commission (Pc2)
+      rows.add([
+        ['17 GST Total:', gst17TotalKgController.text],
+        ['USD RATE:', usdRatePcController.text],
+        ['Commission:', commissionPc2Controller.text],
+      ]);
+      
+      // Row 7: Overhead Charges % (Kg), $ (Pc), (intermediate total - Pc2, no label)
+      rows.add([
+        ['Overhead Charges %:', overheadChargesPercentKgController.text],
+        ['\$:', dollarPcController.text],
+        ['', intermediateTotal2Controller.text],
+      ]);
+      
+      // Row 8: Overhead % Total (Kg), (empty for Pc), Total (Pc2)
+      rows.add([
+        ['Overhead % Total:', overheadTotalKgController.text],
+        ['', ''],
+        ['Total:', totalPc2Controller.text],
+      ]);
+      
+      // Row 9: Profit % (Kg), (empty for Pc), USD RATE (Pc2)
+      rows.add([
+        ['Profit %:', profitPercentKgController.text],
+        ['', ''],
+        ['USD RATE:', usdRatePc2Controller.text],
+      ]);
+      
+      // Row 10: Profit % Total (Kg), (empty for Pc), $ (Pc2)
+      rows.add([
+        ['Profit % Total:', profitPercentTotalKgController.text],
+        ['', ''],
+        ['\$:', dollarPc2Controller.text],
+      ]);
+      
+      // Row 11: Commission % (Kg)
+      rows.add([
+        ['Commission %:', commissionPercentKgController.text],
+      ]);
+      
+      // Row 12: Commission % Total (Kg)
+      rows.add([
+        ['Commission % Total:', commissionPercentTotalKgController.text],
+      ]);
+      
+      // Row 13: Total (Kg)
+      rows.add([
+        ['Total:', totalKgController.text],
+      ]);
+      
+      // Row 14: USD Rate (Kg)
+      rows.add([
+        ['USD Rate:', usdRateKgController.text],
+      ]);
+      
+      // Row 15: $ (Kg)
+      rows.add([
+        ['\$:', dollarKgController.text],
+      ]);
 
       final pages = [ {'title': 'Towel Costing Sheet', 'rows': rows} ];
       try {
         await printPagesDirect(pages, header: 'Towel Costing Sheet');
-        Get.snackbar('Success', 'PDF generated successfully', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: const EdgeInsets.all(16));
+        Get.snackbar('Success', 'PDF generated successfully', backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: EdgeInsets.symmetric(vertical: 200));
       } catch (e) {
-        Get.snackbar('Error', 'Failed to generate PDF: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: const EdgeInsets.all(16));
+        Get.snackbar('Error', 'Failed to generate PDF: $e', backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: EdgeInsets.symmetric(vertical: 200));
       }
     } finally {
       isLoading.value = false;

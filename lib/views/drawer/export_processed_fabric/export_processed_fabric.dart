@@ -38,7 +38,7 @@ class ExportProcessedFabricPage extends StatelessWidget {
           ),
         ),
         title: const Text(
-          'EXPORT PROCESSED FABRIC',
+          'EXPORT PROCESSED FABRIC SHEET',
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,

@@ -116,14 +116,13 @@ class ApiService {
     required String companyId,
     required String companyName,
     required String fullName,
-    required String username,
     required String email,
     required String address,
     required String departmentName,
     required String designation,
     required String cellNumber,
     required String password,
-    required int status,
+    required String status,
   }) async {
     try {
       final response = await _dio.post(
@@ -132,7 +131,6 @@ class ApiService {
           'company_id': companyId,
           'company_name': companyName,
           'full_name': fullName,
-          'username': username,
           'email_address': email,
           'address': address,
           'dept_name': departmentName,
@@ -149,6 +147,30 @@ class ApiService {
             ? (error.response!.data['message']?.toString() ??
                 'Unable to add user')
             : error.message ?? 'Unable to add user',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyUserOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'verifyUserOtp',
+        data: FormData.fromMap({
+          'email': email,
+          'otp': otp,
+        }),
+      );
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to verify OTP')
+            : error.message ?? 'Unable to verify OTP',
         statusCode: error.response?.statusCode,
       );
     }

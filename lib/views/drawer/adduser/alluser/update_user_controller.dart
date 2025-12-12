@@ -80,8 +80,7 @@ class ManageUserController extends GetxController {
         response['message']?.toString() ?? 'User updated successfully',
         backgroundColor: Colors.green,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
         borderRadius: 8,
         icon: const Icon(Icons.check_circle, color: Colors.white),
       );
@@ -93,8 +92,7 @@ class ManageUserController extends GetxController {
         error.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } finally {
       isLoading.value = false;
@@ -128,6 +126,7 @@ class ManageUserController extends GetxController {
         'Deletion endpoint not provided yet.',
         backgroundColor: Colors.orange,
         colorText: Colors.white,
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     }
   }

@@ -59,11 +59,10 @@ class LoginController extends GetxController {
         Get.snackbar(
           'Success',
           response['message']?.toString() ?? 'Login successful',
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4CAF50),
           colorText: Colors.white,
           duration: const Duration(seconds: 2),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.symmetric(vertical: 200),
         );
 
         Get.offAll(() => const HomePage());
@@ -71,21 +70,19 @@ class LoginController extends GetxController {
         Get.snackbar(
           'Error',
           error.message,
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.symmetric(vertical: 200),
         );
       } catch (e) {
         Get.snackbar(
           'Error',
           'Login failed: $e',
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.symmetric(vertical: 200),
         );
       } finally {
         isLoading.value = false;

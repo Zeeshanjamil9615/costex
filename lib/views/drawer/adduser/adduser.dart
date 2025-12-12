@@ -95,7 +95,7 @@ class AddUserPage extends StatelessWidget {
                   key: controller.formKey,
                   child: Column(
                     children: [
-                      // Row 1: Full Name, Username, Email
+                      // Row 1: Full Name, Email
                       _buildResponsiveRow([
                         Expanded(
                           child: CustomTextField(
@@ -108,16 +108,6 @@ class AddUserPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: CustomTextField(
-                            label: 'Username',
-                            hintText: 'Enter Username',
-                            controller: controller.usernameController,
-                            required: true,
-                            validator: controller.validateUsername,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
                           child: HighlightedTextField(
                             label: 'Email',
                             controller: controller.emailController,
@@ -126,6 +116,7 @@ class AddUserPage extends StatelessWidget {
                             validator: controller.validateEmail,
                           ),
                         ),
+                        const Expanded(flex: 1, child: SizedBox()),
                       ]),
 
                       const SizedBox(height: 20),

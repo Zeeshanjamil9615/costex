@@ -1,6 +1,7 @@
 import 'package:costex_app/api_service/api_service.dart';
 import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/views/drawer/adduser/alluser/all_user_controller.dart';
+import 'package:costex_app/views/drawer/adduser/otp_verification.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -8,8 +9,11 @@ class AddUserController extends GetxController {
   final ApiService _apiService = ApiService();
   final SessionService _session = SessionService.instance;
   // Text Controllers
+
+
+         
+         
   final fullNameController = TextEditingController();
-  final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final addressController = TextEditingController();
   final departmentController = TextEditingController();
@@ -18,7 +22,7 @@ class AddUserController extends GetxController {
   final passwordController = TextEditingController();
 
   // Status (0 = Deactive, 1 = Active)
-  final status = 0.obs;
+  final status = 1.obs;
 
   // Form Key
   final formKey = GlobalKey<FormState>();
@@ -30,7 +34,6 @@ class AddUserController extends GetxController {
   void onClose() {
     // Dispose controllers
     fullNameController.dispose();
-    usernameController.dispose();
     emailController.dispose();
     addressController.dispose();
     departmentController.dispose();
@@ -57,32 +60,61 @@ class AddUserController extends GetxController {
           companyId: companyId,
           companyName: companyName,
           fullName: fullNameController.text.trim(),
-          username: usernameController.text.trim(),
           email: emailController.text.trim(),
           address: addressController.text.trim(),
           departmentName: departmentController.text.trim(),
           designation: designationController.text.trim(),
           cellNumber: cellNumberController.text.trim(),
           password: passwordController.text.trim(),
-          status: status.value,
+          status: status.value.toString(),
         );
 
+        // Check if OTP verification is required
+        final data = response['data'];
+        if (data is Map<String, dynamic> && data['requires_otp'] == true) {
+          // Navigate to OTP verification screen
+          final email = emailController.text.trim();
+          Get.to(() => AddUserOtpVerificationPage(email: email));
+          
+          Get.snackbar(
+            'OTP Sent',
+            response['message']?.toString() ?? 'OTP sent to your email. Please verify.',
+            margin: EdgeInsets.symmetric(vertical: 200),
+            backgroundColor: const Color(0xFF4CAF50),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+          
+          // Clear form after navigating to OTP screen
+          clearForm();
+        } else {
+          // User added successfully without OTP (shouldn't happen with new API, but handle it)
+          Get.snackbar(
+            'Success',
+            response['message']?.toString() ?? 'User added successfully',
+            margin: EdgeInsets.symmetric(vertical: 200),
+            backgroundColor: const Color(0xFF4CAF50),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+
+          clearForm();
+          _notifyUsersPage();
+        }
+      } on ApiException catch (e) {
         Get.snackbar(
-          'Success',
-          response['message']?.toString() ?? 'User added successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF4CAF50),
+          'Error',
+          e.message,
+          margin: EdgeInsets.symmetric(vertical: 200),
+          backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
         );
-
-        clearForm();
-        _notifyUsersPage();
       } catch (e) {
         Get.snackbar(
           'Error',
           e.toString(),
-          snackPosition: SnackPosition.BOTTOM,
+          margin: EdgeInsets.symmetric(vertical: 200),
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
@@ -96,14 +128,13 @@ class AddUserController extends GetxController {
   // Clear form
   void clearForm() {
     fullNameController.clear();
-    usernameController.clear();
     emailController.clear();
     addressController.clear();
     departmentController.clear();
     designationController.clear();
     cellNumberController.clear();
     passwordController.clear();
-    status.value = 0; // Reset to default (Deactive)
+    status.value = 1; // Reset to default (Active)
   }
 
   void _notifyUsersPage() {
@@ -119,16 +150,6 @@ class AddUserController extends GetxController {
     }
     if (value.length < 3) {
       return 'Full name must be at least 3 characters';
-    }
-    return null;
-  }
-
-  String? validateUsername(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Username is required';
-    }
-    if (value.length < 3) {
-      return 'Username must be at least 3 characters';
     }
     return null;
   }

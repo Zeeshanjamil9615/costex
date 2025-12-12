@@ -957,7 +957,7 @@ class MultiMadeupsController extends GetxController
       default: return 0.0;
     }
   }
-
+  
   TextEditingController _getQualityController(int product) {
     switch (product) {
       case 1: return quality1Controller;
@@ -1010,6 +1010,16 @@ class MultiMadeupsController extends GetxController
         return containerSize4Controller;
       default:
         return containerSize1Controller;
+    }
+  }
+
+  TextEditingController _getPortController(int product) {
+    switch (product) {
+      case 1: return port1Controller;
+      case 2: return port2Controller;
+      case 3: return port3Controller;
+      case 4: return port4Controller;
+      default: return port1Controller;
     }
   }
 
@@ -1223,10 +1233,9 @@ class MultiMadeupsController extends GetxController
       Get.snackbar(
         'Validation',
         'Please enter customer name before saving.',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFFFC107),
         colorText: Colors.black,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
       return;
     }
@@ -1237,10 +1246,9 @@ class MultiMadeupsController extends GetxController
       Get.snackbar(
         'Error',
         'Company information not found. Please login again.',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
       return;
     }
@@ -1391,28 +1399,25 @@ class MultiMadeupsController extends GetxController
       Get.snackbar(
         'Success',
         response['message']?.toString() ?? 'Quotation saved successfully',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF4CAF50),
         colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } on ApiException catch (error) {
       Get.snackbar(
         'Error',
         error.message,
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } catch (e) {
       Get.snackbar(
         'Error',
         'Failed to save: $e',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } finally {
       isLoading.value = false;
@@ -1422,97 +1427,134 @@ class MultiMadeupsController extends GetxController
   Future<void> generatePDF() async {
     try {
       isLoading.value = true;
-      // Build rows in a single-column style so each PDF row matches the sheet row.
+      // Build rows matching the exact sheet view layout
       final rows = <List<List<String>>>[];
 
-      void addRow(String label, String value) {
+      void addRow(List<String> cells) {
+        rows.add([cells]);
+      }
+
+      // Customer Name (full width)
+      addRow(['Customer Name', customerNameController.text]);
+
+      // ========== BASIC TAB ==========
+      // For each product: Warp/Weft in one row, Reed/Pick in one row, Grey Width separate, Finish Width separate
+      for (int i = 1; i <= 4; i++) {
+        final basic = _getBasicControllers(i);
+        rows.add([['Product $i - Warp', basic[0].text], ['Product $i - Weft', basic[1].text]]);
+        rows.add([['Product $i - Reed', basic[2].text], ['Product $i - Pick', basic[3].text]]);
+        rows.add([['Product $i - Grey Width', basic[4].text]]);
+        rows.add([['Product $i - Finish Width', basic[5].text]]);
+      }
+
+      // ========== CONSUMPTION TAB ==========
+      // For each product group: Product Name, then for each row: 3 fields per row (wide layout)
+      for (int p = 1; p <= 4; p++) {
+        rows.add([['Product Group $p', 'Product $p']]);
+        rows.add([['Product Name', _getGeneralProductNameController(p).text]]);
+        
+        for (int r = 1; r <= 4; r++) {
+          final ctrls = _getConsumptionRowControllers(p, r);
+          // Row 1: Product Name (flex:2), Size 1, Size 2 (3 fields)
+          rows.add([
+            ['Item $p.$r - Product Name', ctrls[0].text],
+            ['Item $p.$r - Size 1', ctrls[1].text],
+            ['Item $p.$r - Size 2', ctrls[2].text],
+          ]);
+          // Row 2: CutSize, Grey Width, Finish Width (3 fields)
+          rows.add([
+            ['Item $p.$r - Cut Size', ctrls[3].text],
+            ['Item $p.$r - Grey Width', ctrls[4].text],
+            ['Item $p.$r - Finish Width', ctrls[5].text],
+          ]);
+          // Row 3: Pcs, Consumption, Consumption Price (3 fields)
+          rows.add([
+            ['Item $p.$r - PCS', ctrls[6].text],
+            ['Item $p.$r - Consumption', ctrls[7].text],
+            ['Item $p.$r - Consumption Price', ctrls[8].text],
+          ]);
+        }
+        rows.add([['Product $p Total', _getTotalController(p).text]]);
+        rows.add([['Product $p Consumption Price', _getConsumptionPriceController(p).text]]);
+      }
+
+      // ========== FABRIC TAB ==========
+      // Each field shows 4 products side by side (4 fields in one row)
+      final fabricFields = [
+        ['Quality', (int i) => _getQualityController(i).text],
+        ['Loom', (int i) => _getLoomController(i).text],
+        ['Weave', (int i) => _getWeaveController(i).text],
+        ['Warp Rate/Lbs', (int i) => _getFabricValues(i)['warpRate']!.toString()],
+        ['Weft Rate/Lbs', (int i) => _getFabricValues(i)['weftRate']!.toString()],
+        ['Conversion/Pick', (int i) => _getFabricValues(i)['conversionPick']!.toString()],
+        ['Warp Weight', (int i) => _getFabricCalculatedControllers(i)[0].text],
+        ['Weft Weight', (int i) => _getFabricCalculatedControllers(i)[1].text],
+        ['Total Weight', (int i) => _getFabricCalculatedControllers(i)[2].text],
+        ['Warp Price', (int i) => _getFabricCalculatedControllers(i)[3].text],
+        ['Weft Price', (int i) => _getFabricCalculatedControllers(i)[4].text],
+        ['Conversion', (int i) => _getFabricCalculatedControllers(i)[5].text],
+        ['Grey Fabric Price', (int i) => _getFabricCalculatedControllers(i)[6].text],
+        ['Mending/MT', (int i) => _getMendingMT(i).toString()],
+        ['Processing/inch', (int i) => _getProcessingInchController(i).text],
+        ['Processing Charges', (int i) => _getFabricCalculatedControllers(i)[7].text],
+        ['Wastage %', (int i) => _getWastage(i).toString()],
+        ['Finish Fabric Cost', (int i) => _getFabricCalculatedControllers(i)[8].text],
+      ];
+
+      for (final field in fabricFields) {
+        final label = field[0] as String;
+        final getter = field[1] as String Function(int);
         rows.add([
-          [label, value],
+          ['$label - P1', getter(1)],
+          ['$label - P2', getter(2)],
+          ['$label - P3', getter(3)],
+          ['$label - P4', getter(4)],
         ]);
       }
 
-      addRow('Customer Name', customerNameController.text);
+      // ========== FREIGHT TAB ==========
+      // Each field shows 4 products in a 2x2 grid (4 fields, arranged as 2 rows of 2)
+      final freightFields = [
+        ['Product Name', (int i) => _getGeneralProductNameController(i).text, true],
+        ['Consumption Price', (int i) => _getConsumptionPriceController(i).text, false],
+        ['Stitching', (int i) => _getFreightControllers(i)[0].text, false],
+        ['Accessories', (int i) => _getFreightControllers(i)[1].text, false],
+        ['Poly Bag', (int i) => _getFreightControllers(i)[2].text, false],
+        ['Miscellaneous', (int i) => _getFreightControllers(i)[3].text, false],
+        ['Packing charges', (int i) => _getFreightControllers(i)[4].text, false],
+        ['Container Size', (int i) => _getContainerSizeController(i).text, true],
+        ['Container Capacity', (int i) => _getFreightControllers(i)[5].text, false],
+        ['Rate of Exchange', (int i) => _getFreightControllers(i)[6].text, false],
+        ['FOB Price in PKR', (int i) => _getFreightCalculatedControllers(i)[0].text, false],
+        ['FOB Price in \$', (int i) => _getFreightCalculatedControllers(i)[1].text, false],
+        ['Freight in \$', (int i) => _getFreightControllers(i)[7].text, false],
+        ['Port', (int i) => _getPortController(i).text, true],
+        ['Freight Calculation', (int i) => _getFreightCalculatedControllers(i)[2].text, false],
+        ['C & F Price in \$', (int i) => _getFreightCalculatedControllers(i)[3].text, false],
+        ['Profit %', (int i) => _getFreightControllers(i)[8].text, false],
+        ['Commission %', (int i) => _getFreightControllers(i)[9].text, false],
+        ['Overhead %', (int i) => _getFreightControllers(i)[10].text, false],
+        ['FOB Price Final', (int i) => _getFreightCalculatedControllers(i)[4].text, false],
+        ['C&F Price Final', (int i) => _getFreightCalculatedControllers(i)[5].text, false],
+      ];
 
-      // Basic details per product (each field its own row, like the cards)
-      for (int i = 1; i <= 4; i++) {
-        addRow('Product $i - Warp', _getBasicControllers(i)[0].text);
-        addRow('Product $i - Weft', _getBasicControllers(i)[1].text);
-        addRow('Product $i - Reed', _getBasicControllers(i)[2].text);
-        addRow('Product $i - Pick', _getBasicControllers(i)[3].text);
-        addRow('Product $i - Grey Width', _getBasicControllers(i)[4].text);
-        addRow('Product $i - Finish Width', _getBasicControllers(i)[5].text);
+      for (final field in freightFields) {
+        final label = field[0] as String;
+        final getter = field[1] as String Function(int);
+        // 2x2 grid: Row 1 has P1 and P2, Row 2 has P3 and P4
+        rows.add([
+          ['$label - P1', getter(1)],
+          ['$label - P2', getter(2)],
+        ]);
+        rows.add([
+          ['$label - P3', getter(3)],
+          ['$label - P4', getter(4)],
+        ]);
       }
 
-      // Consumption per product (stacked like the ExpansionTile content)
-      for (int p = 1; p <= 4; p++) {
-        addRow('Product Group', 'Product $p');
-        addRow('Product Name', _getGeneralProductNameController(p).text);
-        for (int r = 1; r <= 4; r++) {
-          final ctrls = _getConsumptionRowControllers(p, r);
-          addRow('Item $p.$r - Product Name', ctrls[0].text);
-          addRow('Item $p.$r - Size 1', ctrls[1].text);
-          addRow('Item $p.$r - Size 2', ctrls[2].text);
-          addRow('Item $p.$r - Cut Size', ctrls[3].text);
-          addRow('Item $p.$r - Grey Width', ctrls[4].text);
-          addRow('Item $p.$r - Finish Width', ctrls[5].text);
-          addRow('Item $p.$r - PCS', ctrls[6].text);
-          addRow('Item $p.$r - Consumption', ctrls[7].text);
-          addRow('Item $p.$r - Consumption Price', ctrls[8].text);
-        }
-        addRow('Product $p Total', _getTotalController(p).text);
-        addRow('Product $p Consumption Price', _getConsumptionPriceController(p).text);
-      }
-
-      // Fabric details per product (each card field on its own row)
-      for (int i = 1; i <= 4; i++) {
-        final fabric = _getFabricCalculatedControllers(i);
-        addRow('Fabric - Product $i - Quality', _getQualityController(i).text);
-        addRow('Fabric - Product $i - Loom', _getLoomController(i).text);
-        addRow('Fabric - Product $i - Weave', _getWeaveController(i).text);
-        addRow('Fabric - Product $i - Warp Rate/Lbs', _getFabricValues(i)['warpRate']!.toString());
-        addRow('Fabric - Product $i - Weft Rate/Lbs', _getFabricValues(i)['weftRate']!.toString());
-        addRow('Fabric - Product $i - Conversion/Pick', _getFabricValues(i)['conversionPick']!.toString());
-        addRow('Fabric - Product $i - Warp Weight', fabric[0].text);
-        addRow('Fabric - Product $i - Weft Weight', fabric[1].text);
-        addRow('Fabric - Product $i - Total Weight', fabric[2].text);
-        addRow('Fabric - Product $i - Warp Price', fabric[3].text);
-        addRow('Fabric - Product $i - Weft Price', fabric[4].text);
-        addRow('Fabric - Product $i - Conversion', fabric[5].text);
-        addRow('Fabric - Product $i - Grey Fabric Price', fabric[6].text);
-        addRow('Fabric - Product $i - Processing/inch', _getProcessingInchController(i).text);
-        addRow('Fabric - Product $i - Processing Charges', fabric[7].text);
-        addRow('Fabric - Product $i - Mending/MT', _getMendingMT(i).toString());
-        addRow('Fabric - Product $i - Wastage %', _getWastage(i).toString());
-        addRow('Fabric - Product $i - Finish Fabric Cost', fabric[8].text);
-      }
-
-      // Freight / export details per product (single-field rows)
-      for (int i = 1; i <= 4; i++) {
-        final freight = _getFreightCalculatedControllers(i);
-        final freightInputs = _getFreightControllers(i);
-        addRow('Freight - Product $i - Consumption Price', _getConsumptionPriceController(i).text);
-        addRow('Freight - Product $i - Stitching', freightInputs[0].text);
-        addRow('Freight - Product $i - Accessories', freightInputs[1].text);
-        addRow('Freight - Product $i - Poly Bag', freightInputs[2].text);
-        addRow('Freight - Product $i - Miscellaneous', freightInputs[3].text);
-        addRow('Freight - Product $i - Packing charges', freightInputs[4].text);
-        addRow('Freight - Product $i - Container Size', _getContainerSizeController(i).text);
-        addRow('Freight - Product $i - Container Capacity', freightInputs[5].text);
-        addRow('Freight - Product $i - Rate of Exchange', freightInputs[6].text);
-        addRow('Freight - Product $i - Freight in \$', freightInputs[7].text);
-        addRow('Freight - Product $i - FOB Price in PKR', freight[0].text);
-        addRow('Freight - Product $i - FOB Price in \$', freight[1].text);
-        addRow('Freight - Product $i - Freight Calculation in \$', freight[2].text);
-        addRow('Freight - Product $i - C & F Price in \$', freight[3].text);
-        addRow('Freight - Product $i - Profit %', freightInputs[8].text);
-        addRow('Freight - Product $i - Commission %', freightInputs[9].text);
-        addRow('Freight - Product $i - Overhead %', freightInputs[10].text);
-        addRow('Freight - Product $i - FOB Price Final', freight[4].text);
-        addRow('Freight - Product $i - C & F Price Final', freight[5].text);
-      }
-
-      addRow('FOB Total DuvetSet', fobTotalDuvetSet1Controller.text);
-      addRow('C&F Total DuvetSet', cfTotalDuvetSet1Controller.text);
+      // Totals (single field rows)
+      rows.add([['FOB Total DuvetSet', fobTotalDuvetSet1Controller.text]]);
+      rows.add([['C&F Total DuvetSet', cfTotalDuvetSet1Controller.text]]);
 
       final pages = [
         {'title': 'Export Multi-Width Fabric', 'rows': rows}
@@ -1520,9 +1562,9 @@ class MultiMadeupsController extends GetxController
 
       try {
         await printPagesDirect(pages, header: 'Export Multi-Width Fabric');
-        Get.snackbar('Success', 'PDF generated successfully', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: const EdgeInsets.all(16));
+        Get.snackbar('Success', 'PDF generated successfully', backgroundColor: const Color(0xFF4CAF50), colorText: Colors.white, margin: EdgeInsets.symmetric(vertical: 200));
       } catch (e) {
-        Get.snackbar('Error', 'Failed to generate PDF: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: const EdgeInsets.all(16));
+        Get.snackbar('Error', 'Failed to generate PDF: $e', backgroundColor: const Color(0xFFF44336), colorText: Colors.white, margin: EdgeInsets.symmetric(vertical: 200));
       }
     } finally {
       isLoading.value = false;

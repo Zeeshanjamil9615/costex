@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:costex_app/api_service/api_service.dart';
 import 'package:costex_app/services/session_service.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class User {
@@ -93,7 +94,7 @@ class AllUsersController extends GetxController {
       Get.snackbar(
         'Error',
         'Unable to fetch users. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } finally {
       isLoading.value = false;

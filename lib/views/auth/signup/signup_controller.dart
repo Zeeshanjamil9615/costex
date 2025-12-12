@@ -68,11 +68,10 @@ class SignupController extends GetxController {
           'Success',
           response['message']?.toString() ??
               'Company registered. A verification code has been sent to your email.',
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF4CAF50),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.symmetric(vertical: 200),
         );
 
         Get.to(() => OtpVerificationPage(email: email));
@@ -80,21 +79,19 @@ class SignupController extends GetxController {
         Get.snackbar(
           'Error',
           error.message,
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.symmetric(vertical: 200),
         );
       } catch (e) {
         Get.snackbar(
           'Error',
           'Registration failed: $e',
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.symmetric(vertical: 200),
         );
       } finally {
         isLoading.value = false;

@@ -178,7 +178,7 @@ class GreyFabricCostingController extends GetxController {
         'Please enter customer name',
         backgroundColor: AppColors.error,
         colorText: AppColors.textLight,
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
       return;
     }
@@ -190,7 +190,7 @@ class GreyFabricCostingController extends GetxController {
         'Company information missing. Please login again.',
         backgroundColor: AppColors.error,
         colorText: AppColors.textLight,
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
       return;
     }
@@ -232,7 +232,7 @@ class GreyFabricCostingController extends GetxController {
             'Grey Fabric Quotation Saved Successfully',
         backgroundColor: AppColors.success,
         colorText: AppColors.textLight,
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } on ApiException catch (error) {
       Get.snackbar(
@@ -240,7 +240,7 @@ class GreyFabricCostingController extends GetxController {
         error.message,
         backgroundColor: AppColors.error,
         colorText: AppColors.textLight,
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } catch (e) {
       Get.snackbar(
@@ -248,7 +248,7 @@ class GreyFabricCostingController extends GetxController {
         'Failed to save quotation: $e',
         backgroundColor: AppColors.error,
         colorText: AppColors.textLight,
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } finally {
       isSaving.value = false;
@@ -263,7 +263,7 @@ class GreyFabricCostingController extends GetxController {
         'Please enter customer name',
         backgroundColor: AppColors.error,
         colorText: AppColors.textLight,
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
       return;
     }
@@ -328,15 +328,15 @@ class GreyFabricCostingController extends GetxController {
     ];
 
     // Use the printing utility to print directly and await completion
-    final pages = [ {'title': 'Grey Fabric Costing', 'rows': rows} ];
+    final pages = [ {'title': 'Grey Fabric Costing Sheet', 'rows': rows} ];
     try {
-      await printPagesDirect(pages, header: 'Grey Fabric Costing');
+      await printPagesDirect(pages, header: 'Grey Fabric Costing Sheet');
       Get.snackbar(
         'Success',
         'PDF generated successfully',
         backgroundColor: AppColors.success,
         colorText: AppColors.textLight,
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     } catch (e) {
       Get.snackbar(
@@ -344,7 +344,7 @@ class GreyFabricCostingController extends GetxController {
         'Failed to generate PDF: $e',
         backgroundColor: AppColors.error,
         colorText: AppColors.textLight,
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
       );
     }
   }

@@ -30,7 +30,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
     if (code.length != 6) {
       Get.snackbar('Invalid code', 'Please enter the 6-digit code sent to your email.',
-          snackPosition: SnackPosition.BOTTOM);
+          margin: EdgeInsets.symmetric(vertical: 200));
       return;
     }
 
@@ -49,7 +49,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         
         'Success',
         response['message']?.toString() ?? 'OTP verified successfully.',
-        snackPosition: SnackPosition.TOP,
+        margin: EdgeInsets.symmetric(vertical: 200),
         backgroundColor: const Color(0xFF4CAF50),
         colorText: Colors.white,
         duration: const Duration(seconds: 40),
@@ -64,7 +64,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       Get.snackbar(
         'Error',
         error.message,
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
       );
@@ -73,7 +73,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       Get.snackbar(
         'Error',
         'OTP verification failed: $error',
-        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(vertical: 200),
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
       );
@@ -83,7 +83,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   Future<void> _resendCode() async {
     // TODO: implement resend code API
     Get.snackbar('Code sent', 'A new verification code has been sent to ${widget.email}.',
-        snackPosition: SnackPosition.BOTTOM);
+        margin: EdgeInsets.symmetric(vertical: 200));
   }
 
   @override
