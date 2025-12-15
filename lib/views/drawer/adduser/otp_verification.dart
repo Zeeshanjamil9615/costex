@@ -63,6 +63,8 @@ class _AddUserOtpVerificationPageState extends State<AddUserOtpVerificationPage>
     } on ApiException catch (error) {
       setState(() => _isLoading = false);
       Get.snackbar(
+
+        
         'Error',
         error.message,
         snackPosition: SnackPosition.BOTTOM,
