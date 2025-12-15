@@ -1,5 +1,6 @@
 import 'package:costex_app/api_service/api_service.dart';
 import 'package:costex_app/utils/colour.dart';
+import 'package:costex_app/views/drawer/adduser/adduser.dart';
 import 'package:costex_app/views/drawer/adduser/alluser/all_user_controller.dart';
 import 'package:costex_app/widget/custom_textfield.dart';
 import 'package:flutter/material.dart';
@@ -43,43 +44,79 @@ class _AddUserOtpVerificationPageState extends State<AddUserOtpVerificationPage>
       if (!mounted) return;
 
       setState(() => _isLoading = false);
+      print(response);
 
-      Get.snackbar(
-        'Success',
-        response['message']?.toString() ?? 'User registered successfully!',
-        margin: EdgeInsets.symmetric(vertical: 200),
-        backgroundColor: const Color(0xFF4CAF50),
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
-
-      // Refresh users list
+      // Refresh users list first
       if (Get.isRegistered<AllUsersController>()) {
         Get.find<AllUsersController>().refreshUsers();
       }
 
+      // Show success message
+      Get.snackbar(
+        'Success',
+        response['message']?.toString() ?? 'User registered successfully!',
+        snackPosition: SnackPosition.TOP,
+        margin: EdgeInsets.symmetric(vertical: Get.height * 0.4),
+        backgroundColor: const Color(0xFF4CAF50),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+      );
+
+      // Wait for snackbar to be visible, then navigate back
+      await Future.delayed(const Duration(milliseconds: 2000));
+      
+      if (!mounted) return;
+      
       // Navigate back to add user page
-      Get.back();
+      Get.off(() => AddUserPage());
+      
     } on ApiException catch (error) {
       setState(() => _isLoading = false);
       Get.snackbar(
         'Error',
         error.message,
-        margin: EdgeInsets.symmetric(vertical: 200),
+        snackPosition: SnackPosition.TOP,
+        margin: EdgeInsets.symmetric(vertical: Get.height * 0.4),
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 2),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
       );
+
+
+      // Wait for snackbar to be visible, then navigate back
+      await Future.delayed(const Duration(milliseconds: 2000));
+
+      
+      if (!mounted) return;
+
+
+      
+      // Navigate back to add user page
     } catch (error) {
       setState(() => _isLoading = false);
       Get.snackbar(
         'Error',
         'OTP verification failed: $error',
-        margin: EdgeInsets.symmetric(vertical: 200),
+        snackPosition: SnackPosition.TOP,
+        margin: EdgeInsets.symmetric(vertical: Get.height * 0.4),
         backgroundColor: const Color(0xFFF44336),
         colorText: Colors.white,
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 2),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
       );
+
+      // Wait for snackbar to be visible, then navigate back
+      await Future.delayed(const Duration(milliseconds: 2000));
+      
+      if (!mounted) return;
+      
+      // Navigate back to add user page
+      Get.back();
     }
   }
 
