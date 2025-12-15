@@ -9,10 +9,6 @@ class AddUserController extends GetxController {
   final ApiService _apiService = ApiService();
   final SessionService _session = SessionService.instance;
   // Text Controllers
-
-
-         
-         
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
   final addressController = TextEditingController();
@@ -79,7 +75,8 @@ class AddUserController extends GetxController {
           Get.snackbar(
             'OTP Sent',
             response['message']?.toString() ?? 'OTP sent to your email. Please verify.',
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
+            margin: EdgeInsets.symmetric(vertical: Get.height * 0.4),
             backgroundColor: const Color(0xFF4CAF50),
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
@@ -92,7 +89,8 @@ class AddUserController extends GetxController {
           Get.snackbar(
             'Success',
             response['message']?.toString() ?? 'User added successfully',
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
+            margin: EdgeInsets.symmetric(vertical: Get.height * 0.4),
             backgroundColor: const Color(0xFF4CAF50),
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
@@ -105,7 +103,8 @@ class AddUserController extends GetxController {
         Get.snackbar(
           'Error',
           e.message,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
+          margin: EdgeInsets.symmetric(vertical: Get.height * 0.4),
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
@@ -114,7 +113,8 @@ class AddUserController extends GetxController {
         Get.snackbar(
           'Error',
           e.toString(),
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
+          margin: EdgeInsets.symmetric(vertical: Get.height * 0.4),
           backgroundColor: const Color(0xFFF44336),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
