@@ -112,6 +112,34 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async {
+    try {
+      final response = await _dio.post(
+        'forgotPassword',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: json.encode({
+          'email_address': email,
+        }),
+      );
+
+      return _parseResponse(response);
+    } on DioException catch (error) {
+      throw ApiException(
+        error.response?.data is Map<String, dynamic>
+            ? (error.response!.data['message']?.toString() ??
+                'Unable to send reset link')
+            : error.message ?? 'Unable to send reset link',
+        statusCode: error.response?.statusCode,
+      );
+    }
+  }
+
   Future<Map<String, dynamic>> addUser({
     required String companyId,
     required String companyName,

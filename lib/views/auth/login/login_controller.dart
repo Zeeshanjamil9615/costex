@@ -1,5 +1,6 @@
 import 'package:costex_app/api_service/api_service.dart';
 import 'package:costex_app/services/session_service.dart';
+import 'package:costex_app/views/auth/forgot_password/forgot_password.dart';
 import 'package:costex_app/views/auth/signup/signup.dart';
 import 'package:costex_app/views/home/home.dart';
 import 'package:flutter/material.dart';
@@ -118,6 +119,11 @@ class LoginController extends GetxController {
   // Navigate to signup
   void goToSignup() {
     Get.to(() => SignupPage());
+  }
+
+  // Navigate to forgot password
+  void goToForgotPassword() {
+    Get.to(() => const ForgotPasswordPage());
   }
 
   void _prefillEmail() {
