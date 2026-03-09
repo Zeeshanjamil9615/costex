@@ -132,18 +132,18 @@ class ManageUserPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     
-                    CustomTextField(
-                      label: 'Address',
-                      controller: controller.addressController,
-                      required: true,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter address';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
+                    // CustomTextField(
+                    //   label: 'Address',
+                    //   controller: controller.addressController,
+                    //   required: true,
+                    //   validator: (value) {
+                    //     if (value == null || value.isEmpty) {
+                    //       return 'Please enter address';
+                    //     }
+                    //     return null;
+                    //   },
+                    // ),
+                    // const SizedBox(height: 20),
                     
                     CustomTextField(
                       label: 'Department Name',

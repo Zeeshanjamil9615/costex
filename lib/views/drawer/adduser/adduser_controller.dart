@@ -165,26 +165,26 @@ class AddUserController extends GetxController {
     return null;
   }
 
-  String? validateAddress(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Address is required';
-    }
-    return null;
-  }
+  // String? validateAddress(String? value) {
+  //   if (value == null || value.isEmpty) {
+  //     return 'Address is required';
+  //   }
+  //   return null;
+  // }
 
-  String? validateDepartment(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Department name is required';
-    }
-    return null;
-  }
+  // String? validateDepartment(String? value) {
+  //   if (value == null || value.isEmpty) {
+  //     return 'Department name is required';
+  //   }
+  //   return null;
+  // }
 
-  String? validateDesignation(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Designation is required';
-    }
-    return null;
-  }
+  // String? validateDesignation(String? value) {
+  //   if (value == null || value.isEmpty) {
+  //     return 'Designation is required';
+  //   }
+  //   return null;
+  // }
 
   String? validateCellNumber(String? value) {
     if (value == null || value.isEmpty) {

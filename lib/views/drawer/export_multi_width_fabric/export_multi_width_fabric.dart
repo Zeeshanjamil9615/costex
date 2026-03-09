@@ -80,8 +80,10 @@ class MultiMadeupsPage extends StatelessWidget {
           labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           tabs: const [
             Tab(text: 'BASIC'),
-            Tab(text: 'CONSUMPTION'),
+
             Tab(text: 'FABRIC'),
+            Tab(text: 'CONSUMPTION'),
+
             Tab(text: 'FREIGHT'),
           ],
         ),
@@ -93,8 +95,9 @@ class MultiMadeupsPage extends StatelessWidget {
           controller: controller.tabController,
           children: [
             _buildBasicDetailsTab(controller),
-            _buildConsumptionDetailsTab(controller),
             _buildFabricDetailsTab(controller),
+            _buildConsumptionDetailsTab(controller),
+
             _buildFreightDetailsTab(controller),
           ],
         ),

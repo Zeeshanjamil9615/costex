@@ -44,7 +44,6 @@ class _AddUserOtpVerificationPageState extends State<AddUserOtpVerificationPage>
       if (!mounted) return;
 
       setState(() => _isLoading = false);
-      print(response);
 
       // Refresh users list first
       if (Get.isRegistered<AllUsersController>()) {

@@ -259,7 +259,7 @@ class AllUsersPage extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _buildDetailRow('User Name', user.userName, Icons.person),
+                _buildDetailRow('User Name', user.name, Icons.person),
                 const SizedBox(height: 12),
                 _buildDetailRow('Email Address', user.email, Icons.email),
                 const SizedBox(height: 12),

@@ -28,9 +28,9 @@ class ManageUserController extends GetxController {
 
   void initializeControllers(User user) {
     _user = user;
-    fullNameController = TextEditingController(text: user.userName);
+    fullNameController = TextEditingController(text: user.name);
     // Initialize username - if API doesn't provide it, leave empty
-    usernameController = TextEditingController();
+    usernameController = TextEditingController(text: user.userName);
     emailController = TextEditingController(text: user.email);
     addressController = TextEditingController(text: user.address);
     departmentController = TextEditingController(text: user.department);

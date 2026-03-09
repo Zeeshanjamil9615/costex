@@ -10,6 +10,8 @@ class User {
   final String companyId;
   final String addedBy;
   final String userName;
+  final String name;
+
   final String email;
   final String cellNo;
   final String department;
@@ -28,6 +30,8 @@ class User {
     required this.department,
     required this.designation,
     required this.address,
+    required this.name,
+
     required this.status,
     required this.timestamp,
   });
@@ -47,14 +51,18 @@ class User {
       id: int.tryParse(readValue('id', '0')) ?? 0,
       companyId: readValue('company_id', '1'),
       addedBy: readValue('added_by', '2'),
-      userName: readValue('full_name', '3'),
+      name: readValue('full_name', '3'),
+
       email: readValue('email_address', '4'),
       address: readValue('address', '5'),
+      
       cellNo: readValue('cell_number', '6'),
       department: readValue('department_name', '7'),
       designation: readValue('designation_no', '8'),
       status: readValue('status', '10'),
       timestamp: readValue('timestamp', '11'),
+      userName: readValue('user_name', '12'),
+
     );
   }
 }

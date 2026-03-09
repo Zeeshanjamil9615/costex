@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:costex_app/api_service/api_service.dart';
 import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/utils/pdf_printer.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -170,7 +171,7 @@ class TowelCostingController extends GetxController with GetSingleTickerProvider
 
   // Store full-precision intermediate values
   final Map<String, double> _fullValues = {};
-  bool _enableCalcLog = true;
+  bool _enableCalcLog = kDebugMode;
 
   void _logCalc(String label, double? value) {
     if (!_enableCalcLog) return;

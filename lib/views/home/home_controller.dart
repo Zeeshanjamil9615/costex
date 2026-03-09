@@ -1,6 +1,5 @@
 import 'package:costex_app/api_service/api_service.dart';
 import 'package:costex_app/services/session_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
@@ -22,10 +21,7 @@ class HomeController extends GetxController {
 
   Future<void> fetchCounts() async {
     final companyId = _session.companyId;
-    if (companyId == null) {
-      debugPrint('No company id found in storage');
-      return;
-    }
+    if (companyId == null) return;
     try {
       isCountsLoading.value = true;
       final response = await _apiService.getCounts(companyId: companyId);
@@ -34,8 +30,8 @@ class HomeController extends GetxController {
         (key, value) => MapEntry(key.toString(), int.tryParse(value.toString()) ?? 0),
       );
       counts.assignAll(parsed);
-    } catch (error) {
-      debugPrint('Failed to fetch counts: $error');
+    } catch (_) {
+      // Silently fail; counts will remain empty
     } finally {
       isCountsLoading.value = false;
     }

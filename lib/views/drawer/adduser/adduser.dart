@@ -119,23 +119,21 @@ class AddUserPage extends StatelessWidget {
                         const Expanded(flex: 1, child: SizedBox()),
                       ]),
 
-                      const SizedBox(height: 20),
 
                       // Row 1.5: Address
-                      _buildResponsiveRow([
-                        Expanded(
-                          child: CustomTextField(
-                            label: 'Address',
-                            hintText: 'Enter Address',
-                            controller: controller.addressController,
-                            required: true,
-                            validator: controller.validateAddress,
-                          ),
-                        ),
-                        const Expanded(flex: 2, child: SizedBox()),
-                      ]),
+                      // _buildResponsiveRow([
+                      //   Expanded(
+                      //     child: CustomTextField(
+                      //       label: 'Address',
+                      //       hintText: 'Enter Address',
+                      //       controller: controller.addressController,
+                      //       required: true,
+                      //       validator: controller.validateAddress,
+                      //     ),
+                      //   ),
+                      //   const Expanded(flex: 2, child: SizedBox()),
+                      // ]),
 
-                      const SizedBox(height: 20),
 
                       // Row 2: Department, Designation, Cell Number
                       _buildResponsiveRow([
@@ -145,7 +143,7 @@ class AddUserPage extends StatelessWidget {
                             hintText: 'Enter Department Name',
                             controller: controller.departmentController,
                             required: true,
-                            validator: controller.validateDepartment,
+                            // validator: controller.validateDepartment,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -155,7 +153,7 @@ class AddUserPage extends StatelessWidget {
                             hintText: 'Designation',
                             controller: controller.designationController,
                             required: true,
-                            validator: controller.validateDesignation,
+                            // validator: controller.validateDesignation,
                           ),
                         ),
                         const SizedBox(width: 16),
