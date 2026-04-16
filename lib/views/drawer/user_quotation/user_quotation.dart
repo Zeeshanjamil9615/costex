@@ -34,7 +34,7 @@ class UserQuotation extends StatelessWidget {
           ),
         ),
         title: const Text(
-          'MY QUOTATIONS',
+          'USER QUOTATIONS',
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,

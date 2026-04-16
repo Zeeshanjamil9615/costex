@@ -32,6 +32,7 @@ class UserQuotationController extends GetxController {
   final RxList<UserOption> userOptions = <UserOption>[].obs;
 
   final List<String> fabricTypes = const [
+    'All',
     'Grey Fabric',
     'Export Grey Fabric',
     'Export Processed Fabric',
@@ -65,7 +66,10 @@ class UserQuotationController extends GetxController {
                 value: user['value']?.toString() ?? '',
               ))
           .toList();
-      userOptions.assignAll(options);
+      final seen = <String>{};
+      userOptions.assignAll(
+        options.where((u) => seen.add(u.value)),
+      );
     } on ApiException catch (error) {
       _showError('Error', error.message);
     } catch (error) {

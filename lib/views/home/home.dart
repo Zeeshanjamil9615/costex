@@ -1,16 +1,10 @@
 import 'package:costex_app/services/session_service.dart';
 import 'package:costex_app/utils/colour.dart';
 import 'package:costex_app/views/auth/login/login.dart';
-import 'package:costex_app/views/drawer/Export_Madeups_fabric/Export_Madeups_fabric.dart';
 import 'package:costex_app/views/drawer/adduser/adduser.dart';
 import 'package:costex_app/views/drawer/adduser/alluser/all_user.dart';
-import 'package:costex_app/views/drawer/export_grey_febric/export_grey_febric.dart';
-import 'package:costex_app/views/drawer/export_multi_width_fabric/export_multi_width_fabric.dart';
-import 'package:costex_app/views/drawer/export_processed_fabric/export_processed_fabric.dart';
-import 'package:costex_app/views/drawer/grey_febric_costing_sheet/grey_febric_costing_sheet.dart';
 import 'package:costex_app/views/drawer/my_quotation/my_quotation.dart';
-import 'package:costex_app/views/drawer/towel_costing_sheet/towel_costing_sheet.dart';
-import 'package:costex_app/views/drawer/user_quotation/user_quotation.dart';
+import 'package:costex_app/views/drawer/my_booking/my_booking.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'home_controller.dart';
@@ -307,6 +301,12 @@ class AppDrawer extends StatelessWidget {
                 _buildMenuItem(
                   icon: Icons.dashboard,
                   title: 'Dashboard',
+                  page: const MyBookingPage(),
+                  homeController: homeController,
+                ),
+                _buildMenuItem(
+                  icon: Icons.book,
+                  title: 'My Booking',
                   page: const HomePage(),
                   homeController: homeController,
                 ),
@@ -315,57 +315,76 @@ class AppDrawer extends StatelessWidget {
                   title: 'Users',
                   homeController: homeController,
                 ),
-                _buildMenuItem(
-                  icon: Icons.inventory,
-                  title: 'Grey Fabric Sheet',
-                  page: const GreyFabricCostingScreen(),
-                  homeController: homeController,
-                ),
-                _buildMenuItem(
-                  icon: Icons.upload_file,
-                  title: 'Export Grey Fabric Sheet',
-                  page: const ExportGreyPage(),
-                  homeController: homeController,
-                ),
-                _buildMenuItem(
-                  icon: Icons.checkroom,
-                  title: 'Export Processed Fabric Sheet',
-                  page: const ExportProcessedFabricPage(),
-                  homeController: homeController,
-                ),
-                _buildMenuItem(
-                  icon: Icons.attach_money,
-                  title: 'Export Made-Ups Fabric Sheet',
-                  page: const ExportMadeupsPage(),
-                  homeController: homeController,
-                ),
-                _buildMenuItem(
-                  icon: Icons.width_full,
-                  title: 'Export Multi Width Made-Ups Fabric Sheet',
-                  page: const MultiMadeupsPage(),
-                  homeController: homeController,
-                ),
-                _buildMenuItem(
-                  icon: Icons.cleaning_services,
-                  title: 'Towel Costing Sheet',
-                  page: const TowelCostingPage(),
-                  homeController: homeController,
-                ),
-                _buildMenuItem(
-                  icon: Icons.request_quote,
-                  title: 'My Quotations',
-                  page: const MyQuotationsPage(),
-                  homeController: homeController,
-                ),
-                _buildMenuItem(
-                  icon: Icons.description,
-                  title: 'User Quotations',
-                  page: const UserQuotation(),
-                  homeController: homeController,
-                ),
+                // _buildMenuItem(
+                //   icon: Icons.inventory,
+                //   title: 'Grey Fabric Sheet',
+                //   page: const GreyFabricCostingScreen(),
+                //   homeController: homeController,
+                // ),
+                // _buildMenuItem(
+                //   icon: Icons.upload_file,
+                //   title: 'Export Grey Fabric Sheet',
+                //   page: const ExportGreyPage(),
+                //   homeController: homeController,
+                // ),
+                // _buildMenuItem(
+                //   icon: Icons.checkroom,
+                //   title: 'Export Processed Fabric Sheet',
+                //   page: const ExportProcessedFabricPage(),
+                //   homeController: homeController,
+                // ),
+                // _buildMenuItem(
+                //   icon: Icons.attach_money,
+                //   title: 'Export Made-Ups Fabric Sheet',
+                //   page: const ExportMadeupsPage(),
+                //   homeController: homeController,
+                // ),
+                // _buildMenuItem(
+                //   icon: Icons.width_full,
+                //   title: 'Export Multi Width Made-Ups Fabric Sheet',
+                //   page: const MultiMadeupsPage(),
+                //   homeController: homeController,
+                // ),
+                // _buildMenuItem(
+                //   icon: Icons.cleaning_services,
+                //   title: 'Towel Costing Sheet',
+                //   page: const TowelCostingPage(),
+                //   homeController: homeController,
+                // ),
+                // _buildMenuItem(
+                //   icon: Icons.request_quote,
+                //   title: 'My Quotations',
+                //   page: const MyQuotationsPage(),
+                //   homeController: homeController,
+                // ),
+                // _buildMenuItem(
+                //   icon: Icons.description,
+                //   title: 'User Quotations',
+                //   page: const UserQuotation(),
+                //   homeController: homeController,
+                // ),
+                ListTile(
+            leading: const Icon(
+              Icons.logout,
+              color: Colors.white70,
+              size: 20,
+            ),
+            title: const Text(
+              'Logout',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
+            ),
+            onTap: () async {
+              await SessionService.instance.clearSession();
+              Get.offAll(() => const LoginPage());
+            },
+          ),
               ],
             ),
           ),
+         
         ],
       ),
     );
